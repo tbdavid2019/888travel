@@ -1,6 +1,7 @@
 name = "travel-roamradar"
 main = "worker.js"
 compatibility_date = "2025-01-01"
+account_id = "379570860738dd1757ba7f67ef2bdffe"
 
 # Serve the front end from the SAME Worker, so one URL is both the app and the
 # API. Static files in public/ (index.html, manifest, sw.js, icons) are served
@@ -16,8 +17,8 @@ directory = "./public"
 #    within the hour and finishes any inbox backlog on its own (no need to
 #    keep the app open). Costs ~4 subrequests and zero Claude tokens when
 #    there is nothing new.
-[triggers]
-crons = ["0 18 * * *", "30 * * * *"]
+# [triggers]
+# crons = ["0 18 * * *", "30 * * * *"]
 
 # The "Deploy to Cloudflare" button AUTO-CREATES this KV namespace in the
 # deployer's own account and rewrites the id below — nothing to do.
@@ -25,7 +26,7 @@ crons = ["0 18 * * *", "30 * * * *"]
 # and paste the returned id here.
 [[kv_namespaces]]
 binding = "TRIPS"
-id = "3401bc1218c04ba68201a41ecac772ab"
+id = "09abe45c640249fea47ddd93bce9c657"
 
 # No secret is stored in this file. Everything is optional and connects IN THE
 # APP (Settings) — no dashboard needed. Or set them as Worker secrets instead:
