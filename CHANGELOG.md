@@ -7,6 +7,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.3.0] - 2026-10-06
+
+### Added / 新增功能
+- **全方位時區支援與即時目的地時差鐘 (Comprehensive Timezone & Jet Lag Support)**：
+  - **本人出發地時區 (Home Base Timezone)**：
+    - 「設定」彈窗新增常駐出發地時區設定（`homeTz`），預設自動偵測瀏覽器時區（如 `Asia/Taipei`），亦可從主流國際時區選單手動切換，並自動同步至 Worker 端。
+    - 出發地預設由作者原版的葡萄牙波爾圖（`OPO`）在地化校正為台灣台北（`TPE`）。
+  - **目的地時區自動解析 (Destination Timezone Auto-Resolution)**：
+    - 結合 Open-Meteo Geocoding 即時回傳之地理時區與內建全球主要機場 `IATA_TZ` 快速對照表，自動為全球目的地精準判斷 IANA 標準時區代碼（如 `Asia/Tokyo`、`Europe/Paris`、`America/New_York`）。
+    - 旅程編輯表單新增「目的地時區」欄位，支援使用者自訂或留空自動解析。
+  - **卡片即時時區鐘與時差標籤 (Live Destination Clock & Jet Lag Chips)**：
+    - 旅程卡片頂部資訊列新增即時時差徽章：例如 `🕒 18:45 (Tokyo · 快 1 小時)`、`🕒 11:45 (Paris · 慢 6 小時)`、`🕒 17:45 (Taipei · 無時差)`，帶有完整 UTC Offset 與雙向時區對比提示。
+    - 旅程進行中（Live Travelling）時，提供最直接的當地即時鐘顯示。
+  - **日曆訂閱 (ICS) 時區相容**：
+    - 匯出之 ICS 訂閱 feed 與個別行程全面注入 `X-WR-TIMEZONE` 與事件時區宣告，防止外部日曆 App 匯入時產生跨日位移。
+- **動態獲取可用模型清單 (Dynamic Live LLM Model Fetching)**：
+  - Worker 新增 `POST /settings/llm/models` 端點，直接連線至 OpenAI、Groq、DeepSeek、Google Gemini、Anthropic 的官方 `/models` API，即時抓取使用者帳號底下最新且真正活著的可用模型清單。
+  - 設定視窗在模型輸入框右側新增 **「🔍 取得可用模型清單」** 按鈕與 `<datalist>` 自動完成選單，一鍵連線列出即時可用模型，徹底根絕模型被官方廢棄（Decommissioned）或寫死過期名稱的痛點。
+
+### Changed / 改善與優化
+- **清理提供者選單名稱 (Sanitized Provider Dropdown)**：
+  - 徹底移除選單標籤中寫死的具體模型名稱（如不再標註已變動或廢棄的 `(GPT-4o mini)`、`(極速 Llama 3.3)` 等），改採純粹提供者品牌名稱。
+  - Worker 端後備預設模型全面升級為主流活躍版本，並增強 API 呼叫失敗時的詳細錯誤日誌，提升除錯透明度。
+
+---
+
 ## [2.2.0] - 2026-10-06
 
 ### Added / 新增功能

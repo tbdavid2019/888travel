@@ -229,7 +229,13 @@ export default {
       const gIcs = (await env.TRIPS.get("g_ics")) || "";
       const llm = await getLLMConfig(env);
       const resend = await getResendConfig(env);
+      const home = (await env.TRIPS.get("home")) || "";
+      const homeTz = (await env.TRIPS.get("home_tz")) || "";
+      const units = (await env.TRIPS.get("units")) || "";
       return cors(json({
+        home,
+        homeTz,
+        units,
         googleClientSet: !!gClient,
         googleClientId: gClient ? gClient.id : null,
         googleConnected: !!(gClient && gRefresh),
@@ -306,6 +312,76 @@ export default {
 
       await env.TRIPS.put("llm_config", JSON.stringify(newConfig));
       delete env._llmConfig;
+      return cors(json({ ok: true }));
+    }
+
+    // Fetch live model list from LLM Provider (OpenAI, Groq, DeepSeek, Gemini, Anthropic, Custom)
+    if (url.pathname === "/settings/llm/models" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      let provider = ((body && body.provider) || "").trim().toLowerCase();
+      let baseUrl = ((body && body.baseUrl) || "").trim();
+      let apiKey = ((body && body.apiKey) || "").replace(/\s+/g, "");
+
+      const saved = await getLLMConfig(env);
+      if (!provider) provider = saved.provider || "openai";
+      if (!baseUrl && provider !== "anthropic") baseUrl = saved.baseUrl;
+      if (!apiKey) apiKey = saved.apiKey;
+
+      if (!apiKey) {
+        return cors(json({ error: "尚未提供或設定 API 金鑰，請先輸入 API Key 後再點擊取得模型清單。" }, 400));
+      }
+
+      try {
+        let models = [];
+        if (provider === "anthropic") {
+          const res = await fetch("https://api.anthropic.com/v1/models", {
+            headers: {
+              "x-api-key": apiKey,
+              "anthropic-version": "2023-06-01"
+            }
+          });
+          if (!res.ok) {
+            const errText = await res.text().catch(() => "");
+            return cors(json({ error: `Anthropic API 錯誤 (${res.status}): ${errText.slice(0, 150)}` }, res.status));
+          }
+          const data = await res.json();
+          models = (data.data || []).map((m) => m.id);
+        } else {
+          let endpoint = (baseUrl || "").replace(/\/+$/, "");
+          if (!endpoint) {
+            if (provider === "gemini") endpoint = "https://generativelanguage.googleapis.com/v1beta/openai";
+            else if (provider === "groq") endpoint = "https://api.groq.com/openai/v1";
+            else if (provider === "deepseek") endpoint = "https://api.deepseek.com/v1";
+            else endpoint = "https://api.openai.com/v1";
+          }
+          const res = await fetch(`${endpoint}/models`, {
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json"
+            }
+          });
+          if (!res.ok) {
+            const errText = await res.text().catch(() => "");
+            return cors(json({ error: `模型查詢失敗 (${res.status}): ${errText.slice(0, 150)}` }, res.status));
+          }
+          const data = await res.json();
+          const list = data.data || [];
+          models = list.map((m) => m.id || m.name).filter(Boolean);
+        }
+
+        models.sort();
+        return cors(json({ ok: true, provider, models }));
+      } catch (err) {
+        return cors(json({ error: "連線至模型提供者失敗: " + err.message }, 500));
+      }
+    }
+
+    // Save general user preferences (home base, home timezone, units)
+    if (url.pathname === "/settings/profile" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      if (body.home !== undefined) await env.TRIPS.put("home", String(body.home).toUpperCase());
+      if (body.homeTz !== undefined) await env.TRIPS.put("home_tz", String(body.homeTz));
+      if (body.units !== undefined) await env.TRIPS.put("units", String(body.units));
       return cors(json({ ok: true }));
     }
 
@@ -540,11 +616,13 @@ export default {
         const ingested = (existing.segments || []).filter((s) => s.source && s.source !== "manual");
         const manual = (body.segments || []).filter((s) => !s.source || s.source === "manual");
         store.trips[id] = { ...existing, from: body.from, to: body.to, start: body.start, end: body.end,
-          label: body.label, notes: body.notes || "", segments: dedupeSegs([...ingested, ...manual]),
+          label: body.label, notes: body.notes || "", timezone: body.timezone !== undefined ? body.timezone : (existing.timezone || ""),
+          segments: dedupeSegs([...ingested, ...manual]),
           photo: body.photo !== undefined ? body.photo : (existing.photo || ""), updatedAt: Date.now() };
       } else {
         store.trips[id] = { id, from: body.from || "", to: body.to || "",
-          start: body.start, end: body.end, label: body.label || "", notes: body.notes || "", segments: body.segments || [],
+          start: body.start, end: body.end, label: body.label || "", notes: body.notes || "",
+          timezone: body.timezone || "", segments: body.segments || [],
           photo: body.photo || "", updatedAt: Date.now() };
       }
       await saveStore(env, store);
@@ -959,13 +1037,13 @@ async function getLLMConfig(env) {
     else provider = "anthropic";
   }
 
-  // Sensible default models
+  // Sensible fallback models if user did not specify one
   if (!model) {
-    if (provider === "anthropic") model = "claude-haiku-4-5";
+    if (provider === "anthropic") model = "claude-3-5-haiku-latest";
     else if (provider === "gemini") model = "gemini-2.0-flash";
-    else if (provider === "groq") model = "llama-3.3-70b-versatile";
+    else if (provider === "groq") model = "openai/gpt-oss-120b";
     else if (provider === "deepseek") model = "deepseek-chat";
-    else model = "gpt-4o-mini";
+    else model = "gpt-4o";
   }
 
   // Default OpenAI-compatible base URLs
@@ -1078,7 +1156,11 @@ async function extractSegments(env, emailText, deliberate) {
           messages: [{ role: "user", content: sysInstruction + "\n\n" + userPrompt }]
         })
       });
-      if (!res.ok) return undefined;
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        console.error(`LLM Anthropic error (${res.status}):`, errText);
+        return undefined;
+      }
       const data = await res.json();
       rawContent = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
     } else {
@@ -1092,7 +1174,7 @@ async function extractSegments(env, emailText, deliberate) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: llm.model || "gpt-4o-mini",
+          model: llm.model || "gpt-4o",
           temperature: 0.1,
           messages: [
             { role: "system", content: sysInstruction },
@@ -1100,11 +1182,16 @@ async function extractSegments(env, emailText, deliberate) {
           ]
         })
       });
-      if (!res.ok) return undefined;
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        console.error(`LLM OpenAI-compat error (${res.status}):`, errText);
+        return undefined;
+      }
       const data = await res.json();
       rawContent = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
     }
   } catch (e) {
+    console.error("LLM execution error:", e);
     return undefined;
   }
 
@@ -1409,7 +1496,7 @@ function shareTripHtml(t) {
     + ".t{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#1b8a57;background:rgba(27,138,87,.1);padding:3px 8px;border-radius:999px;flex:0 0 auto;margin-top:2px}"
     + ".b{flex:1;line-height:1.5;font-size:15px}.a{color:#756d5e}.w{flex:0 0 auto;font-size:13px;color:#756d5e;white-space:nowrap}"
     + "footer{margin-top:22px;color:#a9a190;font-size:12px}</style>"
-    + "<main><h1>" + hesc(t.label || t.to || "Trip") + "</h1><p class='d'>" + hesc(t.to || "") + " · " + hesc(t.start || "") + " – " + hesc(t.end || "") + "</p>"
+    + "<main><h1>" + hesc(t.label || t.to || "Trip") + "</h1><p class='d'>" + hesc(t.to || "") + " · " + hesc(t.start || "") + " – " + hesc(t.end || "") + (t.timezone ? " · 🕒 " + hesc(t.timezone) : "") + "</p>"
     + (rows || "<p class='d'>No plans on this trip yet.</p>")
     + "<footer>Shared read-only · plans update live as the trip owner adds them</footer></main>";
 }
@@ -1418,8 +1505,9 @@ function icsEscape(s) { return String(s || "").replace(/\\/g, "\\\\").replace(/;
 function buildIcs(store) {
   const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
   const ev = Object.values(store.trips).filter((t) => isDate(t.start) && isDate(t.end)).map((t) => {
-    const desc = (t.segments || []).slice().sort(segCmp)
+    let desc = (t.segments || []).slice().sort(segCmp)
       .map((s) => (s.type || "plan") + ": " + (s.name || "") + (s.note ? " — " + s.note : "")).join("\n");
+    if (t.timezone) desc = (desc ? desc + "\n" : "") + "Timezone: " + t.timezone;
     return ["BEGIN:VEVENT",
       "UID:" + t.id + "@travel-hub",
       "DTSTAMP:" + stamp,
@@ -1429,7 +1517,7 @@ function buildIcs(store) {
       desc ? "DESCRIPTION:" + icsEscape(desc) : "",
       "END:VEVENT"].filter(Boolean).join("\r\n");
   }).join("\r\n");
-  return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//888RoamTravel//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:888漫步旅遊 · 888RoamTravel\r\n" + ev + "\r\nEND:VCALENDAR\r\n";
+  return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//888RoamTravel//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:888漫步旅遊 · 888RoamTravel\r\nX-WR-TIMEZONE:Asia/Taipei\r\n" + ev + "\r\nEND:VCALENDAR\r\n";
 }
 
 async function loadStore(env) {

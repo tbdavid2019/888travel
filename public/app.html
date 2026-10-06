@@ -513,8 +513,88 @@
     else{mem[key]=val;}
   }catch(e){console.error("save",e);}}
 
-  var trips=[], wishes=[], home="OPO", settings={workerUrl:""}, syncState="local", authToken="";
+  var trips=[], wishes=[], home=(isZH()?"TPE":"OPO"), homeTz="", settings={workerUrl:""}, syncState="local", authToken="";
   var tab="upcoming", openSet={}, calMonths=6;
+
+  /* ===================== timezone helpers ===================== */
+  function getHomeTz(){
+    if(homeTz) return homeTz;
+    try {
+      var stored = localStorage.getItem("travel:hometz");
+      if(stored) return (homeTz = stored);
+    } catch(e){}
+    try {
+      var detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if(detected) return (homeTz = detected);
+    } catch(e){}
+    return (homeTz = isZH() ? "Asia/Taipei" : "UTC");
+  }
+
+  function tzOffsetMinutes(tz, date){
+    date = date || new Date();
+    try {
+      var utc = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
+      var loc = new Date(date.toLocaleString("en-US", { timeZone: tz }));
+      return Math.round((loc - utc) / 60000);
+    } catch(e){ return 0; }
+  }
+
+  function fmtUtcOffset(tz, date){
+    var m = tzOffsetMinutes(tz, date);
+    var sign = m >= 0 ? "+" : "-";
+    var abs = Math.abs(m);
+    var h = Math.floor(abs / 60);
+    var min = abs % 60;
+    return "UTC" + sign + h + (min ? ":" + (min < 10 ? "0" : "") + min : "");
+  }
+
+  function tzDiffHours(destTz, originTz){
+    originTz = originTz || getHomeTz();
+    var destOff = tzOffsetMinutes(destTz);
+    var originOff = tzOffsetMinutes(originTz);
+    return (destOff - originOff) / 60;
+  }
+
+  function fmtTimeDiff(destTz, originTz){
+    var diff = tzDiffHours(destTz, originTz);
+    if(Math.abs(diff) < 0.01) return isZH() ? "無時差" : "same time";
+    var isAhead = diff > 0;
+    var abs = Math.abs(diff);
+    var hStr = abs % 1 === 0 ? String(abs) : abs.toFixed(1);
+    return isZH() ? ((isAhead ? "快 " : "慢 ") + hStr + " 小時") : ((isAhead ? "+" : "-") + hStr + "h");
+  }
+
+  function fmtDestTime(destTz){
+    try {
+      return new Intl.DateTimeFormat(isZH() ? "zh-TW" : "en-US", {
+        timeZone: destTz,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).format(new Date());
+    } catch(e){ return ""; }
+  }
+
+  var COMMON_TZ = [
+    "Asia/Taipei", "Asia/Tokyo", "Asia/Seoul", "Asia/Hong_Kong", "Asia/Singapore",
+    "Asia/Bangkok", "Asia/Kuala_Lumpur", "Asia/Ho_Chi_Minh", "Asia/Dubai",
+    "Europe/London", "Europe/Paris", "Europe/Berlin", "Europe/Rome", "Europe/Madrid",
+    "Europe/Amsterdam", "Europe/Lisbon", "Atlantic/Madeira",
+    "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles",
+    "America/Vancouver", "America/Toronto", "Pacific/Honolulu",
+    "Australia/Sydney", "Australia/Melbourne", "Pacific/Auckland", "UTC"
+  ];
+
+  function renderTimezoneOptions(current){
+    current = current || getHomeTz();
+    var list = COMMON_TZ.slice();
+    if(current && !list.includes(current)) list.unshift(current);
+    return list.map(function(tz){
+      var off = fmtUtcOffset(tz);
+      var city = (tz.split("/")[1] || tz).replace(/_/g, " ");
+      return '<option value="' + esc(tz) + '"' + (tz === current ? ' selected' : '') + '>' + esc(tz) + ' (' + off + ' · ' + city + ')</option>';
+    }).join("");
+  }
 
   /* ===================== date / util helpers (preserved) ===================== */
   function todayISO(){var d=new Date();d.setHours(0,0,0,0);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -646,19 +726,59 @@
     try{
       var r=await fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name="+encodeURIComponent(name));
       if(r.ok){var d=await r.json(),g=(d.results||[])[0];
-        if(g){var o={lat:g.latitude,lon:g.longitude,cc:g.country_code,country:g.country};geoCache[k]=o;try{localStorage.setItem("geo:"+k,JSON.stringify(o));}catch(e){}return o;}}
+        if(g){var o={lat:g.latitude,lon:g.longitude,cc:g.country_code,country:g.country,timezone:g.timezone};geoCache[k]=o;try{localStorage.setItem("geo:"+k,JSON.stringify(o));}catch(e){}return o;}}
     }catch(e){}
     geoCache[k]=null;return null;
   }
   // Common IATA codes -> city, so a "from" like OPO still geocodes for the distance chip.
   var IATA={OPO:"Porto",LIS:"Lisbon",FAO:"Faro",FNC:"Funchal",PDL:"Ponta Delgada",MAD:"Madrid",BCN:"Barcelona",AGP:"Malaga",LHR:"London",LGW:"London",STN:"London",LTN:"London",CDG:"Paris",ORY:"Paris",AMS:"Amsterdam",FRA:"Frankfurt",MUC:"Munich",BER:"Berlin",ZRH:"Zurich",GVA:"Geneva",VIE:"Vienna",BRU:"Brussels",DUB:"Dublin",EDI:"Edinburgh",MAN:"Manchester",MXP:"Milan",LIN:"Milan",FCO:"Rome",VCE:"Venice",NAP:"Naples",ATH:"Athens",IST:"Istanbul",CPH:"Copenhagen",ARN:"Stockholm",OSL:"Oslo",HEL:"Helsinki",WAW:"Warsaw",PRG:"Prague",BUD:"Budapest",KEF:"Reykjavik",JFK:"New York",EWR:"New York",LGA:"New York",BOS:"Boston",IAD:"Washington",DCA:"Washington",MIA:"Miami",MCO:"Orlando",ATL:"Atlanta",ORD:"Chicago",DFW:"Dallas",IAH:"Houston",AUS:"Austin",DEN:"Denver",PHX:"Phoenix",LAS:"Las Vegas",LAX:"Los Angeles",SAN:"San Diego",SFO:"San Francisco",SJC:"San Jose",PDX:"Portland",SEA:"Seattle",HNL:"Honolulu",YYZ:"Toronto",YVR:"Vancouver",YUL:"Montreal",MEX:"Mexico City",CUN:"Cancun",GRU:"São Paulo",CGH:"São Paulo",VCP:"Campinas",GIG:"Rio de Janeiro",SDU:"Rio de Janeiro",FLN:"Florianopolis",BSB:"Brasilia",CNF:"Belo Horizonte",SSA:"Salvador",REC:"Recife",FOR:"Fortaleza",POA:"Porto Alegre",CWB:"Curitiba",EZE:"Buenos Aires",AEP:"Buenos Aires",MVD:"Montevideo",SCL:"Santiago",BOG:"Bogota",MDE:"Medellin",LIM:"Lima",UIO:"Quito",PTY:"Panama City",SJO:"San Jose",SJU:"San Juan",DXB:"Dubai",AUH:"Abu Dhabi",DOH:"Doha",TLV:"Tel Aviv",CAI:"Cairo",CMN:"Casablanca",RAK:"Marrakesh",JNB:"Johannesburg",CPT:"Cape Town",NBO:"Nairobi",BKK:"Bangkok",HKT:"Phuket",CNX:"Chiang Mai",SIN:"Singapore",KUL:"Kuala Lumpur",CGK:"Jakarta",DPS:"Denpasar",SGN:"Ho Chi Minh City",HAN:"Hanoi",MNL:"Manila",HKG:"Hong Kong",PEK:"Beijing",PVG:"Shanghai",NRT:"Tokyo",HND:"Tokyo",KIX:"Osaka",ICN:"Seoul",TPE:"Taipei",DEL:"Delhi",BOM:"Mumbai",BLR:"Bangalore",CMB:"Colombo",MLE:"Male",SYD:"Sydney",MEL:"Melbourne",BNE:"Brisbane",PER:"Perth",AKL:"Auckland"};
+  var IATA_TZ={
+    TPE:"Asia/Taipei",TSA:"Asia/Taipei",KHH:"Asia/Taipei",
+    NRT:"Asia/Tokyo",HND:"Asia/Tokyo",KIX:"Asia/Tokyo",CTS:"Asia/Tokyo",FUK:"Asia/Tokyo",OKA:"Asia/Tokyo",
+    ICN:"Asia/Seoul",GMP:"Asia/Seoul",PUS:"Asia/Seoul",
+    HKG:"Asia/Hong_Kong",MFM:"Asia/Macau",
+    PEK:"Asia/Shanghai",PKX:"Asia/Shanghai",PVG:"Asia/Shanghai",SHA:"Asia/Shanghai",CAN:"Asia/Shanghai",SZX:"Asia/Shanghai",
+    SIN:"Asia/Singapore",
+    BKK:"Asia/Bangkok",DMK:"Asia/Bangkok",HKT:"Asia/Bangkok",CNX:"Asia/Bangkok",
+    KUL:"Asia/Kuala_Lumpur",PEN:"Asia/Kuala_Lumpur",
+    SGN:"Asia/Ho_Chi_Minh",HAN:"Asia/Ho_Chi_Minh",DAD:"Asia/Ho_Chi_Minh",
+    MNL:"Asia/Manila",CEB:"Asia/Manila",
+    DPS:"Asia/Makassar",CGK:"Asia/Jakarta",
+    DEL:"Asia/Kolkata",BOM:"Asia/Kolkata",BLR:"Asia/Kolkata",CMB:"Asia/Colombo",MLE:"Indian/Maldives",
+    DXB:"Asia/Dubai",AUH:"Asia/Dubai",DOH:"Asia/Qatar",TLV:"Asia/Jerusalem",CAI:"Africa/Cairo",
+    LHR:"Europe/London",LGW:"Europe/London",STN:"Europe/London",LTN:"Europe/London",EDI:"Europe/London",MAN:"Europe/London",DUB:"Europe/Dublin",
+    CDG:"Europe/Paris",ORY:"Europe/Paris",NCE:"Europe/Paris",
+    AMS:"Europe/Amsterdam",BRU:"Europe/Brussels",
+    FRA:"Europe/Berlin",MUC:"Europe/Berlin",BER:"Europe/Berlin",
+    ZRH:"Europe/Zurich",GVA:"Europe/Zurich",VIE:"Europe/Vienna",
+    FCO:"Europe/Rome",MXP:"Europe/Rome",LIN:"Europe/Rome",VCE:"Europe/Rome",NAP:"Europe/Rome",
+    MAD:"Europe/Madrid",BCN:"Europe/Madrid",AGP:"Europe/Madrid",
+    LIS:"Europe/Lisbon",OPO:"Europe/Lisbon",FAO:"Europe/Lisbon",FNC:"Atlantic/Madeira",PDL:"Atlantic/Azores",
+    ATH:"Europe/Athens",IST:"Europe/Istanbul",
+    CPH:"Europe/Copenhagen",ARN:"Europe/Stockholm",OSL:"Europe/Oslo",HEL:"Europe/Helsinki",
+    WAW:"Europe/Warsaw",PRG:"Europe/Prague",BUD:"Europe/Budapest",KEF:"Atlantic/Reykjavik",
+    JFK:"America/New_York",EWR:"America/New_York",LGA:"America/New_York",BOS:"America/New_York",IAD:"America/New_York",DCA:"America/New_York",MIA:"America/New_York",MCO:"America/New_York",ATL:"America/New_York",
+    ORD:"America/Chicago",DFW:"America/Chicago",IAH:"America/Chicago",AUS:"America/Chicago",MSP:"America/Chicago",
+    DEN:"America/Denver",PHX:"America/Phoenix",
+    LAX:"America/Los_Angeles",SFO:"America/Los_Angeles",SJC:"America/Los_Angeles",SEA:"America/Los_Angeles",SAN:"America/Los_Angeles",LAS:"America/Los_Angeles",PDX:"America/Los_Angeles",
+    HNL:"Pacific/Honolulu",ANC:"America/Anchorage",
+    YYZ:"America/Toronto",YVR:"America/Vancouver",YUL:"America/Montreal",
+    MEX:"America/Mexico_City",CUN:"America/Cancun",
+    GRU:"America/Sao_Paulo",CGH:"America/Sao_Paulo",VCP:"America/Sao_Paulo",GIG:"America/Sao_Paulo",SDU:"America/Sao_Paulo",
+    EZE:"America/Argentina/Buenos_Aires",AEP:"America/Argentina/Buenos_Aires",MVD:"America/Montevideo",SCL:"America/Santiago",
+    BOG:"America/Bogota",MDE:"America/Bogota",LIM:"America/Lima",UIO:"America/Guayaquil",
+    SYD:"Australia/Sydney",MEL:"Australia/Melbourne",BNE:"Australia/Brisbane",PER:"Australia/Perth",ADL:"Australia/Adelaide",
+    AKL:"Pacific/Auckland",CHC:"Pacific/Auckland"
+  };
   async function geoPlace(name){
     name=(name||"").trim();if(!name)return null;
+    var iataTz=IATA_TZ[name.toUpperCase()];
     var g=await geoCity(IATA[name.toUpperCase()]||name);
-    if(g)return g;
+    if(g){if(!g.timezone&&iataTz)g.timezone=iataTz;return g;}
     // "Jurerê Internacional, Florianópolis" -> try each part until one geocodes
     var parts=name.split(/[,(\/]/).map(function(s){return s.trim();}).filter(Boolean);
     for(var i=0;i<parts.length&&!g;i++){if(parts[i]!==name)g=await geoCity(IATA[parts[i].toUpperCase()]||parts[i]);}
+    if(g&&!g.timezone&&iataTz)g.timezone=iataTz;
     return g;
   }
   function distKm(a,b){var R=6371,toR=Math.PI/180,sLa=Math.sin((b.lat-a.lat)*toR/2),sLo=Math.sin((b.lon-a.lon)*toR/2),h=sLa*sLa+Math.cos(a.lat*toR)*Math.cos(b.lat*toR)*sLo*sLo;return 2*R*Math.asin(Math.sqrt(h));}
@@ -704,6 +824,19 @@
     var ci=CINFO[g.cc]||{},parts=[];
     var o=await geoPlace(t.from||home);          // no origin on the trip -> measure from home base
     if(o){var km=distKm(o,g);if(km>=1)parts.push('<span class="di">📏 '+fmtDist(km)+'</span>');}
+
+    // Timezone & Local Time Clock
+    var destTz = t.timezone || (g && g.timezone) || IATA_TZ[(t.to||"").toUpperCase()];
+    if(destTz){
+      var curDestTime = fmtDestTime(destTz);
+      var homeTzVal = getHomeTz();
+      var diffStr = fmtTimeDiff(destTz, homeTzVal);
+      var offsetStr = fmtUtcOffset(destTz);
+      var cityName = (destTz.split("/")[1]||destTz).replace(/_/g," ");
+      var tip = (isZH() ? "目的地時區: " : "Destination TZ: ") + destTz + " (" + offsetStr + ")\n" + (isZH() ? "本人出發地時區: " : "Home TZ: ") + homeTzVal;
+      parts.push('<span class="di tz-chip" title="'+esc(tip)+'" style="cursor:help">🕒 '+(curDestTime ? '<strong style="font-variant-numeric:tabular-nums;font-weight:600">'+curDestTime+'</strong> ' : '')+'<span class="tz-diff" style="opacity:.9">('+cityName+' · '+diffStr+')</span></span>');
+    }
+
     if(t.start&&t.end){var w=await weatherFor(g.lat,g.lon,t.start,t.end);if(w)parts.push('<span class="di">'+wIcon(w.code)+' '+fmtTemp(w.lo)+'-'+fmtTemp(w.hi)+tempUnit()+(w.typical?(isZH()?' <em>常態氣候</em>':' <em>typical</em>'):'')+'</span>');}
     if(ci.cur==="EUR"){parts.push('<span class="di">💶 '+(isZH()?"歐元":"Euro")+'</span>');}
     else if(ci.cur){var fx=await fxRates();if(fx&&fx[ci.cur]){var pe=fx[ci.cur],pu=fx.USD?fx[ci.cur]/fx.USD:0;parts.push('<span class="di">💱 €1='+fmtMoney(pe)+' '+ci.cur+(pu?' · $1='+fmtMoney(pu):'')+'</span>');}else parts.push('<span class="di">💱 '+ci.cur+'</span>');}
@@ -715,8 +848,10 @@
   function icsForTrip(t){
     var dt=function(d){return d.replace(/-/g,"");};
     var dtEnd=function(d){var x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()+1);return x.toISOString().slice(0,10).replace(/-/g,"");};
+    var tz=t.timezone||getHomeTz();
     var desc=(t.segments||[]).map(function(s){return (s.type||"")+": "+(s.name||"");}).join("\\n");
-    return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//888RoamTravel//EN","BEGIN:VEVENT","UID:"+t.id+"@travel",
+    if(tz) desc = (desc ? desc + "\\n" : "") + "Timezone: " + tz;
+    return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//888RoamTravel//EN","X-WR-TIMEZONE:"+tz,"BEGIN:VEVENT","UID:"+t.id+"@travel",
       "DTSTART;VALUE=DATE:"+dt(t.start),"DTEND;VALUE=DATE:"+dtEnd(t.end),
       "SUMMARY:Trip: "+((t.label||codeify(t.to)||"Travel").replace(/[,;]/g," ")),"DESCRIPTION:"+desc,"END:VEVENT","END:VCALENDAR"].join("\r\n");
   }
@@ -1124,6 +1259,7 @@
     '<div class="two">'+field(isZH()?"出發地 (From)":"From","f_from","text",fromVal,isZH()?"例如：台北 / TPE":"Porto / OPO")+field(isZH()?"目的地 (To)":"To","f_to","text",t.to,isZH()?"例如：東京 / NRT":"Funchal / FNC")+'</div>'+
     '<div class="two">'+field(isZH()?"出發日期":"Departure","f_start","date",t.start,"")+field(isZH()?"回程日期":"Return","f_end","date",t.end,"")+'</div>'+
     field(isZH()?"旅程標題":"Label","f_label","text",t.label,isZH()?"例如：夏日東京放鬆遊":"Build Days - Madeira",optL)+
+    field(isZH()?"目的地時區 (Destination Timezone)":"Destination Timezone","f_tz","text",t.timezone||"",isZH()?"例如：Asia/Tokyo（留空則自動解析）":"e.g. Asia/Tokyo (blank = auto-detect)",optL)+
     '<div class="field"><label>'+(isZH()?"備註說明":"Notes")+' <span class="opt">'+optL+'</span></label><textarea id="f_notes" placeholder="'+(isZH()?"落地簽、飯店已預付、攜帶轉接頭...":"Visa on arrival, hotel prepaid, bring adapter...")+'">'+esc(t.notes||"")+'</textarea></div>'+
     '<div class="err" id="ferr"></div>'+
     '<div class="modal-actions"><button class="btn" id="cancelBtn">'+(isZH()?"取消":"Cancel")+'</button><button class="btn solid" id="saveTrip">'+(t.id?(isZH()?"儲存旅程":"Save trip"):(isZH()?"新增旅程":"Add trip"))+'</button></div>';}
@@ -1143,13 +1279,13 @@
     var c=document.getElementById("cancelBtn");if(c)c.onclick=closeModal;
     var st=document.getElementById("saveTrip");
     if(st)st.onclick=async function(){
-      var from=val("f_from"),to=val("f_to"),s=val("f_start"),e=val("f_end"),label=val("f_label"),notes=val("f_notes"),err=document.getElementById("ferr");err.textContent="";
+      var from=val("f_from"),to=val("f_to"),s=val("f_start"),e=val("f_end"),label=val("f_label"),tz=val("f_tz"),notes=val("f_notes"),err=document.getElementById("ferr");err.textContent="";
       if(!from||!to){err.textContent=isZH()?"請填寫出發地與目的地。":"Add both a from and a to.";return;}
       if(!s||!e){err.textContent=isZH()?"請選擇出發與回程日期。":"Pick departure and return dates.";return;}
       if(dayDiff(s,e)<0){err.textContent=isZH()?"回程日期不能早於出發日期。":"Return is before departure.";return;}
       var id=modal.dataset.editId;
-      if(id){var t=trips.find(function(x){return x.id===id;});Object.assign(t,{from:from,to:to,start:s,end:e,label:label,notes:notes});await persistTrip(t,"update");}
-      else{var nt={id:uid(),from:from,to:to,start:s,end:e,label:label,notes:notes,segments:[]};trips.push(nt);await persistTrip(nt,"create");}
+      if(id){var t=trips.find(function(x){return x.id===id;});Object.assign(t,{from:from,to:to,start:s,end:e,label:label,timezone:tz,notes:notes});await persistTrip(t,"update");}
+      else{var nt={id:uid(),from:from,to:to,start:s,end:e,label:label,timezone:tz,notes:notes,segments:[]};trips.push(nt);await persistTrip(nt,"create");}
       closeModal();render();toast(id?(isZH()?"旅程已更新":"Trip updated"):(isZH()?"旅程已新增":"Trip added"));
     };
     var sw=document.getElementById("saveWish");
@@ -1353,8 +1489,10 @@
       :('One-time setup at <b>console.cloud.google.com</b>: create a project, enable the <b>Google Calendar API</b> and <b>Gmail API</b>, then under Credentials create an <b>OAuth client ID (Web application)</b> with:<br>· Authorised JavaScript origin: <b>'+gOrigin+'</b><br>· Authorised redirect URI: <b>'+gRedirect+'</b><br>Then in <b>Audience</b> (OAuth consent screen) hit <b>Publish app</b> — in Testing mode Google cuts the connection after 7 days.<br>Paste the client ID and secret here, Save, then hit Connect Google and approve access.<br><b>Tip:</b> forward any confirmation email to yourself with <b>+trip</b> added before the @ (e.g. you<b>+trip</b>@yourdomain.com) and the next sync files it — whatever the sender.');
     openModal('<h3>'+(isZH()?"設定":"Settings")+'</h3>'+
       '<div class="field"><label>'+(isZH()?"語言 (Language)":"Language")+'</label><select id="s_lang"><option value="zh-TW"'+(isZH()?" selected":"")+'>繁體中文 (Traditional Chinese)</option><option value="en"'+(!isZH()?" selected":"")+'>English</option></select></div>'+
-      field(isZH()?"預設出發基地 (Default starting location)":"Default starting location","s_home","text",home,"OPO")+
-      '<div class="hint">'+(isZH()?"你的常駐城市——將自動填入新旅程的出發地，並用於計算卡片上的飛行距離。":"Your home base — prefilled as the origin of new trips and used for the distance on each card.")+'</div>'+
+      field(isZH()?"預設出發基地 (Default starting location)":"Default starting location","s_home","text",home,isZH()?"TPE":"OPO")+
+      '<div class="field"><label>'+(isZH()?"本人出發地時區 (Home Base Timezone)":"Home Base Timezone")+' <span class="opt">'+(isZH()?"(計算目的地時差基準)":"(time diff reference)")+'</span></label>'+
+      '<select id="s_home_tz">'+renderTimezoneOptions(getHomeTz())+'</select></div>'+
+      '<div class="hint">'+(isZH()?"你的常駐時區（已依瀏覽器自動偵測）。所有旅程卡片將以此為基準計算目的地時差與當地時鐘。":"Your home timezone (auto-detected). Destination time differences and clocks are calculated from this.")+'</div>'+
       '<div class="field"><label>'+(isZH()?"度量單位 (Units)":"Units")+'</label><select id="s_units"><option value="metric"'+(settings.units==="imperial"?"":" selected")+'>'+(isZH()?"公制 — 公里 (km) 與 攝氏 (°C)":"Metric — km &amp; °C")+'</option><option value="imperial"'+(settings.units==="imperial"?" selected":"")+'>'+(isZH()?"美制 — 英哩 (mi) 與 華氏 (°F)":"US — miles &amp; °F")+'</option></select></div>'+
       '<div class="hint">'+(isZH()?"用於計算各旅程的飛行距離以及目的地的預測氣溫。":"Used for the trip distance and destination weather on each card.")+'</div>'+
       field(isZH()?"Worker 雲端同步網址 (Worker URL)":"Worker URL","s_worker","text",settings.workerUrl,"https://travel-sync.you.workers.dev",isZH()?"(留空 = 僅保存在本機)":"(blank = local only)")+
@@ -1367,17 +1505,23 @@
       '<div id="gStatus" class="hint" style="font-size:14px;line-height:1.55;margin-top:10px">'+(isZH()?"檢查連線狀態中…":"Checking connection…")+'</div>'+
       '<h4 style="margin-top:24px">'+(isZH()?"郵件智慧解析（LLM 模型設定）":"Smart Email Parsing (LLM Settings)")+'</h4>'+
       '<div class="field"><label>'+(isZH()?"LLM 服務提供者 (LLM Provider)":"LLM Provider")+'</label><select id="s_llm_provider">'+
-        '<option value="gemini">Google Gemini (相容 OpenAI 端點)</option>'+
-        '<option value="openai">OpenAI (GPT-4o mini)</option>'+
-        '<option value="groq">Groq (極速 Llama 3.3)</option>'+
-        '<option value="deepseek">DeepSeek (高 CP 值)</option>'+
-        '<option value="anthropic">Anthropic Claude (原生 Messages API)</option>'+
+        '<option value="gemini">Google Gemini</option>'+
+        '<option value="openai">OpenAI</option>'+
+        '<option value="groq">Groq</option>'+
+        '<option value="deepseek">DeepSeek</option>'+
+        '<option value="anthropic">Anthropic Claude</option>'+
         '<option value="custom">'+(isZH()?"自訂 OpenAI 相容服務 (Custom)":"Custom OpenAI-Compatible")+'</option>'+
       '</select></div>'+
       field(isZH()?"API 端點網址 (Base URL)":"API Base URL","s_llm_base","text","","https://generativelanguage.googleapis.com/v1beta/openai",isZH()?"(Anthropic 留空即可)":"(blank for Anthropic)")+
-      field(isZH()?"模型名稱 (Model)":"Model Name","s_llm_model","text","","gemini-2.0-flash")+
+      '<div class="field"><label>'+(isZH()?"模型名稱 (Model)":"Model Name")+'</label>'+
+        '<div style="display:flex;gap:8px;align-items:stretch">'+
+          '<input id="s_llm_model" list="llm_models_list" type="text" placeholder="'+(isZH()?"輸入模型 ID 或點擊右側抓取":"e.g. gpt-4o, gemini-2.0-flash, or fetch")+'" style="flex:1">'+
+          '<button class="btn" id="llmFetchModels" type="button" style="white-space:nowrap;padding:0 12px;font-size:13px">'+(isZH()?"🔍 取得可用模型清單":"🔍 Fetch Models")+'</button>'+
+        '</div>'+
+        '<datalist id="llm_models_list"></datalist>'+
+      '</div>'+
       field(isZH()?"API 金鑰 (API Key)":"API Key","s_llm_key","password","",isZH()?"僅儲存於你的 Worker":"stored on your worker only",isZH()?"僅存於 Worker 端":"stored on your worker only")+
-      '<div class="hint">'+(isZH()?"支援 Google Gemini、OpenAI、Groq、DeepSeek、Anthropic 及任何相容 OpenAI 的 API 端點。切換上方提供者將自動預填推薦的 Base URL 與模型名稱。":"Supports Google Gemini, OpenAI, Groq, DeepSeek, Anthropic, or any OpenAI-compatible API base URL. Switching provider auto-fills recommended settings.")+'</div>'+
+      '<div class="hint">'+(isZH()?"支援 Google Gemini、OpenAI、Groq、DeepSeek、Anthropic 及任何相容 OpenAI 的 API 端點。切換提供者將填入預設端點，點擊「🔍 取得可用模型清單」可連線即時取得你的帳號真正支援的有效模型。":"Supports Google Gemini, OpenAI, Groq, DeepSeek, Anthropic, or any OpenAI-compatible API base URL. Switching provider sets base URL; click \"Fetch Models\" to retrieve the live active models from your account.")+'</div>'+
       '<div class="modal-actions act-row"><button class="btn" id="llmSave">'+(isZH()?"儲存 LLM 設定":"Save LLM Config")+'</button></div>'+
       '<div id="llmStatus" class="hint" style="margin-top:8px"></div>'+
 
@@ -1434,25 +1578,73 @@
             ? ('<span style="color:var(--green)">● '+(isZH()?'Resend 郵件已就緒':'Resend ready')+'</span> <span class="opt">('+(d.resendFrom||"default")+(d.resendSource==="secret"?' · secret':'')+')</span>')
             : ('<span style="color:var(--amber)">◐ '+(isZH()?'尚未設定 Resend API 金鑰 — 信箱 OTP 登入暫不可用':'Resend key not set — OTP login unavailable')+'</span>');
         }
+        if(d.homeTz && document.getElementById("s_home_tz")){
+          document.getElementById("s_home_tz").value = d.homeTz;
+          homeTz = d.homeTz;
+          try{localStorage.setItem("travel:hometz",homeTz);}catch(e){}
+        }
+        if(d.home && document.getElementById("s_home") && !document.getElementById("s_home").value){
+          document.getElementById("s_home").value = d.home;
+          home = d.home;
+        }
       }catch(e){setGStatus('<span style="color:var(--faint)">Worker not reachable.</span>');}
     }
 
     var LLM_PRESETS = {
-      gemini: { base: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-2.0-flash" },
-      openai: { base: "https://api.openai.com/v1", model: "gpt-4o-mini" },
-      groq: { base: "https://api.groq.com/openai/v1", model: "llama-3.3-70b-versatile" },
-      deepseek: { base: "https://api.deepseek.com/v1", model: "deepseek-chat" },
-      anthropic: { base: "", model: "claude-haiku-4-5" },
-      custom: { base: "", model: "" }
+      gemini: { base: "https://generativelanguage.googleapis.com/v1beta/openai" },
+      openai: { base: "https://api.openai.com/v1" },
+      groq: { base: "https://api.groq.com/openai/v1" },
+      deepseek: { base: "https://api.deepseek.com/v1" },
+      anthropic: { base: "" },
+      custom: { base: "" }
     };
     var provSelect = document.getElementById("s_llm_provider");
     if(provSelect){
       provSelect.onchange = function(){
         var p = provSelect.value;
         if(LLM_PRESETS[p]){
-          var bEl = document.getElementById("s_llm_base"), mEl = document.getElementById("s_llm_model");
+          var bEl = document.getElementById("s_llm_base");
           if(bEl) bEl.value = LLM_PRESETS[p].base;
-          if(mEl) mEl.value = LLM_PRESETS[p].model;
+        }
+      };
+    }
+
+    var fetchBtn = document.getElementById("llmFetchModels");
+    if(fetchBtn){
+      fetchBtn.onclick = async function(){
+        var p = val("s_llm_provider") || "openai";
+        var b = val("s_llm_base");
+        var k = val("s_llm_key");
+        var orig = fetchBtn.textContent;
+        fetchBtn.disabled = true;
+        fetchBtn.textContent = isZH() ? "查詢中…" : "Fetching…";
+        try{
+          var r = await fetch(apiBase() + "/settings/llm/models", {
+            method: "POST",
+            headers: Object.assign({"Content-Type": "application/json"}, authHeaders()),
+            body: JSON.stringify({ provider: p, baseUrl: b, apiKey: k })
+          });
+          var d = await r.json();
+          if(!r.ok || !d.ok){
+            toast(d.error || (isZH() ? "無法取得模型清單" : "Failed to fetch models"));
+            return;
+          }
+          var models = d.models || [];
+          var dl = document.getElementById("llm_models_list");
+          if(dl){
+            dl.innerHTML = models.map(function(m){ return '<option value="' + esc(m) + '">'; }).join("");
+          }
+          var mInput = document.getElementById("s_llm_model");
+          if(mInput && (!mInput.value || !models.includes(mInput.value))){
+            var best = models.find(function(m){ return /flash|gpt-4|claude-3|chat/i.test(m); }) || models[0];
+            if(best) mInput.value = best;
+          }
+          toast(isZH() ? ("✅ 成功獲取 " + models.length + " 個可用模型！可在輸入框選取") : ("✅ Loaded " + models.length + " models!"));
+        }catch(e){
+          toast(isZH() ? "無法連線至 Worker" : "Worker unreachable");
+        }finally{
+          fetchBtn.disabled = false;
+          fetchBtn.textContent = orig;
         }
       };
     }
@@ -1652,8 +1844,20 @@
       var imp=val("imp");
       var chosenLang = val("s_lang") || "zh-TW";
       if(chosenLang !== LANG) setLang(chosenLang);
-      home=(val("s_home")||"OPO").toUpperCase();settings.workerUrl=val("s_worker").replace(/\/+$/,"");settings.units=val("s_units")||"metric";
-      await save("home",home);await save("settings",settings);
+      home=(val("s_home")||(isZH()?"TPE":"OPO")).toUpperCase();
+      homeTz=val("s_home_tz")||getHomeTz();
+      settings.workerUrl=val("s_worker").replace(/\/+$/,"");settings.units=val("s_units")||"metric";
+      try{localStorage.setItem("travel:hometz",homeTz);}catch(e){}
+      await save("home",home);await save("homeTz",homeTz);await save("settings",settings);
+      if(settings.workerUrl){
+        try{
+          await fetch(apiBase()+"/settings/profile",{
+            method:"POST",
+            headers:Object.assign({"Content-Type":"application/json"},authHeaders()),
+            body:JSON.stringify({home:home,homeTz:homeTz,units:settings.units})
+          });
+        }catch(e){}
+      }
       if(imp)doImport(imp);
       closeModal();updateStatusChip();
       if(settings.workerUrl){toast(isZH()?"同步中…":"Syncing...");await refresh();}else{render();toast(isZH()?"設定已儲存":"Saved");}
@@ -1931,21 +2135,33 @@
     }catch(e){}
   }
   (async function(){
-    trips=await load("trips",null);wishes=await load("wishes",null);home=await load("home",null);settings=await load("settings",null)||{workerUrl:""};
+    trips=await load("trips",null);wishes=await load("wishes",null);home=await load("home",null);homeTz=await load("homeTz",null);settings=await load("settings",null)||{workerUrl:""};
     var firstRun=(trips===null&&wishes===null);
-    if(trips===null)trips=[];if(wishes===null)wishes=[];if(!home)home="OPO";
+    if(trips===null)trips=[];if(wishes===null)wishes=[];
+    if(!home)home=isZH()?"TPE":"OPO";
+    if(!homeTz)homeTz=getHomeTz();
     await probeOrigin();
-    // Seed the sample trip only in pure local mode; when synced the worker store is the source of truth.
+    // Seed sample trip only in pure local mode; when synced worker store is source of truth.
     if(firstRun && !settings.workerUrl){
-      trips=[{id:uid(),from:"OPO",to:"FNC",start:"2026-09-15",end:"2026-09-18",label:"Build Days - Madeira",segments:[
-        {type:"flight",name:"TAP TP1693 OPO to FNC",start:"2026-09-15",address:"Porto to Funchal",conf:"seed1"},
-        {type:"hotel",name:"Castanheiro Boutique Hotel",start:"2026-09-15",end:"2026-09-18",address:"Rua do Castanheiro 31, Funchal",conf:"seed2"},
-        {type:"ride",name:"Airport pickup",start:"2026-09-15",address:"FNC arrivals",conf:"seed3"},
-        {type:"flight",name:"TAP TP1694 FNC to OPO",start:"2026-09-18",address:"Funchal to Porto",conf:"seed4"}
-      ]}];
-      wishes=[{id:uid(),from:"OPO",dest:"",days:"5",month:"August",budget:"€400",note:"Anywhere warm, flexible dates, direct if possible."}];
+      if(isZH()){
+        trips=[{id:uid(),from:"TPE",to:"NRT",start:"2026-10-15",end:"2026-10-20",label:"東京秋季漫步自由行",timezone:"Asia/Tokyo",segments:[
+          {type:"flight",name:"星宇航空 JX800 台北 TPE 至 東京 NRT",start:"2026-10-15T08:30",address:"台北桃園機場第一航廈",conf:"seed1"},
+          {type:"hotel",name:"東京目黑星野 OMO5 飯店",start:"2026-10-15",end:"2026-10-20",address:"東京都目黑區",conf:"seed2"},
+          {type:"rail",name:"京成 Skyliner 機場快線",start:"2026-10-15T13:00",address:"成田機場第二航廈",conf:"seed3"},
+          {type:"flight",name:"星宇航空 JX801 東京 NRT 至 台北 TPE",start:"2026-10-20T14:15",address:"東京成田機場第二航廈",conf:"seed4"}
+        ]}];
+        wishes=[{id:uid(),from:"TPE",dest:"京都 / KIX",days:"6",month:"November",budget:"NT$35,000",note:"賞楓季直飛航班，行程彈性。"}];
+      } else {
+        trips=[{id:uid(),from:"OPO",to:"FNC",start:"2026-09-15",end:"2026-09-18",label:"Build Days - Madeira",timezone:"Atlantic/Madeira",segments:[
+          {type:"flight",name:"TAP TP1693 OPO to FNC",start:"2026-09-15",address:"Porto to Funchal",conf:"seed1"},
+          {type:"hotel",name:"Castanheiro Boutique Hotel",start:"2026-09-15",end:"2026-09-18",address:"Rua do Castanheiro 31, Funchal",conf:"seed2"},
+          {type:"ride",name:"Airport pickup",start:"2026-09-15",address:"FNC arrivals",conf:"seed3"},
+          {type:"flight",name:"TAP TP1694 FNC to OPO",start:"2026-09-18",address:"Funchal to Porto",conf:"seed4"}
+        ]}];
+        wishes=[{id:uid(),from:"OPO",dest:"",days:"5",month:"August",budget:"€400",note:"Anywhere warm, flexible dates, direct if possible."}];
+      }
       openSet[trips[0].id]=true;
-      save("trips",trips);save("wishes",wishes);save("home",home);
+      save("trips",trips);save("wishes",wishes);save("home",home);save("homeTz",homeTz);
     }
     ensureIds();
     updateStaticTexts();

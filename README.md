@@ -125,10 +125,13 @@ RoamRadar 是一套 Progressive Web App (PWA)。加入主畫面後即可全螢�
 
 888漫步旅遊 本身支援純手動維護所有行程。如需開啟自動匯入或 OTP 郵件登入功能，可於 App 內的 **「設定 (Settings)」** 視窗進行設定，金鑰將直接安全儲存於您的 Cloudflare KV（或透過 Worker Secrets）：
 
-- **Google 行事曆與 Gmail**：至 [Google Cloud Console](https://console.cloud.google.com/) 啟用 Calendar API 與 Gmail API，建立網頁版 OAuth 用戶端（App 設定視窗內會直接提供您需填寫的來源與重導向 URI）。貼上 Client ID 與 Secret 後點擊「連結 Google」即可。
+- **時區與目的地時差鐘 (Timezone & Jet Lag)**：
+  - 支援常駐出發地時區（`homeTz`，自動偵測瀏覽器時區如 `Asia/Taipei`，亦可隨時手動自訂）。
+  - 自動依據目的地地理資訊與機場代碼解析目的地標準時區（如 `Asia/Tokyo`、`Europe/Paris`）。
+  - 旅程卡片即時顯示目的地當地時間與時差標籤（例如 `🕒 18:45 (Tokyo · 快 1 小時)`），日曆訂閱 (ICS) 亦全面支援時區標記。
 - **多模型 LLM 智慧郵件解析 (Universal LLM)**：
   - 支援 **Google Gemini**、**OpenAI**、**Groq**、**DeepSeek**、**Anthropic Claude** 或 **自訂 OpenAI 相容服務**。
-  - 在 App 設定的「郵件智慧解析」下拉選單中選擇提供者，系統將自動預填推薦之 Base URL 與模型名稱（例如 Gemini 預填 `gemini-2.0-flash`、OpenAI 預填 `gpt-4o-mini`、Groq 預填 `llama-3.3-70b`、Anthropic 預填 `claude-haiku-4-5`）。
+  - 在 App 設定的「郵件智慧解析」下拉選單中選擇提供者，點擊 **「🔍 取得可用模型清單」** 即可一鍵連線官方 API 動態撈取您帳號目前最新可用的模型清單，從下拉選單直接點選，不再受限於寫死的過期或廢棄模型！
   - 貼上您的 API Key 點擊「儲存 LLM 設定」即可。亦可透過 Worker Secrets 靜態配置：`LLM_API_KEY`、`LLM_BASE_URL`、`LLM_MODEL`、`LLM_PROVIDER`。
 - **Resend 郵件寄送與 OTP 驗證碼 (Email Delivery & OTP)**：
   - 至 [Resend](https://resend.com/api-keys) 免費建立 API Key（`re_...`）。
