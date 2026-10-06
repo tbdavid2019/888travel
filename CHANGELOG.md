@@ -23,6 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     - 點擊切換時以微動態即時置換 DOM 文案，並與 App 端共享語言設定。
   - **PWA 安裝清單 (`manifest.webmanifest` & `public/manifest.webmanifest`)**：
     - 應用程式名稱在地化為 `RoamRadar 旅遊雷達`，並補齊雙語應用說明。
+  - **AI 代理人協同規範 (`AGENTS.md`)**：
+    - 建立跨 AI 代理人（Antigravity, Cursor, Claude Code, Copilot 等）通用的工程架構手冊、資料模型不變式（Invariant Rules）、鏡像同步守則與語意規範。
 
 ### Changed / 改善與優化
 - **文件全面升級與重構 (Documentation Revamp)**：
@@ -37,8 +39,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - 移除上游 Fork 網絡綁定，正式建立為獨立原創儲存庫。
 
 ### Removed / 移除檔案
-- **清理開發者指令檔**：
-  - 刪除 `CLAUDE.md`，將專案架構說明與鏡像維護守則統整收錄於 `README.md`。
+- **清理舊版專用指令檔**：
+  - 刪除 `CLAUDE.md`，由現代化、跨平台的通用規範 [`AGENTS.md`](file:///Users/david/Documents/git/tbdavid2019/travel-roamradar/AGENTS.md) 全面接替。
 
 ### Compatibility / 相容性保證
 - **後端資料結構完整相容**：
