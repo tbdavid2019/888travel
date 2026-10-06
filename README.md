@@ -1,267 +1,197 @@
-# ✈️ RoamRadar - your own personal travel hub
+# ✈️ RoamRadar 旅遊雷達 · 個人專屬雲端旅遊行程中樞
 
-> **A free, open-source, self-hosted personal travel app.** Keep every flight, hotel, ride, countdown, wishlist and past trip on one living timeline. Bookings can flow in automatically from Google Calendar and Gmail. Runs as a single Cloudflare Worker on your own account. Built with AI agents by [Giovanni Brees](https://www.giovannibrees.com).
+> **一個免費、開源、100% 個人自架的單頁式旅遊行程管理中心。**  
+> 將所有航班、住宿、租車、交通接駁、倒數計時、願望清單與過往足跡整合在單一動態旅程時間軸。支援 Google 行事曆與 Gmail 郵件自動匯入（由 Claude AI 智慧解析）。完全託管於您個人的 Cloudflare Worker 雲端帳戶，無須共用伺服器，資料隱私 100% 操之在己。  
+> 
+> *A free, open-source, self-hosted personal travel app running entirely on your own Cloudflare Worker account. Built with AI agents by [Giovanni Brees](https://www.giovannibrees.com), enhanced with full Traditional Chinese (繁體中文) & English i18n by [tbdavid2019](https://github.com/tbdavid2019).*
+
+---
 
 [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-1E40FF.svg)](LICENSE)
 ![Self-hosted](https://img.shields.io/badge/self--hosted-yes-1B8A57.svg)
-![Built with AI agents](https://img.shields.io/badge/built%20with-AI%20agents-FF5A35.svg)
-![Cloudflare Workers](https://img.shields.io/badge/runs%20on-Cloudflare%20Workers-F38020.svg)
-![i18n](https://img.shields.io/badge/i18n-%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87%20%7C%20English-blueviolet.svg)
+![Runs on Cloudflare Workers](https://img.shields.io/badge/runs%20on-Cloudflare%20Workers-F38020.svg)
+![i18n](https://img.shields.io/badge/i18n-繁體中文%20%7C%20English-blueviolet.svg)
+![PWA Ready](https://img.shields.io/badge/PWA-installable-success.svg)
+![Vanilla JS](https://img.shields.io/badge/stack-Vanilla%20JS%20(No%20Build)-yellow.svg)
 
 <p align="center">
-  <img src="docs/screenshots/travel-demo.gif" alt="Walkthrough: trip card with photo, year calendar, and been-there world map" width="300">
+  <img src="docs/screenshots/travel-demo.gif" alt="RoamRadar 介面展示：旅程卡片、年度行事曆與足跡世界地圖" width="340">
 </p>
 
-A single-screen travel app you **host yourself**, for free, on your own
-Cloudflare account. It pulls your trips together and (optionally) fills them in
-automatically from your **Google Calendar** and **Gmail**, then adds the extras:
-a year calendar, a "been there" world map, per-trip weather, currency, plug
-type, emergency numbers, and one-tap "add to any calendar."
+---
 
-> **Personal and self-hosted.** Each person runs their *own* copy with their
-> *own* data. Nobody logs into anyone else's instance; there is no shared
-> server. Everything lives in *your* Cloudflare account, behind *your* password.
+## 🧭 產品核心特色 (Core Highlights)
 
-## A look inside
-
-| A trip at a glance | Year overview + days away | "Been there" map |
+| 旅程一覽與在地情報 | 年度行事曆與離家天數 | 足跡地圖 (Been There) |
 |:---:|:---:|:---:|
-| ![Lisbon trip card with photo, weather, currency, plug type and emergency number](docs/screenshots/tripcard.png) | ![Calendar overview and days away by year](docs/screenshots/calendar.png) | ![World map of countries visited with visit counts](docs/screenshots/map.png) |
+| ![旅程卡片包含相片、天氣預報、匯率、插座型號與緊急電話](docs/screenshots/tripcard.png) | ![全年度行事曆總覽與離家天數統計](docs/screenshots/calendar.png) | ![已造訪世界國家地圖與造訪次數統計](docs/screenshots/map.png) |
 
-<sub>A sample “Lisbon” trip. The app pulls each destination's photo automatically.</sub>
+<sub>▲ 示範旅程卡片：系統會依目的地自動抓取代表相片、即時天氣預報、當地貨幣匯率與各國緊急救助電話。</sub>
 
-## ✨ Key features
+---
 
-**Trips & plans**
-- 🧳 **Per-trip plans** — attach flights, hotels, rides and free-text notes to any
-  trip; manual plans are never overwritten by a sync.
-- ✍️ **Add by hand or let it fill itself in** — type a trip in seconds, or connect
-  Google (below) and let bookings flow in on their own.
-- 🛟 **Your hand-made plans are sacred** — no automatic sync ever changes or
-  deletes a plan you added yourself.
+## ✨ 完整功能清單 (Key Features)
 
-**🌐 Multi-language & Localized (多語系與在地化)**
-- 🇹🇼 **繁體中文 & English** — One-tap seamless language toggle in the header navigation and Settings modal, with automatic persistence (`localStorage`).
-- ✍️ **Optimized typography** — Beautiful CJK font stack (`PingFang TC`, `Noto Sans TC`, `Microsoft JhengHei`) tuned for crisp readability across mobile and desktop.
-- 📆 **Localized date formats & categories** — Flights, hotels, rides, itinerary timeline, and year wrapped stats natively adapted for traditional Chinese travel vocabulary.
+### 🌐 全站雙語與在地化體驗 (Full i18n & Localized)
+- **繁體中文 & English 一鍵無縫切換**：在頂部導覽列或「設定」視窗中隨時切換，全站文案即時更新，並自動於本地記憶偏好（`localStorage`）。
+- **極致 CJK 字型排版**：全面針對繁體中文讀者優化字型備援（`-apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei"`），在 iOS、macOS、Windows 與 Android 皆具備最舒適的閱讀質感。
+- **在地化日期與名詞**：符合台灣與繁體中文閱讀習慣的日期區間（如 `2026年 9月15日 – 9月18日`）、行程分類（航班、飯店住宿、租車、機場接駁、鐵路列車、餐廳活動）。
 
-**Planning & overview**
-- 🗓️ **Calendar overview** — a 3 / 6 / 12-month view of exactly when you're away,
-  with every travel day marked.
-- 📊 **Days away by year** — see total days travelled per calendar year (Jan 1–Dec 31);
-  tap a year for the per-trip breakdown so any number is one tap from "why."
-- 🌍 **"Been there" world map** — every country you've set foot in, filled in on a
-  world map, each with a **visit count** (even tiny island nations).
-- 🛫 **Upcoming / Past / Wishlist** tabs, with a fare-watch wishlist for trips
-  you're still dreaming up.
+### 🧳 旅程與細項規劃 (Trips & Plans)
+- **結構化細項掛載**：每趟旅程可附加多筆航班、住宿、接駁與自由備忘筆記。
+- **手動規劃神聖不可侵犯**：使用者手動輸入的行程具備最高優先權，任何雲端自動同步排程絕不覆蓋或刪除手動資料。
+- **倒數計時與狀態分頁**：即將啟程（Upcoming）、歷史回憶（Past）、足跡地圖（Been there）、時間軸（Timeline）與行事曆（Calendar），並附帶「想去的目的地（Wishlist）」機票追蹤清單。
 
-**At-a-glance destination intel** (auto-filled per trip)
-- 🌦️ **Weather** for your travel dates (forecast, or the typical climate if far off).
-- 💱 **Currency** vs both **€ and $**, live rates.
-- 🔌 **Plug type & voltage** so you pack the right adapter.
-- 🆘 **Local emergency number**.
-- 🖼️ **A real photo** of where you're heading.
+### 🤖 智慧自動匯入 (Smart Import via Google & Claude AI)
+- **Google 日曆雙向串接**：自動讀取行程相關預訂，並在個人日曆上寫入整合旅程區塊。
+- **Gmail 訂單智慧解析**：連接 Anthropic Claude AI（預設使用平價 Haiku 模型），自動解析過去一年收件匣預訂信件（機票航班號、轉機地點、飯店門禁密碼、入住時間、租車取還地點）。
+- **「+trip」轉發必成備案**：無法自動辨識的小民宿或旅行社確認信，只需轉發給自己並在 `@` 前加上 `+trip`（例如 `you+trip@domain.com`），系統背景每小時定時排程自動解析歸檔。轉發飯店自動建立旅程，轉發機票自動建立跨期旅程。
 
-**On your phone & yours alone**
-- 🔗 **Share a trip** — one tap copies a private read-only link so a travel
-  companion sees the live itinerary (hotel door codes included), no login.
-- 🎉 **Year wrapped** — flip the share card to your year in review: trips,
-  days away, countries, distance — story-ready.
-- 📅 **Add to any calendar** — one-tap `.ics` export for Apple / Google / Outlook,
-  plus a private **subscribe-by-URL feed** of all trips that stays updated.
-- 🩹 **Weekly snapshots** — an automatic full backup every Sunday (4 weeks
-  kept, plus one before every destructive action), restored in one tap.
-- 📱 **Installs like a native app** — Add to Home Screen on iPhone or Android, opens
-  full-screen, works offline (it's a PWA). *(Step-by-step below.)*
-- 🔐 **Your own password** — set once, stays signed in for 30 days per device.
-- 🗄️ **Backup & import** — export all your trips as JSON, re-import any time.
-- 🛡️ **100% your data** — everything lives in *your* Cloudflare account; nobody
-  else (not even the repo author) can see your trips.
+### 📲 行動裝置與社交分享 (Mobile & Sharing)
+- **PWA 原生級體驗**：可直接加入 iPhone / Android 主畫面，支援全螢幕沉浸式運行與離線檢視。
+- **專屬旅伴唯讀分享 (Share Trip)**：在旅程中點擊即可複製獨立唯讀連結，同伴無須登入即可查看完整時刻表與飯店門禁資訊。
+- **Instagram 限時動態 9:16 卡片**：一鍵產生適合社群分享的動態視覺卡片，截圖即發。
+- **年度回顧 (Year Wrapped)**：以大字呈現年度旅行指標——總旅程數、離家天數、造訪國家與總飛行里程。
+- **萬用日曆訂閱 (ICS Feed)**：提供可在 Apple 日曆、Google 日曆或 Outlook 中訂閱的私密 URL，隨時保持同步。
+- **雲端每週自動快照 (Snapshots)**：每週日自動備份完整資料（保留 4 週），並在任何破壞性操作前保留副本，隨時一鍵秒級還原。
 
-## Deploy your own (≈5 minutes, free)
+---
 
-### 1. Click the button
+## 🚀 5 分鐘快速部署指南 (Deploy in ≈5 Mins, Free)
+
+本專案運行於 Cloudflare 免費層（Free Plan 額度充裕），零主機伺服器費用。
+
+### 方法 A：一鍵網頁部署（最推薦）
+
+點擊下方按鈕，即可將專案複製到您的 GitHub 並直接建立 Cloudflare Worker 與 KV 資料庫：
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tbdavid2019/travel-roamradar)
 
-This copies the repo into **your** GitHub, creates the Worker in **your**
-Cloudflare account, and **auto-creates the KV namespace** it needs. (Free plan
-is plenty.) When it finishes you'll get a URL like
-`https://travel-roamradar.<you>.workers.dev`.
+1. 點擊上方按鈕授權 Cloudflare 連線。
+2. 系統會自動在您的 Cloudflare 帳戶建立 Worker 與 `TRIPS` KV 命名空間。
+3. 部署完成後將獲得專屬網址（例如：`https://travel-roamradar.<your-subdomain>.workers.dev`）。
+4. **立即開啟網址並設定帳號密碼**（首位註冊者即為管理員，請務必第一時間設定）。
 
-> **No keys are needed to deploy.** If the form shows any variables screen,
-> leave everything as-is and continue — Google and Claude both connect
-> **inside the app** afterwards (Settings), never at deploy time.
->
-> **"An unknown error occurred" under Project name?** Almost always one of:
-> a leftover repo from an earlier attempt with the same name on your GitHub
-> (delete it or pick a new project name), the Cloudflare GitHub app not
-> having access to the selected Git account (github.com → Settings →
-> Applications → Cloudflare Workers & Pages → grant access), or a brand-new
-> Cloudflare account that hasn't registered its `workers.dev` subdomain yet
-> (Cloudflare dash → Workers & Pages → set your subdomain, then retry).
+---
 
-### 2. Open the app and set your password
+### 方法 B：透過命令列 CLI 部署
 
-Open your new URL. The **first** person to log in sets the email + password —
-so do this immediately. (Use any email; it's just your login.)
-
-### 3. Start adding trips
-
-That's all you need — add a trip with dates and everything else (weather,
-currency, map, calendar) fills in around it. Want your bookings to import
-themselves? Connect Google in the **Automatic import** section below.
-
-### 4. Put it on your phone's home screen
-
-See **"📱 Add it to your home screen"** just below for the per-phone steps.
-
-That's it. 🎉
-
-## 📱 Add it to your home screen
-
-The app is a **PWA** — once it's on your home screen it opens full-screen with
-its own icon, no browser bars, and works like a normal app (even offline for the
-parts that don't need the network).
-
-### iPhone / iPad (Safari)
-1. Open your app URL (e.g. `https://travel-roamradar.<you>.workers.dev`) in **Safari**
-   — this must be Safari, not Chrome, on iOS.
-2. Tap the **Share** button (the square with an arrow pointing up).
-3. Scroll down and tap **Add to Home Screen**.
-4. Edit the name if you like → tap **Add** (top right).
-5. Open it from the new icon. Log in once; it stays signed in for 30 days.
-
-### Android (Chrome)
-1. Open your app URL in **Chrome**.
-2. Tap the **⋮** menu (top right).
-3. Tap **Add to Home screen** (or **Install app** if it's offered).
-4. Confirm **Add / Install**.
-5. Open it from the new icon and log in.
-
-> **Tip:** add it on every device you use — each one stays signed in on its own,
-> and they all sync through your Worker.
-
-<details>
-<summary>Prefer the command line? (optional)</summary>
+若您熟悉終端機操作：
 
 ```bash
-git clone https://github.com/tbdavid2019/travel-roamradar && cd travel-roamradar
-npm i -g wrangler && wrangler login
-wrangler kv namespace create TRIPS      # paste the id into wrangler.toml
+# 1. 複製儲存庫
+git clone https://github.com/tbdavid2019/travel-roamradar.git
+cd travel-roamradar
+
+# 2. 安裝 Cloudflare Wrangler CLI 並登入
+npm i -g wrangler
+wrangler login
+
+# 3. 建立 KV 命名空間
+wrangler kv namespace create TRIPS
+
+# 4. 將產生的 KV id 貼入 wrangler.toml
+# [[kv_namespaces]]
+# binding = "TRIPS"
+# id = "貼於此處"
+
+# 5. 發布至 Cloudflare Workers
 wrangler deploy
 ```
-</details>
 
-## Automatic import (optional)
+---
 
-The app is fully usable by hand. To make trips fill themselves in, connect these
-**from inside the app** (Settings) — no Cloudflare dashboard needed:
+## 📱 安裝至手機主畫面 (PWA 指引)
 
-- **Google Calendar & Gmail** — one-time setup at console.cloud.google.com
-  (create a project, enable the Calendar + Gmail APIs, make an OAuth client;
-  the app shows YOUR exact origin/redirect values to paste). Then Settings →
-  **Connect Google**. Trips get written to your calendar, and bookings on your
-  calendar attach to trips.
-- **Email → trip parsing (via Claude)** — paste your own Anthropic API key in
-  Settings. Booking confirmations in your inbox (Booking.com, Airbnb, airlines,
-  Uber…) are parsed into plans automatically — hotel with door PIN, flight with
-  number and times, transfer pickup info. An **hourly background check** files
-  new mail even with the app closed; the daily sync does the full run.
-- **Forward anything**: send any confirmation email to yourself with **+trip**
-  before the @ (e.g. `you+trip@yourdomain.com`) and it's filed within the hour —
-  whatever the sender. No matching trip yet? A forwarded **hotel stay or return
-  ticket creates the trip automatically**. Filing is geography-aware (a Funchal
-  hotel lands in your "Madeira" trip), and even a date-less hotel message (a
-  door code, say) files into the right trip by destination. The in-app **Help**
-  shows your personal forward address.
-- **Calendly** is supported as a Worker secret (see `docs/dev.vars.example`).
+RoamRadar 是一套 Progressive Web App (PWA)。加入主畫面後即可全螢幕沉浸運行，享有原生 App 般的體驗：
 
-Prefer dashboard secrets over in-app keys? Every credential can also be set via
-`wrangler secret put` — a dashboard secret always wins over the in-app copy.
+### iPhone / iPad (Safari)
+1. 在 **Safari** 瀏覽器中開啟您的專屬 App 網址（例如 `https://travel-roamradar.<you>.workers.dev/app`）。
+2. 點擊瀏覽器下方的 **「分享」** 按鈕（向上箭頭方形圖示）。
+3. 往下滑動並點選 **「加入主畫面」** (Add to Home Screen)。
+4. 確認名稱為「RoamRadar 旅遊雷達」後點擊右上角 **「新增」**。
+5. 點擊主畫面圖示開啟並登入一次，可保持登入狀態 30 天。
 
-## How it works
+### Android (Chrome)
+1. 在 **Chrome** 瀏覽器中開啟您的專屬 App 網址。
+2. 點擊右上角選單圖示 **「⋮」**。
+3. 點選 **「加到主畫面」** 或 **「安裝應用程式」**。
+4. 確認安裝，即可從主畫面點擊開啟。
 
-- `travel-app.html` / `public/index.html` — the front end (one file, vanilla JS).
-- `worker.js` — the Cloudflare Worker: serves the app, gates it behind your
-  password, runs the optional Google Calendar + Gmail import, and stores
-  everything in one KV namespace (`TRIPS`).
-- `wrangler.toml` — Worker config: the KV binding, one full sync per day
-  (18:00 UTC) and an hourly email-only check — the app's **Sync** button runs
-  the full job on demand.
+---
 
+## ⚙️ 外部服務連接指引 (可選)
+
+RoamRadar 本身支援純手動維護所有行程。如需開啟自動匯入功能，可於 App 內的 **「設定 (Settings)」** 視窗進行設定：
+
+- **Google 行事曆與 Gmail**：至 [Google Cloud Console](https://console.cloud.google.com/) 啟用 Calendar API 與 Gmail API，建立網頁版 OAuth 用戶端（App 設定視窗內會直接提供您需填寫的來源與重導向 URI）。貼上 Client ID 與 Secret 後點擊「連結 Google」即可。
+- **Anthropic Claude 郵件智慧解析**：至 [Anthropic Console](https://console.anthropic.com/) 取得 API Key（`sk-ant-...`），貼入「設定」內的郵件智慧解析欄位。採用最平價的 Claude Haiku 模型，每封郵件解析費用不到美金千分之一分。
+
+---
+
+## 🏗️ 專案架構與檔案配置 (Architecture)
+
+本專案採用極簡無依賴設計，零建置步驟（No framework, no build step），維護性與響應速度極高：
+
+```text
+├── travel-app.html          # Web App 核心前端（單檔純 Vanilla JS，資料互動與介面渲染）
+├── website/
+│   └── index.html           # 官方形象宣傳首頁（含多語系即時切換字典）
+├── public/                  # Cloudflare Workers Assets 鏡像目錄
+│   ├── app.html             # travel-app.html 之正式發布鏡像
+│   ├── index.html           # website/index.html 之正式發布鏡像
+│   └── manifest.webmanifest # PWA 清單發布鏡像
+├── worker.js                # Cloudflare Worker 核心伺服端（路由、密碼驗證、KV 同步、排程）
+├── wrangler.toml            # Cloudflare Worker 組態與 Cron 排程定義
+├── manifest.webmanifest     # PWA 應用程式清單原始檔
+└── CHANGELOG.md             # 專案版本更新紀錄
 ```
-Trip: { id, from, to, start (YYYY-MM-DD), end, label, notes, segments[] }
-```
 
-## Privacy
+> [!IMPORTANT]
+> **鏡像維護原則 (Mirror Rule)**：  
+> 當您修改根目錄的 `travel-app.html`、`website/index.html` 或 `manifest.webmanifest` 時，提交前必須執行對應的鏡像複製指令：
+> ```bash
+> cp travel-app.html public/app.html
+> cp website/index.html public/index.html
+> cp manifest.webmanifest public/manifest.webmanifest
+> ```
 
-Everything lives in **your** Cloudflare account: your trips in your KV, your keys
-on your Worker, behind your password. The maintainer of this repo has no
-access to your instance or your data.
+---
 
-### Anonymous install count
+## 🔒 隱私與安全性聲明 (Privacy & Security)
 
-The one exception, and it's a narrow one: on first-time setup (the moment you
-create your password), your instance can send **one** anonymous ping —
-literally `{ "id": "<a random 128-bit number>" }` and nothing else — to a
-tiny counter Worker the maintainer runs, just so they know roughly how many
-people are using this template.
+- **100% 個人專屬持有**：所有行程資料存放於您個人的 Cloudflare KV，Google 與 Anthropic 金鑰僅在伺服器端環境加密執行，絕不向前端回傳。
+- **無共享伺服器**：沒有任何中心化雲端伺服器能存取您的旅程資料。
+- **遙測已預設關閉**：本儲存庫中 `wrangler.toml` 內的 `TELEMETRY_URL` 預設為留空，絕不對外發送任何隱私連線。
 
-That's the whole of it. **No trip, no email, no key, no name, no location —
-no data of any kind beyond that one random number — is ever sent, tracked,
-logged, or available to anyone, at any time, for any reason.** The id can't
-be traced back to you; it exists only so your instance isn't counted twice.
-To see the running total, open `https://<your-counter>.workers.dev/count?key=<your READ_KEY>`
-in a browser — it's a plain page with just the number, nothing to parse.
-The code for both sides is public: the ping is `pingInstallCount()` in
-`worker.js`, and the counter that receives it is the whole of
-`counter/counter-worker.js` — five lines that store an id and a total,
-nothing more.
+---
 
-It is **off by default** — `TELEMETRY_URL` ships blank in `wrangler.toml`,
-which means zero network calls, full stop, unless you deploy the counter
-yourself and paste its URL in. Deploying from a public clone of this repo
-where someone (e.g. the maintainer) already filled that line in means your
-instance participates too; blank the line, or delete the one `ctx.waitUntil
-(pingInstallCount(env))` call in `worker.js`, to opt out completely — nothing
-else in the app depends on it either way.
+## ❓ 常見問答 (FAQ)
 
-## Frequently asked questions
+**Q：RoamRadar 是免費的嗎？**  
+A：是的。本專案為開源專案，且 Cloudflare Workers 的免費方案每日提供 100,000 次請求額度，個人使用完全無需任何主機費用。
 
-**Is RoamRadar free?**
-Yes. It is open-source and self-hosted - you run your own copy on your own
-Cloudflare account, which is free for personal use.
+**Q：是否支援繁體中文與多語系？**  
+A：完整支援！介面提供「繁體中文」與「English」雙語即時切換，包含所有導覽、設定、表單、行程卡片與使用說明指南。
 
-**Where is my travel data stored?**
-In your own Cloudflare KV, behind your own password. Nothing is sent to a shared
-server, and the repo author cannot see your trips.
+**Q：一定要串接 Google 帳號或 Anthropic 金鑰才能使用嗎？**  
+A：完全不需要。RoamRadar 可以純手動輸入並管理所有旅程細項，第三方串接純粹是為了提供自動匯入的便利性。
 
-**Do I have to connect my email or calendar?**
-No. RoamRadar is fully usable by hand. Connecting Google Calendar and Gmail is
-optional and only makes trips fill themselves in from your existing bookings.
+---
 
-**What is RoamRadar built with?**
-A single Cloudflare Worker serving a vanilla-JavaScript front end, with one KV
-namespace for storage. No framework, no build step.
+## ❤️ 特別鳴謝與作者資訊 (Acknowledgments & Credits)
 
-**Does RoamRadar support multiple languages?**
-Yes! RoamRadar provides full bilingual support for **繁體中文 (Traditional Chinese)** and **English**, easily switchable with one tap directly from the navigation bar or Settings.
+- **Original Creator (原作者)**：  
+  誠摯感謝 **[Giovanni Brees](https://www.giovannibrees.com)** 開源打造出這套架構精巧、設計優雅的 RoamRadar 個人旅遊中樞！其在單租戶架構與 AI 代理人開發上的先驅實踐，為本專案奠定了最卓越的基礎。
+  - 個人網站：https://www.giovannibrees.com
+  - LinkedIn：https://www.linkedin.com/in/giovannibrees/
+  - Podcast 節目《The Zero-Employee Company》：https://open.spotify.com/show/033TuF4FmEurDDvBZlOAYr
 
-**Who made RoamRadar?**
-[Giovanni Brees](https://www.giovannibrees.com), a founder and AI-first
-entrepreneur. His AI development agent built the app from scratch, with Claude
-Fable and Codex reviewing the code and Claude handling the visual design.
+- **Traditional Chinese Localization & Maintenance (繁體中文在地化維護)**：  
+  由 **[tbdavid2019](https://github.com/tbdavid2019)** 深度重構與維護，全面注入繁體中文多語系機制、在地化字型工藝與中文旅遊語境優化。
 
-## Acknowledgments & Credits / 特別鳴謝
+---
 
-- **Original Creator (原作者)**: A huge thank you to **[Giovanni Brees](https://www.giovannibrees.com)** for designing, architecting, and open-sourcing the original [RoamRadar](https://github.com/giovannibrees/travel-roamradar). His work on single-tenant self-hosted architecture and AI-first engineering created an extraordinary foundation for personal travel management.
-  - Website: https://www.giovannibrees.com
-  - LinkedIn: https://www.linkedin.com/in/giovannibrees/
-  - Podcast, *The Zero-Employee Company*: https://open.spotify.com/show/033TuF4FmEurDDvBZlOAYr
-- **Traditional Chinese Localization & Enhancements (繁體中文在地化分支)**: Maintained by [tbdavid2019](https://github.com/tbdavid2019) with comprehensive i18n support, East Asian typography craft improvements, and bilingual landing page & PWA integration.
+## 📄 開源授權 (License)
 
-## License
-
-[PolyForm Noncommercial 1.0.0](LICENSE) — free to run, modify, and self-host for
-any **noncommercial** purpose. You may not sell it or use it commercially.
+本專案遵循 [PolyForm Noncommercial 1.0.0](LICENSE) 授權條款：允許自由運行、修改並用於任何非商業性個人目的。

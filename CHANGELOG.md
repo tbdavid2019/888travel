@@ -25,12 +25,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     - 應用程式名稱在地化為 `RoamRadar 旅遊雷達`，並補齊雙語應用說明。
 
 ### Changed / 改善與優化
+- **文件全面升級與重構 (Documentation Revamp)**：
+  - 大幅重寫 [`README.md`](file:///Users/david/Documents/git/tbdavid2019/travel-roamradar/README.md)，採用繁體中文優先排版，補齊完整產品特色表格、快速部署按鈕（A/B 方案）、手機 PWA 安裝指南、專案架構說明、鏡像原則與常見問答。
 - **字型與排版優化 (Typography & Font Stack)**：
   - 遵循 `impeccable` 設計規範，補齊 `-apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Heiti TC", "Microsoft JhengHei"` 字型備援，確保在 macOS、iOS、Windows 與 Android 各裝置上皆具備高度清晰與舒適的繁體中文字級閱讀體驗。
 - **在地化日期格式**：
   - 日期區間格式化依據語系動態適配（例如中文呈現 `2026年 9月15日 – 9月18日`）。
 - **鏡像同步 (Mirror Compliance)**：
   - 嚴格遵守專案發布規範，將根目錄原始碼無縫同步至 `public/` 目錄。
+- **獨立儲存庫建立 (Standalone Repository)**：
+  - 移除上游 Fork 網絡綁定，正式建立為獨立原創儲存庫。
+
+### Removed / 移除檔案
+- **清理開發者指令檔**：
+  - 刪除 `CLAUDE.md`，將專案架構說明與鏡像維護守則統整收錄於 `README.md`。
 
 ### Compatibility / 相容性保證
 - **後端資料結構完整相容**：
