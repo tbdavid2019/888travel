@@ -31,6 +31,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - 官網（Landing Page）頁尾正式更新為 **`Created with ❤️ for travel, by david888.com（修改於 Giovanni Brees）`**（英文版：`adapted from Giovanni Brees`），同時保留原作者連結致敬，明確標示 `david888.com` 為目前維護與分支修改者。
 - **免跳轉 GitHub，直連 App 體驗 (Direct App Access CTAs)**：
   - 首頁底部巨型按鈕、頂部導航列與 Hero 區塊的行動呼籲（CTA）全面改為 **「直接開啟 888漫步旅遊」** / **「立即開啟 888漫步旅遊」**，直接連結進入 `https://travel.david888.com/app`，不再引導前往 GitHub 倉庫，為一般使用者帶來更即時純粹的 Web App 入口體驗。
+- **線上生產環境域名切換至 travel.david888.com (Production Domain Configuration)**：
+  - 正式將官方生產環境網址切換為 **`https://travel.david888.com`**，並同步至 `wrangler.toml` 的自訂網域宣告（`routes`）與 Cloudflare 邊緣路由。
+  - 官網所有 `canonical`、`og:url`、`og:image`、`twitter:url`、`twitter:image` 以及 JSON-LD Structured Data 全面切換至 `https://travel.david888.com`，達成最佳 SEO 權重與社群卡片體驗。
 - **網站地圖與搜尋引擎標註校正**：
   - `sitemap.xml` 與 `robots.txt` 域名更新為 `https://travel.david888.com`，結構化資料（JSON-LD）亦加入 `david888.com` 作者標記。
 - **清理提供者選單名稱 (Sanitized Provider Dropdown)**：

@@ -3,6 +3,11 @@ main = "worker.js"
 compatibility_date = "2025-01-01"
 account_id = "379570860738dd1757ba7f67ef2bdffe"
 
+routes = [
+  { pattern = "travel.david888.com", custom_domain = true }
+]
+workers_dev = true
+
 # Serve the front end from the SAME Worker, so one URL is both the app and the
 # API. Static files in public/ (index.html, manifest, sw.js, icons) are served
 # first; anything that is not a static file - /trips, /sync, OPTIONS, the cron -
