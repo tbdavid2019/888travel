@@ -25,7 +25,7 @@
     --cobalt:#1E40FF; --coral:#FF5A35; --amber:#E89A2B; --green:#1B8A57; --purple:#7C4DFF;
     --cream:#F4EFE4; --soft:#F6F2E9;
     --flight:var(--cobalt); --hotel:var(--green); --car:var(--amber); --ride:var(--purple); --rail:var(--coral); --other:var(--muted);
-    --display:'Bricolage Grotesque',sans-serif; --body:'Archivo',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+    --display:'Bricolage Grotesque',-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Heiti TC",sans-serif; --body:'Archivo',-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Heiti TC","Microsoft JhengHei",system-ui,sans-serif; --mono:'JetBrains Mono',"SF Mono","PingFang TC",ui-monospace,monospace;
   }
   *{box-sizing:border-box} html,body{margin:0;padding:0}
   body{background:var(--canvas);color:var(--ink);font-family:var(--body);line-height:1.45;-webkit-font-smoothing:antialiased;padding:max(40px,env(safe-area-inset-top)) clamp(20px,5vw,72px) calc(80px + env(safe-area-inset-bottom))}
@@ -355,9 +355,10 @@
   <header class="topbar">
     <div class="brand">
       <h1>RoamRadar</h1>
-      <p>Every trip - its flights, stays and rides - on one living timeline.</p>
+      <p id="brandDesc">Every trip - its flights, stays and rides - on one living timeline.</p>
     </div>
     <div class="ctl">
+      <button class="btn" id="langBtn" title="切換語言 / Switch language">繁中 / EN</button>
       <button class="btn" id="refreshBtn" style="display:none">Sync now</button>
       <button class="btn" id="shareBtn">Share</button>
       <button class="btn" id="helpBtn">Help</button>
@@ -369,11 +370,11 @@
   <section class="stats" id="stats"></section>
 
   <nav class="tabs">
-    <button class="tab active" data-tab="upcoming">Upcoming <span class="cnt" id="c-up"></span></button>
-    <button class="tab" data-tab="timeline">Timeline</button>
-    <button class="tab" data-tab="past">Past <span class="cnt" id="c-past"></span></button>
-    <button class="tab" data-tab="calendar">Calendar</button>
-    <button class="tab" data-tab="map">Map</button>
+    <button class="tab active" data-tab="upcoming" id="tabUp">Upcoming <span class="cnt" id="c-up"></span></button>
+    <button class="tab" data-tab="timeline" id="tabTl">Timeline</button>
+    <button class="tab" data-tab="past" id="tabPast">Past <span class="cnt" id="c-past"></span></button>
+    <button class="tab" data-tab="calendar" id="tabCal">Calendar</button>
+    <button class="tab" data-tab="map" id="tabMap">Map</button>
   </nav>
 
   <section class="section">
@@ -393,7 +394,26 @@
 <script>
 (function(){
   "use strict";
-  var BUILD="2026-07-10.36";   // bump on every UI change - shown in Settings so "which version am I on?" has an answer
+  var BUILD="2026-07-10.36";
+
+  /* ===================== i18n infrastructure ===================== */
+  var LANG = (function(){
+    try {
+      var s = localStorage.getItem("travel:lang");
+      if (s === "zh-TW" || s === "en") return s;
+      if (navigator.language && navigator.language.toLowerCase().indexOf("zh") === 0) return "zh-TW";
+    } catch(e){}
+    return "zh-TW";
+  })();
+  function isZH() { return LANG === "zh-TW"; }
+  function setLang(l) {
+    LANG = l;
+    try { localStorage.setItem("travel:lang", l); } catch(e){}
+    document.documentElement.lang = isZH() ? "zh-Hant-TW" : "en";
+    updateStaticTexts();
+    render();
+  }
+   // bump on every UI change - shown in Settings so "which version am I on?" has an answer
 
   /* ===================== storage / model (preserved) ===================== */
   // Persistence priority: host window.storage (if embedded) -> localStorage
@@ -420,12 +440,26 @@
   function parse(iso){var p=iso.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
   function dayDiff(a,b){return Math.round((parse(b)-parse(a))/86400000);}
   var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  function fmtRange(s,e){var ds=parse(s),de=parse(e),sd=ds.getDate(),ed=de.getDate(),sm=MON[ds.getMonth()],em=MON[de.getMonth()],sy=ds.getFullYear(),ey=de.getFullYear();
+  var MON_ZH=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+  function getMon(idx){ return isZH() ? MON_ZH[idx] : MON[idx]; }
+  function fmtRange(s,e){var ds=parse(s),de=parse(e),sd=ds.getDate(),ed=de.getDate(),sm=getMon(ds.getMonth()),em=getMon(de.getMonth()),sy=ds.getFullYear(),ey=de.getFullYear();
+    if(isZH()){
+      if(s===e)return sy+"年"+sm+sd+"日";
+      if(sy===ey&&ds.getMonth()===de.getMonth())return sy+"年"+sm+sd+"日 - "+ed+"日";
+      if(sy===ey)return sy+"年"+sm+sd+"日 - "+em+ed+"日";
+      return sy+"年"+sm+sd+"日 - "+ey+"年"+em+ed+"日";
+    }
     if(s===e)return sd+" "+sm+" "+sy; if(sy===ey&&ds.getMonth()===de.getMonth())return sd+"-"+ed+" "+sm+" "+sy;
     if(sy===ey)return sd+" "+sm+" - "+ed+" "+em+" "+sy; return sd+" "+sm+" "+sy+" - "+ed+" "+em+" "+ey;}
-  function fmtSeg(iso){if(!iso)return"";var d=parse(iso);return d.getDate()+" "+MON[d.getMonth()];}
+  function fmtSeg(iso){if(!iso)return"";var d=parse(iso);return isZH() ? (getMon(d.getMonth())+d.getDate()+"日") : (d.getDate()+" "+MON[d.getMonth()]);}
   // short form for the share card: 2-digit years so long ranges never crowd the row
-  function fmtRangeS(s,e){var ds=parse(s),de=parse(e),sd=ds.getDate(),ed=de.getDate(),sm=MON[ds.getMonth()],em=MON[de.getMonth()],sy=String(ds.getFullYear()).slice(2),ey=String(de.getFullYear()).slice(2);
+  function fmtRangeS(s,e){var ds=parse(s),de=parse(e),sd=ds.getDate(),ed=de.getDate(),sm=getMon(ds.getMonth()),em=getMon(de.getMonth()),sy=String(ds.getFullYear()).slice(2),ey=String(de.getFullYear()).slice(2);
+    if(isZH()){
+      if(s===e)return sm+sd+"日 '"+sy;
+      if(sy===ey&&ds.getMonth()===de.getMonth())return sm+sd+"-"+ed+"日 '"+sy;
+      if(sy===ey)return sm+sd+"日 - "+em+ed+"日 '"+sy;
+      return sm+sd+"日 '"+sy+" - "+em+ed+"日 '"+ey;
+    }
     if(s===e)return sd+" "+sm+" "+sy; if(sy===ey&&ds.getMonth()===de.getMonth())return sd+"-"+ed+" "+sm+" "+sy;
     if(sy===ey)return sd+" "+sm+" - "+ed+" "+em+" "+sy; return sd+" "+sm+" "+sy+" - "+ed+" "+em+" "+ey;}
   function duration(s,e){return dayDiff(s,e)+1;}
@@ -589,10 +623,10 @@
     var ci=CINFO[g.cc]||{},parts=[];
     var o=await geoPlace(t.from||home);          // no origin on the trip -> measure from home base
     if(o){var km=distKm(o,g);if(km>=1)parts.push('<span class="di">📏 '+fmtDist(km)+'</span>');}
-    if(t.start&&t.end){var w=await weatherFor(g.lat,g.lon,t.start,t.end);if(w)parts.push('<span class="di">'+wIcon(w.code)+' '+fmtTemp(w.lo)+'-'+fmtTemp(w.hi)+tempUnit()+(w.typical?' <em>typical</em>':'')+'</span>');}
-    if(ci.cur==="EUR"){parts.push('<span class="di">💶 Euro</span>');}
+    if(t.start&&t.end){var w=await weatherFor(g.lat,g.lon,t.start,t.end);if(w)parts.push('<span class="di">'+wIcon(w.code)+' '+fmtTemp(w.lo)+'-'+fmtTemp(w.hi)+tempUnit()+(w.typical?(isZH()?' <em>常態氣候</em>':' <em>typical</em>'):'')+'</span>');}
+    if(ci.cur==="EUR"){parts.push('<span class="di">💶 '+(isZH()?"歐元":"Euro")+'</span>');}
     else if(ci.cur){var fx=await fxRates();if(fx&&fx[ci.cur]){var pe=fx[ci.cur],pu=fx.USD?fx[ci.cur]/fx.USD:0;parts.push('<span class="di">💱 €1='+fmtMoney(pe)+' '+ci.cur+(pu?' · $1='+fmtMoney(pu):'')+'</span>');}else parts.push('<span class="di">💱 '+ci.cur+'</span>');}
-    if(ci.plug)parts.push('<span class="di">🔌 Type '+ci.plug+(ci.volt?' · '+ci.volt:'')+'</span>');
+    if(ci.plug)parts.push('<span class="di">🔌 '+(isZH()?"規格 ":"Type ")+ci.plug+(ci.volt?' · '+ci.volt:'')+'</span>');
     if(ci.em)parts.push('<span class="di">🆘 '+ci.em+'</span>');
     node.innerHTML=parts.join('');
   }
@@ -606,13 +640,44 @@
       "SUMMARY:Trip: "+((t.label||codeify(t.to)||"Travel").replace(/[,;]/g," ")),"DESCRIPTION:"+desc,"END:VEVENT","END:VCALENDAR"].join("\r\n");
   }
   function downloadICS(id){
-    var t=trips.find(function(x){return x.id===id;});if(!t||!t.start||!t.end){toast("Add dates first");return;}
+    var t=trips.find(function(x){return x.id===id;});if(!t||!t.start||!t.end){toast(isZH()?"請先填寫旅程出發與回程日期":"Add dates first");return;}
     var b=new Blob([icsForTrip(t)],{type:"text/calendar"}),a=document.createElement("a");
-    a.href=URL.createObjectURL(b);a.download=(codeify(t.to)||"trip")+".ics";document.body.appendChild(a);a.click();document.body.removeChild(a);toast("Calendar file ready");
+    a.href=URL.createObjectURL(b);a.download=(codeify(t.to)||"trip")+".ics";document.body.appendChild(a);a.click();document.body.removeChild(a);toast(isZH()?"行事曆檔案已備妥":"Calendar file ready");
   }
 
   var CAT={flight:{c:"var(--flight)",t:"rgba(30,64,255,.1)"},hotel:{c:"var(--hotel)",t:"rgba(27,138,87,.12)"},car:{c:"var(--car)",t:"rgba(232,154,43,.14)"},ride:{c:"var(--ride)",t:"rgba(124,77,255,.12)"},rail:{c:"var(--rail)",t:"rgba(255,90,53,.12)"},other:{c:"var(--other)",t:"rgba(117,109,94,.12)"}};
   function cat(type){return CAT[type]||CAT.other;}
+  function segTypeName(type){
+    var zhMap={flight:"航班",hotel:"住宿飯店",car:"租車自駕",ride:"交通接駁",rail:"鐵路高鐵",other:"其他項目"};
+    return isZH() ? (zhMap[type]||type) : (type||"plan");
+  }
+
+  
+  function updateStaticTexts(){
+    var bd = document.getElementById("brandDesc");
+    if(bd) bd.textContent = isZH() ? "將所有航班、住宿與交通接駁，整合於動態旅程時間軸。" : "Every trip - its flights, stays and rides - on one living timeline.";
+    var lb = document.getElementById("langBtn");
+    if(lb) lb.textContent = isZH() ? "English" : "繁體中文";
+    var rb = document.getElementById("refreshBtn");
+    if(rb) rb.textContent = isZH() ? "立即同步" : "Sync now";
+    var sb = document.getElementById("shareBtn");
+    if(sb) sb.textContent = isZH() ? "分享" : "Share";
+    var hb = document.getElementById("helpBtn");
+    if(hb) hb.textContent = isZH() ? "說明" : "Help";
+    var stb = document.getElementById("setBtn");
+    if(stb) stb.textContent = isZH() ? "設定" : "Settings";
+
+    var tu = document.getElementById("tabUp");
+    if(tu && tu.childNodes[0]) tu.childNodes[0].textContent = isZH() ? "即將出發 " : "Upcoming ";
+    var tt = document.getElementById("tabTl");
+    if(tt) tt.textContent = isZH() ? "時間軸" : "Timeline";
+    var tp = document.getElementById("tabPast");
+    if(tp && tp.childNodes[0]) tp.childNodes[0].textContent = isZH() ? "歷史回憶 " : "Past ";
+    var tc = document.getElementById("tabCal");
+    if(tc) tc.textContent = isZH() ? "行事曆" : "Calendar";
+    var tm = document.getElementById("tabMap");
+    if(tm) tm.textContent = isZH() ? "足跡地圖" : "Map";
+  }
 
   /* ===================== hero (new) ===================== */
   function renderHero(){
@@ -626,18 +691,21 @@
     // counting today - arrival day on a 9-11 Jul trip says "3 days in", never "0".
     var live=st.k==="live";
     var n=live?dayDiff(todayISO(),next.end)+1:(st.k==="soon"?st.n:0);
-    var lab=live?("day"+(n===1?"":"s")+" left in"):"days to";
+    var lab=live?(isZH()?"當前停留剩餘天數":("day"+(n===1?"":"s")+" left in")):(isZH()?"天後啟程前往":"days to");
+    var pillText=live?(isZH()?"旅途中":"NOW"):(isZH()?"下一趟旅程":"NEXT TRIP");
+    var openText=isZH()?"查看行程規劃":"Open itinerary";
+    var durText=duration(next.start,next.end)+(isZH()?" 天":" days");
     var city=codeify(next.to)||"Travel";
     var dateStr=fmtRange(next.start,next.end).toUpperCase();
     el.innerHTML=
       '<div class="hero">'+
         '<div class="hero-text">'+
-          '<div class="hero-top"><span class="pill-next">'+(live?"NOW":"NEXT TRIP")+'</span><span class="hero-date">'+esc(dateStr)+'</span></div>'+
+          '<div class="hero-top"><span class="pill-next">'+pillText+'</span><span class="hero-date">'+esc(dateStr)+'</span></div>'+
           '<div class="hero-count"><span class="num">'+n+'</span>'+
             '<div class="lab"><div>'+lab+'</div><div class="city">'+esc(codeify(next.to))+'</div></div></div>'+
           '<div class="route"><span class="code">'+esc(codeify(next.from))+'</span><span class="line"></span>'+plane(22,"color:var(--coral)")+'<span class="code">'+esc(codeify(next.to))+'</span></div>'+
-          '<div class="hero-actions"><button class="hero-btn" id="heroOpen">Open itinerary <span style="font-size:17px">&rarr;</span></button>'+
-            '<span class="hero-cap">'+esc(next.label||codeify(next.to))+' · '+duration(next.start,next.end)+' days</span></div>'+
+          '<div class="hero-actions"><button class="hero-btn" id="heroOpen">'+openText+' <span style="font-size:17px">&rarr;</span></button>'+
+            '<span class="hero-cap">'+esc(next.label||codeify(next.to))+' · '+durText+'</span></div>'+
         '</div>'+
         '<div class="hero-photo"><img src="'+esc(next.photo||destPhoto(next.to,1200))+'"'+(next.photo?'':' data-city="'+esc(next.to)+'"')+' alt="'+esc(next.to)+'"><div class="hero-fade"></div></div>'+
       '</div>';
@@ -652,10 +720,10 @@
     var daysTravelling=up.reduce(function(a,t){return a+duration(t.start,t.end);},0);
     var daysToGo=next?Math.max(0,dayDiff(todayISO(),next.start)):0;
     document.getElementById("stats").innerHTML=
-      stat(trips.length,"Trips logged","")+
-      stat(up.length,"Upcoming","var(--cobalt)")+
-      stat(daysTravelling,"Days travelling","")+
-      stat(daysToGo,"Days to go","var(--coral)");
+      stat(trips.length,isZH()?"已記錄旅程":"Trips logged","")+
+      stat(up.length,isZH()?"即將啟程":"Upcoming","var(--cobalt)")+
+      stat(daysTravelling,isZH()?"旅行總天數":"Days travelling","")+
+      stat(daysToGo,isZH()?"出發倒數天數":"Days to go","var(--coral)");
     document.getElementById("c-up").textContent=up.length;
     document.getElementById("c-past").textContent=trips.length-up.length;
   }
@@ -674,43 +742,47 @@
   function segCmp(a,b){var ka=segSortKey(a),kb=segSortKey(b);return ka<kb?-1:ka>kb?1:segRank(a)-segRank(b);}
   function itinerary(t){
     var segs=(t.segments||[]).slice().sort(segCmp);
-    var addBtn='<button class="addplan" data-addseg="'+t.id+'">+ Add plan</button><button class="addplan ical" data-ics="'+t.id+'">📅 Add to calendar</button><button class="addplan" data-sharetrip="'+t.id+'">🔗 Share trip</button>';
-    if(!segs.length)return '<div class="itin"><div class="empty">No plans yet. Add one below, or synced bookings will land here.</div>'+addBtn+'</div>';
+    var addBtn='<button class="addplan" data-addseg="'+t.id+'">'+(isZH()?"+ 新增細項":"+ Add plan")+'</button>'+
+               '<button class="addplan ical" data-ics="'+t.id+'">'+(isZH()?"📅 加入行事曆":"📅 Add to calendar")+'</button>'+
+               '<button class="addplan" data-sharetrip="'+t.id+'">'+(isZH()?"🔗 分享旅程":"🔗 Share trip")+'</button>';
+    if(!segs.length)return '<div class="itin"><div class="empty">'+(isZH()?"尚無細項規劃。點擊下方新增，或透過同步自動匯入。":"No plans yet. Add one below, or synced bookings will land here.")+'</div>'+addBtn+'</div>';
     var rows=segs.map(function(s){
       var cc=cat(s.type);
       var when=s.start?(fmtSeg(s.start)+(s.end&&s.end!==s.start?" - "+fmtSeg(s.end):"")):"";
       var dispAddr=(s.address||"").replace(/https?:\/\/\S+/g,"").replace(/[-\u2013\u00b7|,\s]+$/,"").trim();
       return '<div class="plan" data-plan="'+t.id+'|'+s.sid+'">'+
         '<div class="dotwrap"><span class="dot" style="background:'+cc.c+';box-shadow:0 0 0 4px var(--card),0 0 0 5px '+cc.c+'"></span></div>'+
-        '<div><div class="ttl"><span class="nm">'+esc(s.name||"Booking")+'</span>'+
-          '<span class="type" style="color:'+cc.c+';background:'+cc.t+'">'+esc(s.type||"plan")+'</span></div>'+
+        '<div><div class="ttl"><span class="nm">'+esc(s.name||(isZH()?"預訂規劃":"Booking"))+'</span>'+
+          '<span class="type" style="color:'+cc.c+';background:'+cc.t+'">'+esc(segTypeName(s.type))+'</span></div>'+
           (s.note?'<div class="sub">'+esc(s.note)+'</div>':'')+
           (dispAddr?'<div class="sub">'+esc(dispAddr)+'</div>':'')+'</div>'+
         '<div class="pmeta">'+(when?'<span class="when">'+when+'</span>':'')+
-          '<button class="mini" data-editseg="'+t.id+'|'+s.sid+'">Edit</button>'+
-          '<button class="x" data-delseg="'+t.id+'|'+s.sid+'">&times;</button></div>'+
+          '<button class="mini" data-editseg="'+t.id+'|'+s.sid+'">'+(isZH()?"編輯":"Edit")+'</button>'+
+          '<button class="x" data-delseg="'+t.id+'|'+s.sid+'" title="'+(isZH()?"刪除":"Delete")+'">&times;</button></div>'+
       '</div>';
     }).join("");
     return '<div class="itin">'+rows+addBtn+'</div>';
   }
   function tripCard(t){
     var st=status(t.start,t.end);
-    var badge=st.k==="soon"?'<span class="c-badge soon">IN '+st.n+(st.n===1?" DAY":" DAYS")+'</span>':st.k==="live"?'<span class="c-badge live">NOW TRAVELLING</span>':'<span class="c-badge done">COMPLETED</span>';
+    var badge=st.k==="soon"?'<span class="c-badge soon">'+(isZH()?("倒數 "+st.n+" 天"):("IN "+st.n+(st.n===1?" DAY":" DAYS")))+'</span>'
+      :st.k==="live"?'<span class="c-badge live">'+(isZH()?"旅途中":"NOW TRAVELLING")+'</span>'
+      :'<span class="c-badge done">'+(isZH()?"已結束":"COMPLETED")+'</span>';
     var open=openSet[t.id]?' open':'';
     return '<article class="trip'+open+'" data-id="'+t.id+'">'+
       '<div class="trip-head">'+
         '<img class="trip-photo" src="'+esc(t.photo||destPhoto(t.to,600))+'"'+(t.photo?'':' data-city="'+esc(t.to)+'"')+' alt="'+esc(t.to)+'">'+
-        '<button class="photo-edit" data-photo="'+t.id+'" title="Change photo">📷</button>'+
+        '<button class="photo-edit" data-photo="'+t.id+'" title="'+(isZH()?"更換相片":"Change photo")+'">📷</button>'+
         '<div class="trip-body"><div class="trip-top"><div>'+
           '<div class="trip-route"><span class="code">'+esc(codeify(t.from))+'</span>'+plane(16,"color:var(--cobalt)")+'<span class="code">'+esc(codeify(t.to))+'</span></div>'+
-          (t.label?'<h3>'+esc(t.label)+'</h3>':'<h3 class="empty">Untitled trip</h3>')+
-          '<div class="chips"><span class="c-date">'+fmtRange(t.start,t.end)+'</span><span class="c-dur">'+duration(t.start,t.end)+' DAYS</span>'+badge+'</div>'+
+          (t.label?'<h3>'+esc(t.label)+'</h3>':'<h3 class="empty">'+(isZH()?"未命名旅程":"Untitled trip")+'</h3>')+
+          '<div class="chips"><span class="c-date">'+fmtRange(t.start,t.end)+'</span><span class="c-dur">'+duration(t.start,t.end)+(isZH()?" 天":" DAYS")+'</span>'+badge+'</div>'+
           '<div class="destinfo" data-dest="'+t.id+'"></div>'+
-        '</div><div class="card-acts"><button class="mini" data-edit="'+t.id+'">Edit</button><button class="mini del" data-del="'+t.id+'">Delete</button></div></div></div>'+
+        '</div><div class="card-acts"><button class="mini" data-edit="'+t.id+'">'+(isZH()?"編輯":"Edit")+'</button><button class="mini del" data-del="'+t.id+'">'+(isZH()?"刪除":"Delete")+'</button></div></div></div>'+
       '</div>'+
       (t.notes?'<div class="tripnote">'+esc(t.notes)+'</div>':'')+
-      '<button class="toggle" data-toggle="'+t.id+'"><span class="lbl"><span class="sq" style="background:var(--cobalt)"></span><span class="sq" style="background:var(--green)"></span><span class="sq" style="background:var(--purple)"></span>ITINERARY</span>'+
-        '<span class="rgt">'+(openSet[t.id]?"Hide plans":"Show plans")+' <span class="caret">'+(openSet[t.id]?"▲":"▼")+'</span></span></button>'+
+      '<button class="toggle" data-toggle="'+t.id+'"><span class="lbl"><span class="sq" style="background:var(--cobalt)"></span><span class="sq" style="background:var(--green)"></span><span class="sq" style="background:var(--purple)"></span>'+(isZH()?"行程規劃":"ITINERARY")+'</span>'+
+        '<span class="rgt">'+(openSet[t.id]?(isZH()?"收合行程":"Hide plans"):(isZH()?"展開行程":"Show plans"))+' <span class="caret">'+(openSet[t.id]?"▲":"▼")+'</span></span></button>'+
       itinerary(t)+
     '</article>';
   }
@@ -755,7 +827,7 @@
       while(d<=end&&guard<400){var iso=isoOf(d);if(!dayInfo[iso])dayInfo[iso]={color:col,label:(t.label||codeify(t.to)||"Trip")};d.setDate(d.getDate()+1);guard++;}
     });
     var now=new Date();now.setDate(1);now.setHours(0,0,0,0);
-    var html='<div class="cal-toggle">'+[3,6,12].map(function(m){return '<button class="cal-tab'+(m===calMonths?' active':'')+'" data-cal="'+m+'">'+m+' months</button>';}).join('')+'</div><div class="cal-grid">';
+    var html='<div class="cal-toggle">'+[3,6,12].map(function(m){return '<button class="cal-tab'+(m===calMonths?' active':'')+'" data-cal="'+m+'">'+m+(isZH()?' 個月':' months')+'</button>';}).join('')+'</div><div class="cal-grid">';
     for(var mi=0;mi<calMonths;mi++)html+=monthCard(new Date(now.getFullYear(),now.getMonth()+mi,1),dayInfo);
     html+='</div>';
     // days away per calendar year (Jan 1 -> Dec 31). Header counts each calendar
@@ -776,15 +848,15 @@
           var spans=x.t.start<y+"-01-01"||x.t.end>y+"-12-31";
           return '<div class="yr-trip"><span class="yr-tr">'+route+'</span><span class="yr-td">'+fmtRange(x.t.start,x.t.end)+' · '+x.c.days+'d'+(spans?' in '+y:'')+'</span></div>';
         }).join('');
-        return '<div class="yr"><div class="yr-top" data-yr="'+y+'"><span class="yr-y">'+y+' <span class="yr-caret">▸</span></span><span class="yr-n">'+n+' day'+(n===1?'':'s')+' away</span></div><div class="yr-bar"><span style="width:'+pct+'%"></span></div><div class="yr-detail">'+(rows||'<div class="yr-trip"><span class="yr-tr">No trips</span></div>')+'</div></div>';
+        return '<div class="yr"><div class="yr-top" data-yr="'+y+'"><span class="yr-y">'+y+' <span class="yr-caret">▸</span></span><span class="yr-n">'+(isZH()?(n+" 天在旅途中"):(n+' day'+(n===1?'':'s')+' away'))+'</span></div><div class="yr-bar"><span style="width:'+pct+'%"></span></div><div class="yr-detail">'+(rows||('<div class="yr-trip"><span class="yr-tr">'+(isZH()?"無旅程":"No trips")+'</span></div>'))+'</div></div>';
       }).join('');
-      html+='<div class="yr-wrap"><div class="yr-lh">Days away by year <span class="yr-hint">— tap a year for the breakdown</span></div>'+yhtml+'</div>';
+      html+='<div class="yr-wrap"><div class="yr-lh">'+(isZH()?"年度離家旅行天數 ":"Days away by year ")+'<span class="yr-hint">'+(isZH()?"— 點擊年份查看旅程明細":"— tap a year for the breakdown")+'</span></div>'+yhtml+'</div>';
     }
     var legend=sorted.map(function(t,i){
       var col=CAL_PAL[i%CAL_PAL.length],route=(t.from?esc(codeify(t.from))+' → ':'')+esc(codeify(t.to));
       return '<div class="cal-leg"><span class="sw" style="background:'+col+'"></span>'+route+'<span class="dt">'+fmtRange(t.start,t.end)+'</span></div>';
     }).join('');
-    html+=legend?'<div class="cal-legend"><div class="cal-lh">Your Trips</div>'+legend+'</div>':'<div class="empty-state" style="margin-top:18px"><div class="h">Nothing booked yet</div><p>Add a trip and the days you’re away light up across the months.</p></div>';
+    html+=legend?'<div class="cal-legend"><div class="cal-lh">'+(isZH()?"你的旅程清單":"Your Trips")+'</div>'+legend+'</div>':'<div class="empty-state" style="margin-top:18px"><div class="h">'+(isZH()?"尚未預訂任何行程":"Nothing booked yet")+'</div><p>'+(isZH()?"新增旅程後，你在外旅行的日子就會在月份日曆上一一點亮。":"Add a trip and the days you’re away light up across the months.")+'</p></div>';
     document.getElementById("list").innerHTML=html;
     document.querySelectorAll(".cal-tab").forEach(function(b){b.onclick=function(){calMonths=+b.dataset.cal;render();};});
     document.querySelectorAll(".yr-top").forEach(function(b){b.onclick=function(){b.parentNode.classList.toggle("open");};});
@@ -792,14 +864,15 @@
   function monthCard(mDate,dayInfo){
     var y=mDate.getFullYear(),m=mDate.getMonth();
     var off=(new Date(y,m,1).getDay()+6)%7,daysIn=new Date(y,m+1,0).getDate(),todayIso=todayISO();
-    var dow=["Mo","Tu","We","Th","Fr","Sa","Su"].map(function(x){return '<div class="cal-dow">'+x+'</div>';}).join('');
+    var dow=(isZH()?["一","二","三","四","五","六","日"]:["Mo","Tu","We","Th","Fr","Sa","Su"]).map(function(x){return '<div class="cal-dow">'+x+'</div>';}).join('');
     var cells='';for(var i=0;i<off;i++)cells+='<div class="cal-d empty"></div>';
     for(var dd=1;dd<=daysIn;dd++){
       var iso=y+"-"+String(m+1).padStart(2,"0")+"-"+String(dd).padStart(2,"0"),info=dayInfo[iso];
       var cls="cal-d"+(info?" trav":"")+(iso===todayIso?" today":"");
       cells+='<div class="'+cls+'"'+(info?' style="--c:'+info.color+'" title="'+esc(info.label)+'"':'')+'>'+dd+'</div>';
     }
-    return '<div class="cal-month"><div class="cal-mh">'+MON[m]+' '+y+'</div><div class="cal-days">'+dow+cells+'</div></div>';
+    var mTitle = isZH() ? (y+"年 "+getMon(m)) : (MON[m]+' '+y);
+    return '<div class="cal-month"><div class="cal-mh">'+mTitle+'</div><div class="cal-days">'+dow+cells+'</div></div>';
   }
 
 
@@ -824,24 +897,25 @@
     var svg='<svg class="worldmap" viewBox="0 8 1000 415" preserveAspectRatio="xMidYMid meet">'+base+badges+'</svg>';
     var sorted=ccs.map(function(c){return visited[c];}).sort(function(a,b){return b.count-a.count||a.country.localeCompare(b.country);});
     var chips=sorted.map(function(v){return '<div class="mc"><span class="fl">'+flagEmoji(v.cc)+'</span><span class="nm">'+esc(v.country)+'</span><span class="ct">×'+v.count+'</span></div>';}).join("");
-    var head='<div class="map-stat"><b>'+ccs.length+'</b> countr'+(ccs.length===1?'y':'ies')+' · <b>'+totalVisits+'</b> visit'+(totalVisits===1?'':'s')+'</div>';
+    var head='<div class="map-stat"><b>'+ccs.length+'</b> '+(isZH()?"個國家/地區 · ":" countr"+(ccs.length===1?'y':'ies')+' · ')+'<b>'+totalVisits+'</b> '+(isZH()?"次造訪":" visit"+(totalVisits===1?'':'s'))+'</div>';
     listEl.innerHTML='<div class="map-wrap">'+svg+'</div>'+head+'<div class="map-chips">'+chips+'</div>';
   }
 
   function render(){
+    updateStaticTexts();
     renderHero();
     renderStats();
-    document.getElementById("listTitle").textContent=tab==="upcoming"?"Upcoming":tab==="past"?"Past":tab==="map"?"Been there":tab==="timeline"?"Where I’m headed":"Calendar";
+    document.getElementById("listTitle").textContent=tab==="upcoming"?(isZH()?"即將啟程":"Upcoming"):tab==="past"?(isZH()?"歷史回憶":"Past"):tab==="map"?(isZH()?"足跡地圖":"Been there"):tab==="timeline"?(isZH()?"我的行程方向":"Where I’m headed"):(isZH()?"行事曆總覽":"Calendar");
     document.getElementById("addBtn").style.display=(tab==="calendar"||tab==="map"||tab==="timeline")?"none":"";
-    document.getElementById("addBtn").textContent="+ Add trip";
+    document.getElementById("addBtn").textContent=isZH()?"+ 新增旅程":"+ Add trip";
     var list=document.getElementById("list");
     if(tab==="map"){renderMap();return;}
     if(tab==="timeline"){renderTimeline();return;}
     if(tab==="calendar"){renderCalendar();hydratePhotos();return;}
     var up=trips.filter(isUpcoming).sort(byStart);
     var past=trips.filter(function(t){return!isUpcoming(t);}).sort(function(a,b){return a.start>b.start?-1:1;});
-    if(tab==="upcoming")list.innerHTML=up.length?up.map(tripCard).join(""):emptyState("Nothing on the horizon","Add your next trip to start the countdown.");
-    else list.innerHTML=past.length?past.map(tripCard).join(""):emptyState("No memories yet","When a trip wraps, it slides here with its photos, receipts and the route you actually flew.");
+    if(tab==="upcoming")list.innerHTML=up.length?up.map(tripCard).join(""):emptyState(isZH()?"暫無即將啟程的旅程":"Nothing on the horizon",isZH()?"新增下一趟旅程，立即開啟出發倒數。":"Add your next trip to start the countdown.");
+    else list.innerHTML=past.length?past.map(tripCard).join(""):emptyState(isZH()?"尚無歷史旅程紀錄":"No memories yet",isZH()?"當一趟旅程結束，就會自動收錄至此，保留照片、記錄與實際飛行軌跡。":"When a trip wraps, it slides here with its photos, receipts and the route you actually flew.");
     hydratePhotos();hydrateDest();
   }
   /* Timeline tab - the horizontal "where I'm headed" strip, upcoming trips only. */
@@ -858,13 +932,13 @@
     var totalDays=up.reduce(function(a,t){return a+duration(t.start,t.end);},0);
     var body=up.length
       ? '<div class="tl-scroll"><div class="tl" style="min-width:'+Math.max(up.length*150,520)+'px"><span class="tl-line"></span>'+nodes+'</div></div>'
-      : '<div class="tl-empty">No upcoming trips yet — add one and it lands here on your timeline.</div>';
+      : '<div class="tl-empty">'+(isZH()?"目前尚無即將出發的旅程——新增後便會在此呈現動態時間軸。":"No upcoming trips yet — add one and it lands here on your timeline.")+'</div>';
     list.innerHTML='<div class="tl-panel">'+
-      '<div class="tl-head"><div class="tl-title">Where I’m<br>headed</div>'+
-        '<div class="tl-sub">'+up.length+' trip'+(up.length===1?"":"s")+' · '+totalDays+' days ahead</div></div>'+
+      '<div class="tl-head"><div class="tl-title">'+(isZH()?"我的行程<br>方向":"Where I’m<br>headed")+'</div>'+
+        '<div class="tl-sub">'+(isZH()?(up.length+" 趟旅程 · 倒數 "+totalDays+" 天"):(up.length+' trip'+(up.length===1?"":"s")+' · '+totalDays+' days ahead'))+'</div></div>'+
       body+'</div>';
   }
-  function emptyState(h,p){return '<div class="empty-state"><div class="h">'+esc(h)+'</div><p>'+esc(p)+'</p><button class="add" onclick="document.getElementById(\'addBtn\').click()">+ Add now</button></div>';}
+  function emptyState(h,p){return '<div class="empty-state"><div class="h">'+esc(h)+'</div><p>'+esc(p)+'</p><button class="add" onclick="document.getElementById(\'addBtn\').click()">'+(isZH()?"+ 立即新增":"+ Add now")+'</button></div>';}
 
   function setActiveTab(){document.querySelectorAll(".tab").forEach(function(x){x.classList.toggle("active",x.dataset.tab===tab);});}
 
@@ -880,18 +954,26 @@
 
   /* ---- segment (plan) form ---- */
   function segForm(s){
-    var types=[["flight","Flight"],["hotel","Hotel / stay"],["car","Rental car"],["ride","Ride / transfer"],["rail","Train"],["other","Other"]];
+    var types=[
+      ["flight", isZH() ? "航班" : "Flight"],
+      ["hotel", isZH() ? "飯店 / 住宿" : "Hotel / stay"],
+      ["car", isZH() ? "租車自駕" : "Rental car"],
+      ["ride", isZH() ? "接駁 / 叫車" : "Ride / transfer"],
+      ["rail", isZH() ? "鐵路 / 高鐵" : "Train"],
+      ["other", isZH() ? "其他項目" : "Other"]
+    ];
     var opts=types.map(function(p){return '<option value="'+p[0]+'"'+(s.type===p[0]?' selected':'')+'>'+p[1]+'</option>';}).join("");
     var showConf=s.conf&&String(s.conf).indexOf("seed")!==0&&String(s.conf).indexOf("man:")!==0?s.conf:"";
-    return '<h3>'+(s.sid?"Edit plan":"Add plan")+'</h3>'+
-      '<div class="field"><label>Type</label><select id="g_type">'+opts+'</select></div>'+
-      field("Name","g_name","text",s.name,"TAP TP1693 OPO to FNC")+
-      field("Address","g_addr","text",s.address,"Rua do Castanheiro 31, Funchal","(optional)")+
-      field("Details","g_note","text",s.note,"Door code 4821# \u00b7 check-in 15:00 \u00b7 TP1479 OPO-LIS 07:10","(optional)")+
-      '<div class="two">'+field("Start","g_start","date",s.start,"")+field("End","g_end","date",s.end,"","(optional)")+'</div>'+
-      field("Confirmation","g_conf","text",showConf,"","(optional)")+
+    var optL=isZH()?"(選填)":"(optional)";
+    return '<h3>'+(s.sid?(isZH()?"編輯細項規劃":"Edit plan"):(isZH()?"新增細項規劃":"Add plan"))+'</h3>'+
+      '<div class="field"><label>'+(isZH()?"類別":"Type")+'</label><select id="g_type">'+opts+'</select></div>'+
+      field(isZH()?"名稱":"Name","g_name","text",s.name,isZH()?"例如：長榮航空 BR87 台北至巴黎":"TAP TP1693 OPO to FNC")+
+      field(isZH()?"地址 / 地點":"Address","g_addr","text",s.address,isZH()?"例如：Rua do Castanheiro 31, Funchal":"Rua do Castanheiro 31, Funchal",optL)+
+      field(isZH()?"備註細節":"Details","g_note","text",s.note,isZH()?"例如：門禁密碼 4821# · 15:00 入住 · 班機 07:10":"Door code 4821# · check-in 15:00 · TP1479 OPO-LIS 07:10",optL)+
+      '<div class="two">'+field(isZH()?"開始時間 / 日期":"Start","g_start","date",s.start,"")+field(isZH()?"結束時間 / 日期":"End","g_end","date",s.end,"",optL)+'</div>'+
+      field(isZH()?"預訂確認代碼":"Confirmation","g_conf","text",showConf,"",optL)+
       '<div class="err" id="gerr"></div>'+
-      '<div class="modal-actions"><button class="btn" id="cancelBtn">Cancel</button><button class="btn solid" id="saveSeg">'+(s.sid?"Save plan":"Add plan")+'</button></div>';
+      '<div class="modal-actions"><button class="btn" id="cancelBtn">'+(isZH()?"取消":"Cancel")+'</button><button class="btn solid" id="saveSeg">'+(s.sid?(isZH()?"儲存細項":"Save plan"):(isZH()?"新增細項":"Add plan"))+'</button></div>';
   }
   /* Plan detail: tap a row, get the traveller view - details, address, maps link. */
   function openPlan(tripId,sid){
@@ -904,14 +986,14 @@
     var addrText=raw.replace(/https?:\/\/\S+/g,"").replace(/[-\u2013\u00b7|,\s]+$/,"").trim();
     var mapsUrl=urlM?urlM[0]:(addrText?"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(addrText):"");
     var showConf=s.conf&&!/^(man:|seed|gcal:)/.test(String(s.conf))?s.conf:"";
-    openModal('<h3 style="margin-bottom:6px">'+esc(s.name||"Plan")+'</h3>'+
-      '<div class="chips" style="margin-bottom:10px"><span class="type" style="color:'+cc.c+';background:'+cc.t+'">'+esc(s.type||"plan")+'</span>'+(when?'<span class="c-date">'+when+'</span>':'')+'</div>'+
-      (s.note?'<div class="pd-row"><div class="pd-k">Details</div><div class="pd-v">'+esc(s.note)+'</div></div>':'')+
-      (addrText?'<div class="pd-row"><div class="pd-k">Address</div><div class="pd-v">'+esc(addrText)+'</div></div>':'')+
-      (showConf?'<div class="pd-row"><div class="pd-k">Confirmation</div><div class="pd-v mono">'+esc(showConf)+'</div></div>':'')+
+    openModal('<h3 style="margin-bottom:6px">'+esc(s.name||(isZH()?"規劃項目":"Plan"))+'</h3>'+
+      '<div class="chips" style="margin-bottom:10px"><span class="type" style="color:'+cc.c+';background:'+cc.t+'">'+esc(segTypeName(s.type))+'</span>'+(when?'<span class="c-date">'+when+'</span>':'')+'</div>'+
+      (s.note?'<div class="pd-row"><div class="pd-k">'+(isZH()?"詳細內容":"Details")+'</div><div class="pd-v">'+esc(s.note)+'</div></div>':'')+
+      (addrText?'<div class="pd-row"><div class="pd-k">'+(isZH()?"地址地點":"Address")+'</div><div class="pd-v">'+esc(addrText)+'</div></div>':'')+
+      (showConf?'<div class="pd-row"><div class="pd-k">'+(isZH()?"確認代碼":"Confirmation")+'</div><div class="pd-v mono">'+esc(showConf)+'</div></div>':'')+
       '<div class="modal-actions">'+
-        (mapsUrl?'<a class="btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center" href="'+esc(mapsUrl)+'" target="_blank" rel="noopener">\ud83d\uddfa\ufe0f Maps</a>':'')+
-        '<button class="btn" id="pd_edit">Edit</button><button class="btn solid" id="pd_close">Close</button></div>');
+        (mapsUrl?'<a class="btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center" href="'+esc(mapsUrl)+'" target="_blank" rel="noopener">🗺️ '+(isZH()?"地圖導航":"Maps")+'</a>':'')+
+        '<button class="btn" id="pd_edit">'+(isZH()?"編輯":"Edit")+'</button><button class="btn solid" id="pd_close">'+(isZH()?"關閉":"Close")+'</button></div>');
     document.getElementById("pd_close").onclick=closeModal;
     document.getElementById("pd_edit").onclick=function(){openSeg(tripId,sid);};
   }
@@ -928,15 +1010,15 @@
     var tr=trips.find(function(x){return x.id===tripId;});if(!tr)return;
     var type=val("g_type"),name=val("g_name"),addr=val("g_addr"),start=val("g_start"),end=val("g_end"),conf=val("g_conf"),note=val("g_note");
     var err=document.getElementById("gerr");err.textContent="";
-    if(!name){err.textContent="Give the plan a name.";return;}
+    if(!name){err.textContent=isZH()?"請為此規劃填寫名稱。":"Give the plan a name.";return;}
     tr.segments=tr.segments||[];
     if(sid){var s=tr.segments.find(function(x){return x.sid===sid;});Object.assign(s,{type:type,name:name,address:addr,note:note,start:start,end:end,conf:conf||s.conf});}
     else tr.segments.push({sid:uid(),source:"manual",type:type,name:name,address:addr,note:note,start:start,end:end,conf:conf||("man:"+uid())});
     tr.segments.sort(function(a,b){return(a.start||"")<(b.start||"")?-1:1;});
-    await persistTrip(tr,"update");closeModal();render();toast(sid?"Plan updated":"Plan added");
+    await persistTrip(tr,"update");closeModal();render();toast(sid?(isZH()?"細項已更新":"Plan updated"):(isZH()?"細項已新增":"Plan added"));
   }
   async function delSeg(tripId,sid){
-    if(!confirm("Delete this plan? It will not come back on the next sync."))return;
+    if(!confirm(isZH()?"確定要刪除此細項嗎？下次同步時不會再次復原。":"Delete this plan? It will not come back on the next sync."))return;
     var tr=trips.find(function(x){return x.id===tripId;});if(!tr)return;
     var seg=(tr.segments||[]).find(function(x){return x.sid===sid;});
     tr.segments=(tr.segments||[]).filter(function(x){return x.sid!==sid;});
@@ -947,22 +1029,20 @@
       try{await fetch(settings.workerUrl+"/segments/delete",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({tripId:tripId,sid:sid,conf:seg&&seg.conf})});}
       catch(e){}
     }
-    await save("trips",trips);render();toast("Plan removed - it won't come back");
+    await save("trips",trips);render();toast(isZH()?"細項已移除——下次同步不會再次出現":"Plan removed - it won't come back");
   }
 
   /* ---- trip form ---- */
   function tripForm(t){t=t||{};
-    // New trip: prefill From with the home base (Settings promises exactly
-    // that), so a first-time user's very first save doesn't bounce with
-    // "Add both a from and a to."
     var fromVal=t.id?t.from:(t.from||home);
-    return '<h3>'+(t.id?"Edit trip":"Add a trip")+'</h3>'+
-    '<div class="two">'+field("From","f_from","text",fromVal,"Porto / OPO")+field("To","f_to","text",t.to,"Funchal / FNC")+'</div>'+
-    '<div class="two">'+field("Departure","f_start","date",t.start,"")+field("Return","f_end","date",t.end,"")+'</div>'+
-    field("Label","f_label","text",t.label,"Build Days - Madeira","(optional)")+
-    '<div class="field"><label>Notes <span class="opt">(optional)</span></label><textarea id="f_notes" placeholder="Visa on arrival, hotel prepaid, bring adapter...">'+esc(t.notes||"")+'</textarea></div>'+
+    var optL=isZH()?"(選填)":"(optional)";
+    return '<h3>'+(t.id?(isZH()?"編輯旅程":"Edit trip"):(isZH()?"新增旅程":"Add a trip"))+'</h3>'+
+    '<div class="two">'+field(isZH()?"出發地 (From)":"From","f_from","text",fromVal,isZH()?"例如：台北 / TPE":"Porto / OPO")+field(isZH()?"目的地 (To)":"To","f_to","text",t.to,isZH()?"例如：東京 / NRT":"Funchal / FNC")+'</div>'+
+    '<div class="two">'+field(isZH()?"出發日期":"Departure","f_start","date",t.start,"")+field(isZH()?"回程日期":"Return","f_end","date",t.end,"")+'</div>'+
+    field(isZH()?"旅程標題":"Label","f_label","text",t.label,isZH()?"例如：夏日東京放鬆遊":"Build Days - Madeira",optL)+
+    '<div class="field"><label>'+(isZH()?"備註說明":"Notes")+' <span class="opt">'+optL+'</span></label><textarea id="f_notes" placeholder="'+(isZH()?"落地簽、飯店已預付、攜帶轉接頭...":"Visa on arrival, hotel prepaid, bring adapter...")+'">'+esc(t.notes||"")+'</textarea></div>'+
     '<div class="err" id="ferr"></div>'+
-    '<div class="modal-actions"><button class="btn" id="cancelBtn">Cancel</button><button class="btn solid" id="saveTrip">'+(t.id?"Save trip":"Add trip")+'</button></div>';}
+    '<div class="modal-actions"><button class="btn" id="cancelBtn">'+(isZH()?"取消":"Cancel")+'</button><button class="btn solid" id="saveTrip">'+(t.id?(isZH()?"儲存旅程":"Save trip"):(isZH()?"新增旅程":"Add trip"))+'</button></div>';}
 
   /* ---- watch form ---- */
   function wishForm(w){w=w||{};var months=["","January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -980,13 +1060,13 @@
     var st=document.getElementById("saveTrip");
     if(st)st.onclick=async function(){
       var from=val("f_from"),to=val("f_to"),s=val("f_start"),e=val("f_end"),label=val("f_label"),notes=val("f_notes"),err=document.getElementById("ferr");err.textContent="";
-      if(!from||!to){err.textContent="Add both a from and a to.";return;}
-      if(!s||!e){err.textContent="Pick departure and return dates.";return;}
-      if(dayDiff(s,e)<0){err.textContent="Return is before departure.";return;}
+      if(!from||!to){err.textContent=isZH()?"請填寫出發地與目的地。":"Add both a from and a to.";return;}
+      if(!s||!e){err.textContent=isZH()?"請選擇出發與回程日期。":"Pick departure and return dates.";return;}
+      if(dayDiff(s,e)<0){err.textContent=isZH()?"回程日期不能早於出發日期。":"Return is before departure.";return;}
       var id=modal.dataset.editId;
       if(id){var t=trips.find(function(x){return x.id===id;});Object.assign(t,{from:from,to:to,start:s,end:e,label:label,notes:notes});await persistTrip(t,"update");}
       else{var nt={id:uid(),from:from,to:to,start:s,end:e,label:label,notes:notes,segments:[]};trips.push(nt);await persistTrip(nt,"create");}
-      closeModal();render();toast(id?"Trip updated":"Trip added");
+      closeModal();render();toast(id?(isZH()?"旅程已更新":"Trip updated"):(isZH()?"旅程已新增":"Trip added"));
     };
     var sw=document.getElementById("saveWish");
     if(sw)sw.onclick=function(){
@@ -1003,21 +1083,21 @@
 
   function changePhoto(id){
     var t=trips.find(function(x){return x.id===id;});if(!t)return;
-    openModal('<h3>Change photo</h3>'+
+    openModal('<h3>'+(isZH()?"更換封面相片":"Change photo")+'</h3>'+
       '<img class="photo-prev" id="pv" src="'+esc(t.photo||destPhoto(t.to,600))+'" alt="">'+
-      field("Image link (URL)","p_url","text",t.photo||"","https://…","paste any image address")+
-      '<div class="hint">Find an image online, right-click it → “Copy image address”, and paste it here. Leave blank to use the automatic photo.</div>'+
-      '<div class="modal-actions"><button class="btn" id="p_reset">Use automatic</button><button class="btn" id="p_cancel">Cancel</button><button class="btn solid" id="p_save">Save</button></div>');
+      field(isZH()?"圖片網址 (URL)":"Image link (URL)","p_url","text",t.photo||"","https://…",isZH()?"貼上任何圖片連結":"paste any image address")+
+      '<div class="hint">'+(isZH()?"在網路上找到喜愛的照片，右鍵「複製圖片位址」並貼於此處。留空則自動載入城市預設相片。":"Find an image online, right-click it → “Copy image address”, and paste it here. Leave blank to use the automatic photo.")+'</div>'+
+      '<div class="modal-actions"><button class="btn" id="p_reset">'+(isZH()?"使用預設相片":"Use automatic")+'</button><button class="btn" id="p_cancel">'+(isZH()?"取消":"Cancel")+'</button><button class="btn solid" id="p_save">'+(isZH()?"儲存":"Save")+'</button></div>');
     var inp=document.getElementById("p_url"),pv=document.getElementById("pv");
     inp.oninput=function(){pv.src=inp.value.trim()||destPhoto(t.to,600);};
     document.getElementById("p_cancel").onclick=closeModal;
     document.getElementById("p_reset").onclick=function(){inp.value="";pv.src=destPhoto(t.to,600);};
-    document.getElementById("p_save").onclick=async function(){t.photo=inp.value.trim();t.updatedAt=Date.now();await persistTrip(t);closeModal();render();toast(t.photo?"Photo updated":"Using automatic photo");};
+    document.getElementById("p_save").onclick=async function(){t.photo=inp.value.trim();t.updatedAt=Date.now();await persistTrip(t);closeModal();render();toast(t.photo?(isZH()?"相片已更新":"Photo updated"):(isZH()?"已套用預設相片":"Using automatic photo"));};
   }
   document.getElementById("list").addEventListener("click",function(e){
     var t=e.target.closest("[data-edit],[data-del],[data-editw],[data-delw],[data-toggle],[data-addseg],[data-editseg],[data-delseg],[data-ics],[data-photo],[data-plan],[data-sharetrip]");
     if(!t)return;
-    if(t.dataset.del){if(confirm("Delete this trip?")){var did=t.dataset.del;trips=trips.filter(function(x){return x.id!==did;});save("trips",trips);render();toast("Trip deleted");
+    if(t.dataset.del){if(confirm(isZH()?"確定要刪除這趟旅程嗎？":"Delete this trip?")){var did=t.dataset.del;trips=trips.filter(function(x){return x.id!==did;});save("trips",trips);render();toast(isZH()?"旅程已刪除":"Trip deleted");
       if(settings.workerUrl){fetch(settings.workerUrl+"/trips/delete",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({id:did})}).catch(function(){});}}}
     else if(t.dataset.edit){modal.dataset.editId=t.dataset.edit;openModal(tripForm(trips.find(function(x){return x.id===t.dataset.edit;})));bindModal();}
     else if(t.dataset.delw){if(confirm("Delete this watch?")){wishes=wishes.filter(function(x){return x.id!==t.dataset.delw;});save("wishes",wishes);render();toast("Watch deleted");}}
@@ -1038,12 +1118,16 @@
   var shareMode="up", wrapStats=null;
   function shareCaption(){
     if(shareMode==="wrap"&&wrapStats){
-      return "My "+wrapStats.yr+" in travel ✈️\n"+wrapStats.trips+" trips · "+wrapStats.days+" days away · "+wrapStats.countries+" countries · "+wrapStats.dist+"\n#travel #wrapped";
+      return isZH()
+        ? ("我的 "+wrapStats.yr+" 年度旅行足跡 ✈️\n"+wrapStats.trips+" 趟旅程 · 旅行 "+wrapStats.days+" 天 · 探索 "+wrapStats.countries+" 個國家/地區 · "+wrapStats.dist+"\n#travel #wrapped #年度回顧")
+        : ("My "+wrapStats.yr+" in travel ✈️\n"+wrapStats.trips+" trips · "+wrapStats.days+" days away · "+wrapStats.countries+" countries · "+wrapStats.dist+"\n#travel #wrapped");
     }
     var up=trips.filter(isUpcoming).sort(byStart);
-    if(!up.length)return "Planning my next adventures ✈️ #travel";
+    if(!up.length)return isZH() ? "正在規劃我的下一趟精彩旅程 ✈️ #travel #旅行" : "Planning my next adventures ✈️ #travel";
     var line=up.map(function(t){return codeify(t.to)+" ("+fmtRange(t.start,t.end)+")";}).join("  ·  ");
-    return "Where I’m headed 🌍✈️\n"+line+"\n"+up.length+" trip"+(up.length===1?"":"s")+" ahead · #travel";
+    return isZH()
+      ? ("我的即將啟程清單 🌍✈️\n"+line+"\n共 "+up.length+" 趟旅程即將出發 · #travel #旅行")
+      : ("Where I’m headed 🌍✈️\n"+line+"\n"+up.length+" trip"+(up.length===1?"":"s")+" ahead · #travel");
   }
   // The year-in-review card: same 9:16 story format, big numbers instead of rows.
   async function openWrap(){
@@ -1059,24 +1143,24 @@
     function big(n,l){return '<div style="display:flex;justify-content:space-between;align-items:baseline;min-width:0">'+
       '<span style="font-size:13px;letter-spacing:.12em;color:rgba(244,239,228,.6);text-transform:uppercase">'+l+'</span>'+
       '<span style="font-family:var(--display);font-size:40px;font-weight:800;letter-spacing:-.02em">'+n+'</span></div>';}
-    var rows=big(done.length,"Trips")+big(days,"Days away")+big(Object.keys(cs).length,"Countries")+big(dist,"Travelled")+
-      (longest?'<div style="font-size:14px;color:rgba(244,239,228,.75);margin-top:2px">Longest: <b style="color:#f4efe4">'+esc(longest.label||longest.to)+'</b> · '+duration(longest.start,longest.end)+' days</div>':'');
+    var rows=big(done.length,isZH()?"趟旅程":"Trips")+big(days,isZH()?"旅行天數":"Days away")+big(Object.keys(cs).length,isZH()?"個國家":"Countries")+big(dist,isZH()?"總飛行距離":"Travelled")+
+      (longest?'<div style="font-size:14px;color:rgba(244,239,228,.75);margin-top:2px">'+(isZH()?"最長旅程：":"Longest: ")+'<b style="color:#f4efe4">'+esc(longest.label||longest.to)+'</b> · '+duration(longest.start,longest.end)+(isZH()?" 天":" days")+'</div>':'');
     shareInner.innerHTML=
-      '<div class="ig-card land" id="igCard"><div class="ig-head"><div class="ig-title">'+yr+'<br>Wrapped</div>'+plane(26,"color:var(--coral);margin-top:4px")+'</div>'+
-        '<div class="ig-list" style="grid-template-columns:1fr;align-content:center;gap:18px">'+(done.length?rows:'<div style="color:rgba(244,239,228,.6);font-size:14px">No trips yet this year.</div>')+'</div>'+
-        '<div class="ig-foot"><div class="meta">MY '+yr+' IN TRAVEL</div>'+plane(14,"color:var(--coral)")+'</div></div>'+
-      '<div class="ig-side"><div class="k">SHARE</div><h3>Your year, one card</h3>'+
-        '<p>Everything you travelled in '+yr+' so far. Screenshot it for your story.</p>'+
-        '<button class="btn solid" id="copyCap">Copy caption</button>'+
-        '<button class="btn" id="modeUp">Upcoming trips</button>'+
-        '<button class="btn" id="closeShare">Close</button></div>';
+      '<div class="ig-card land" id="igCard"><div class="ig-head"><div class="ig-title">'+yr+'<br>'+(isZH()?"年度回顧":"Wrapped")+'</div>'+plane(26,"color:var(--coral);margin-top:4px")+'</div>'+
+        '<div class="ig-list" style="grid-template-columns:1fr;align-content:center;gap:18px">'+(done.length?rows:('<div style="color:rgba(244,239,228,.6);font-size:14px">'+(isZH()?"今年尚無已完成的旅程。":"No trips yet this year.")+'</div>'))+'</div>'+
+        '<div class="ig-foot"><div class="meta">'+(isZH()?(yr+" 年度旅行回顧"):("MY "+yr+" IN TRAVEL"))+'</div>'+plane(14,"color:var(--coral)")+'</div></div>'+
+      '<div class="ig-side"><div class="k">'+(isZH()?"分享":"SHARE")+'</div><h3>'+(isZH()?"一年精彩，匯於一卡":"Your year, one card")+'</h3>'+
+        '<p>'+(isZH()?("匯總你在 "+yr+" 年至今的所有足跡。截圖即可分享至 Instagram 限時動態。"):("Everything you travelled in "+yr+" so far. Screenshot it for your story."))+'</p>'+
+        '<button class="btn solid" id="copyCap">'+(isZH()?"複製貼文文案":"Copy caption")+'</button>'+
+        '<button class="btn" id="modeUp">'+(isZH()?"即將啟程清單":"Upcoming trips")+'</button>'+
+        '<button class="btn" id="closeShare">'+(isZH()?"關閉":"Close")+'</button></div>';
     shareScrim.classList.add("show");
     document.getElementById("modeUp").onclick=function(){openShare();};
     bindShareCommon();
   }
   function bindShareCommon(){
     document.getElementById("closeShare").onclick=function(){shareScrim.classList.remove("show");};
-    document.getElementById("copyCap").onclick=function(){copyText(shareCaption(),"Caption copied");var b=document.getElementById("copyCap");b.textContent="Copied ✓";setTimeout(function(){b.textContent="Copy caption";},1800);};
+    document.getElementById("copyCap").onclick=function(){copyText(shareCaption(),isZH()?"貼文文案已複製":"Caption copied");var b=document.getElementById("copyCap");b.textContent=isZH()?"已複製 ✓":"Copied ✓";setTimeout(function(){b.textContent=isZH()?"複製貼文文案":"Copy caption";},1800);};
   }
   function openShare(){
     shareMode="up";
@@ -1090,17 +1174,17 @@
         '<div class="ig-route"><span class="ig-flag" data-flag="'+esc(t.to)+'"></span><span class="code">'+esc(codeify(t.to))+'</span></div>'+
         '<div class="ig-dates">'+fmtRangeS(t.start,t.end)+'</div></div>';
     }).join(""):'<div style="color:rgba(244,239,228,.6);font-size:14px">No upcoming trips yet.</div>';
-    var footMeta=list.length+" TRIP"+(list.length===1?"":"S")+" · "+totalDays+" DAYS · "+Object.keys(dests).length+" DESTINATION"+(Object.keys(dests).length===1?"":"S");
-    var cols=list.length>9?2:1;      // full-width readable lines; two columns only when 10+ trips
+    var footMeta=isZH()?(list.length+" 趟旅程 · "+totalDays+" 天 · "+Object.keys(dests).length+" 個目的地"):(list.length+" TRIP"+(list.length===1?"":"S")+" · "+totalDays+" DAYS · "+Object.keys(dests).length+" DESTINATION"+(Object.keys(dests).length===1?"":"S"));
+    var cols=list.length>9?2:1;
     shareInner.innerHTML=
-      '<div class="ig-card land" id="igCard"><div class="ig-head"><div class="ig-title">'+yr+'<br>Travel log</div>'+plane(26,"color:var(--coral);margin-top:4px")+'</div>'+
+      '<div class="ig-card land" id="igCard"><div class="ig-head"><div class="ig-title">'+yr+'<br>'+(isZH()?"旅行日誌":"Travel log")+'</div>'+plane(26,"color:var(--coral);margin-top:4px")+'</div>'+
         '<div class="ig-list" style="grid-template-columns:repeat('+cols+',1fr)">'+rows+'</div>'+
         '<div class="ig-foot"><div class="meta">'+footMeta+'</div>'+plane(14,"color:var(--coral)")+'</div></div>'+
-      '<div class="ig-side"><div class="k">SHARE</div><h3>Ready for your story</h3>'+
-        '<p>Every upcoming trip on one compact card. Screenshot it and drop it straight into your Instagram story.</p>'+
-        '<button class="btn solid" id="copyCap">Copy caption</button>'+
-        '<button class="btn" id="modeWrap">'+yr+' wrapped</button>'+
-        '<button class="btn" id="closeShare">Close</button></div>';
+      '<div class="ig-side"><div class="k">'+(isZH()?"分享":"SHARE")+'</div><h3>'+(isZH()?"專為限時動態打造":"Ready for your story")+'</h3>'+
+        '<p>'+(isZH()?"一張卡片囊括所有即將出發的旅程。直接截圖即可放入 Instagram 限時動態。":"Every upcoming trip on one compact card. Screenshot it and drop it straight into your Instagram story.")+'</p>'+
+        '<button class="btn solid" id="copyCap">'+(isZH()?"複製貼文文案":"Copy caption")+'</button>'+
+        '<button class="btn" id="modeWrap">'+(isZH()?(yr+" 年度回顧"):(yr+" wrapped"))+'</button>'+
+        '<button class="btn" id="closeShare">'+(isZH()?"關閉":"Close")+'</button></div>';
     shareScrim.classList.add("show");
     document.getElementById("modeWrap").onclick=openWrap;
     // country flags resolve async from the cached geocoder; rows render instantly without them
@@ -1112,52 +1196,56 @@
     bindShareCommon();
   }
   document.getElementById("shareBtn").onclick=openShare;
+  var lbEl = document.getElementById("langBtn"); if(lbEl) lbEl.onclick=function(){ setLang(isZH() ? "en" : "zh-TW"); };
   function copyText(text,msg){msg=msg||"Copied";if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(function(){toast(msg);},function(){fb(text,msg);});else fb(text,msg);
     function fb(t,m){var ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast(m);}catch(e){toast("Copy failed");}document.body.removeChild(ta);}}
   // Companion link: the worker mints a private read-only URL for this one trip.
   async function shareTrip(id){
-    if(!settings.workerUrl){toast("Sharing needs Synced mode — set a Worker URL in Settings");return;}
+    if(!settings.workerUrl){toast(isZH()?"分享功能需啟用雲端同步模式——請先至「設定」填入 Worker 網址":"Sharing needs Synced mode — set a Worker URL in Settings");return;}
     try{var r=await fetch(settings.workerUrl+"/trips/share",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({id:id})});
       var d=await r.json();
       if(!r.ok||!d.url){toast(d.error||"Could not create the link");return;}
-      copyText(d.url,"Link copied — anyone with it sees this trip, read-only");}
+      copyText(d.url,isZH()?"旅程專屬連結已複製——持連結者可唯讀查看此行程":"Link copied — anyone with it sees this trip, read-only");}
     catch(e){toast("Worker not reachable");}
   }
 
   /* ===================== help ===================== */
   document.getElementById("helpBtn").onclick=function(){
     function topic(title,body){return '<details class="hlp"><summary>'+title+'</summary><div class="hlp-b">'+body+'</div></details>';}
-    openModal('<h3>How everything works</h3>'+
-      topic("Trips & plans",
-        '<p>Add a trip with dates; everything else hangs off it. Inside a trip, <b>plans</b> are your flights, hotels, transfers, dinners and events. Tap any plan to open its detail view \u2014 times, door codes, address, and a <b>Maps</b> button that jumps straight to the location.</p>'+
-        '<p>Plans you add by hand are sacred: no sync will ever change or delete them.</p>')+
-      topic("Automatic sync",
-        '<p>Once your keys are set up, the app refreshes itself <b>once a day at 18:00 UTC</b> (19:00 Portugal in summer). It also syncs whenever you add or edit a trip, and the <b>Sync now</b> button runs the exact same job on demand.</p>'+
-        '<p>Forwarded emails don’t wait for that: an <b>hourly background check</b> reads new mail and files it — even with the app closed and your phone in your pocket.</p>'+
-        '<p>Each sync reads your calendar and inbox for new bookings and writes one \u201cTrip\u201d block per trip to your Google Calendar.</p>')+
-      topic("What lands in a trip automatically",
-        '<p><b>From Google Calendar:</b> bookings (flight/hotel/car/ride/rail by name), anything with a location, and timed invites with guests \u2014 with times and useful description bits (door codes, notes) attached. Bare all-day agenda items are ignored.</p>'+
-        '<p><b>From Gmail:</b> booking confirmations from the last year. An AI (the cheapest model, a fraction of a cent per email) reads each one and extracts the traveller line: flight number and route with layovers, check-in time and PIN codes, pickup time and place, reservation details.</p>')+
-      topic("The guaranteed fallback: forward any email",
-        '<p>If a booking doesn\u2019t show up by itself \u2014 obscure hotel, travel agent PDF, unusual wording \u2014 there\u2019s a path that <b>can\u2019t miss</b>:</p>'+
-        '<p>Forward the confirmation email <b>to yourself with +trip added before the @</b> \u2014 <span id="hlpMail"><b>your-address<span style="color:var(--coral)">+trip</span>@\u2026</b></span>. Wait a moment, hit <b>Sync</b>. Mail sent to your +trip address is always picked up, no sender or keyword matching involved.</p>'+
-        '<p>No trip needs to exist first: a forwarded <b>hotel stay</b> creates its trip (destination, dates, hotel inside), and a forwarded <b>return ticket</b> creates a trip spanning the flights. Everything else files into whichever trip covers its dates — and the app knows geography, so a Funchal hotel lands in your “Madeira” trip.</p>'+
-        '<p>Even an email <b>without dates</b> — say the hotel just messaged you a door code — is kept when you forward it on purpose: the app files it into the trip matching that destination.</p>')+
-      topic("Your keys & privacy",
-        '<p>Everything lives in <b>your</b> Cloudflare account, behind your own password. Your Google and Anthropic keys are saved only on your own worker, used server-side, and never shown back to the browser in full.</p>'+
-        '<p>Booking emails are read once by the Anthropic API to extract the summary; everything else stays between your own worker, Google, and your device.</p>')+
-      topic("Share & Timeline",
-        '<p><b>Share</b> makes a story-ready card (9:16) of your upcoming trips \u2014 screenshot it and post. Inside it, <b>wrapped</b> flips the card to your year in review: trips, days away, countries, distance. <b>Timeline</b> is the same journey as a tab: your next destinations left to right.</p>'+
-        '<p><b>Share trip</b> (inside any trip, next to \u201c+ Add plan\u201d) copies a private read-only link for your travel companions \u2014 they see the live itinerary, hotel codes included, no login. Delete the trip and the link dies with it.</p>'+
-        '<p><b>Calendar feed</b> (Settings \u2192 Backup) gives you one link any calendar app can subscribe to \u2014 all trips, always current, no Google needed.</p>')+
-      topic("Units & distances",
+    openModal('<h3>'+(isZH()?"完整使用教學與功能指南":"How everything works")+'</h3>'+
+      topic(isZH()?"旅程與細項規劃 (Trips & plans)":"Trips & plans",
+        isZH() ?
+        '<p>先建立包含出發與回程日期的「旅程」，所有的具體行程細項皆隸屬於該旅程。在旅程中，<b>細項規劃 (Plans)</b> 包含你的航班、飯店住宿、機場接駁、餐廳晚餐或活動。點擊任何細項即可開啟詳細資訊——時刻表、門禁密碼、詳細地址，以及可直接跳轉導航的 <b>地圖導航 (Maps)</b> 按鈕。</p><p>你手動新增的規劃是神聖不可侵犯的：任何自動同步作業都絕不會覆蓋或刪除它們。</p>' :
+        '<p>Add a trip with dates; everything else hangs off it. Inside a trip, <b>plans</b> are your flights, hotels, transfers, dinners and events. Tap any plan to open its detail view \u2014 times, door codes, address, and a <b>Maps</b> button that jumps straight to the location.</p><p>Plans you add by hand are sacred: no sync will ever change or delete them.</p>')+
+      topic(isZH()?"自動同步機制 (Automatic sync)":"Automatic sync",
+        isZH() ?
+        '<p>完成金鑰設定後，App 每天會在 <b>UTC 18:00</b> 自動重新整理。當你新增或編輯旅程時也會自動觸發同步，右上角的 <b>立即同步 (Sync now)</b> 按鈕亦可隨時手動執行。</p><p>轉發的訂單郵件無需等待定時排程：系統每小時會有<b>背景排程</b>自動掃描並歸檔新郵件——即使關閉 App 且手機放在口袋中也能自動完成。</p><p>每次同步皆會掃描你的日曆與收件匣中的新預訂，並在你的 Google 日曆上寫入每個旅程的整合行程區塊。</p>' :
+        '<p>Once your keys are set up, the app refreshes itself <b>once a day at 18:00 UTC</b> (19:00 Portugal in summer). It also syncs whenever you add or edit a trip, and the <b>Sync now</b> button runs the exact same job on demand.</p><p>Forwarded emails don’t wait for that: an <b>hourly background check</b> reads new mail and files it — even with the app closed and your phone in your pocket.</p><p>Each sync reads your calendar and inbox for new bookings and writes one \u201cTrip\u201d block per trip to your Google Calendar.</p>')+
+      topic(isZH()?"自動匯入的內容 (What lands in a trip)":"What lands in a trip automatically",
+        isZH() ?
+        '<p><b>來自 Google 行事曆：</b>各類預訂行程（依名稱識別航班/住宿/租車/接駁/火車）、附有地點的活動、帶有賓客的定時邀請，並會自動擷取備註中的重要資訊（如門禁密碼、入住時間）。全天型普通日程將會被智慧忽略。</p><p><b>來自 Gmail：</b>過去一年的預訂確認信。由最平價的 Anthropic AI 模型解析每封信件，精準提取旅人所需資訊：航班班機代號、轉機地點、入住時間、取車地點與確認碼。</p>' :
+        '<p><b>From Google Calendar:</b> bookings (flight/hotel/car/ride/rail by name), anything with a location, and timed invites with guests \u2014 with times and useful description bits (door codes, notes) attached. Bare all-day agenda items are ignored.</p><p><b>From Gmail:</b> booking confirmations from the last year. An AI (the cheapest model, a fraction of a cent per email) reads each one and extracts the traveller line: flight number and route with layovers, check-in time and PIN codes, pickup time and place, reservation details.</p>')+
+      topic(isZH()?"必成備案：轉發任何訂單郵件 (Forward any email)":"The guaranteed fallback: forward any email",
+        isZH() ?
+        '<p>如果某筆預訂沒有自動出現在行程中（例如獨立小民宿、旅行社 PDF 附件或特殊格式信件），有一個<b>保證成功</b>的方法：</p><p>將確認信<b>轉發給自己，但在帳號後方加上 +trip</b>——例如 <span id="hlpMail"><b>your-address<span style="color:var(--coral)">+trip</span>@\u2026</b></span>。稍候片刻點擊 <b>立即同步</b> 即可。寄往 +trip 的信件將必定被擷取，不受寄件者或特定關鍵字限制。</p><p>事前無需先建立旅程：轉發的<b>飯店住宿</b>會自動建立旅程，轉發的<b>來回機票</b>會自動建立橫跨飛行日期的旅程。其餘細項會自動歸入涵蓋該日期的旅程中——App 內建地理資訊，例如豐沙爾的飯店會自動歸入「馬德拉」旅程。</p>' :
+        '<p>If a booking doesn\u2019t show up by itself \u2014 obscure hotel, travel agent PDF, unusual wording \u2014 there\u2019s a path that <b>can\u2019t miss</b>:</p><p>Forward the confirmation email <b>to yourself with +trip added before the @</b> \u2014 <span id="hlpMail"><b>your-address<span style="color:var(--coral)">+trip</span>@\u2026</b></span>. Wait a moment, hit <b>Sync</b>. Mail sent to your +trip address is always picked up, no sender or keyword matching involved.</p><p>No trip needs to exist first: a forwarded <b>hotel stay</b> creates its trip (destination, dates, hotel inside), and a forwarded <b>return ticket</b> creates a trip spanning the flights. Everything else files into whichever trip covers its dates — and the app knows geography, so a Funchal hotel lands in your “Madeira” trip.</p><p>Even an email <b>without dates</b> — say the hotel just messaged you a door code — is kept when you forward it on purpose: the app files it into the trip matching that destination.</p>')+
+      topic(isZH()?"金鑰與隱私安全 (Keys & privacy)":"Your keys & privacy",
+        isZH() ?
+        '<p>所有資料皆存放在<b>你自己的</b> Cloudflare 帳戶與專屬密碼保護之下。你的 Google 與 Anthropic 金鑰僅儲存在你個人的 Worker 伺服器端執行，絕不會向瀏覽器完整回傳。</p><p>預訂信件僅經由 Anthropic API 讀取一次以提取摘要資訊；其餘所有資料皆完整保留在你自己的 Worker、Google 與本機裝置之間。</p>' :
+        '<p>Everything lives in <b>your</b> Cloudflare account, behind your own password. Your Google and Anthropic keys are saved only on your own worker, used server-side, and never shown back to the browser in full.</p><p>Booking emails are read once by the Anthropic API to extract the summary; everything else stays between your own worker, Google, and your device.</p>')+
+      topic(isZH()?"分享與動態時間軸 (Share & Timeline)":"Share & Timeline",
+        isZH() ?
+        '<p><b>分享 (Share)</b> 功能可產生專為 Instagram 限時動態打造的 9:16 卡片——直接截圖即可發布。其中的 <b>年度回顧 (Wrapped)</b> 能以大字數據呈現你的年度旅行指標：旅程數、離家天數、國家數與總距離。<b>時間軸 (Timeline)</b> 則以由左至右的動態站點呈現你的下一趟目的地。</p><p><b>分享旅程 (Share trip)</b>（在旅程內點擊）可複製專屬的私密唯讀連結給旅伴——對方無需登入即可查看即時規劃與門禁資訊。若刪除旅程，該連結也會立即失效。</p><p><b>日曆訂閱 (Calendar feed)</b>（設定 → 備份）提供可在任何日曆 App 中訂閱的 ICS 網址——隨時保持最新旅程狀態，無須連接 Google 帳號。</p>' :
+        '<p><b>Share</b> makes a story-ready card (9:16) of your upcoming trips \u2014 screenshot it and post. Inside it, <b>wrapped</b> flips the card to your year in review: trips, days away, countries, distance. <b>Timeline</b> is the same journey as a tab: your next destinations left to right.</p><p><b>Share trip</b> (inside any trip, next to \u201c+ Add plan\u201d) copies a private read-only link for your travel companions \u2014 they see the live itinerary, hotel codes included, no login. Delete the trip and the link dies with it.</p><p><b>Calendar feed</b> (Settings \u2192 Backup) gives you one link any calendar app can subscribe to \u2014 all trips, always current, no Google needed.</p>')+
+      topic(isZH()?"單位與距離 (Units & distances)":"Units & distances",
+        isZH() ?
+        '<p>每趟旅程卡片皆會顯示自常駐基地計算的距離、目的地天氣預測、當地貨幣匯率、電源插頭型號與緊急求助電話。可在「設定」中自由切換公里/°C 或英哩/°F。</p>' :
         '<p>Every trip shows the distance from your starting point plus destination weather, currency, plugs and the emergency number. Switch between km/\u00b0C and miles/\u00b0F in Settings.</p>')+
-      topic("When something looks off",
-        '<p><b>Test connection</b> (Settings \u2192 Google section) checks each stage: Calendar, Gmail (with match count), and email parsing.</p>'+
-        '<p><b>Re-scan inbox</b> is one tap for everything: it re-reads the last year of email and keeps syncing by itself until every booking is in \u2014 progress shows right on screen, nothing else to press. <b>Clean re-import</b> does the same but first removes every auto-imported plan \u2014 plans you added by hand always stay.</p>'+
-        '<p>Every Sunday the worker keeps a full <b>snapshot</b> of your data (last 4 weeks, Settings \u2192 Backup) \u2014 one tap restores everything, and destructive actions save an extra copy first.</p>'+
-        '<p>The <b>build number</b> at the bottom of Settings tells you which version you\u2019re on \u2014 if a fix seems missing, hard-refresh and check it first.</p>')+
-      '<div class="modal-actions"><button class="btn solid" id="helpClose">Close</button></div>');
+      topic(isZH()?"疑難排解與快照還原 (When something looks off)":"When something looks off",
+        isZH() ?
+        '<p><b>測試連線 (Test connection)</b>（設定 → Google 區塊）可逐步檢測：日曆連線、Gmail 讀取（附符合筆數）以及郵件智慧解析。</p><p><b>重新掃描信箱 (Re-scan inbox)</b> 可一鍵重讀過去一年的郵件並持續同步直到全部歸檔。<b>全新重新匯入 (Clean re-import)</b> 則會先清除自動匯入的規劃並重新讀取——你手動新增的規劃絕不會被刪除。</p><p>每週日 Worker 皆會為你的資料建立完整的<b>自動快照 (Snapshot)</b>（保留最近 4 週，設定 → 備份）——可一鍵完整還原，任何重大操作前系統也會先自動保存副本。</p>' :
+        '<p><b>Test connection</b> (Settings \u2192 Google section) checks each stage: Calendar, Gmail (with match count), and email parsing.</p><p><b>Re-scan inbox</b> is one tap for everything: it re-reads the last year of email and keeps syncing by itself until every booking is in \u2014 progress shows right on screen, nothing else to press. <b>Clean re-import</b> does the same but first removes every auto-imported plan \u2014 plans you added by hand always stay.</p><p>Every Sunday the worker keeps a full <b>snapshot</b> of your data (last 4 weeks, Settings \u2192 Backup) \u2014 one tap restores everything, and destructive actions save an extra copy first.</p>')+
+      '<div class="modal-actions"><button class="btn solid" id="helpClose">'+(isZH()?"關閉":"Close")+'</button></div>');
     document.getElementById("helpClose").onclick=closeModal;
     // personalise the +trip example with the signed-in user's own connected mailbox
     if(settings.workerUrl){
@@ -1174,36 +1262,42 @@
   /* ===================== settings (preserved: worker URL, export/import, clear) ===================== */
   document.getElementById("setBtn").onclick=function(){
     var snap=JSON.stringify({version:2,home:home,trips:trips,wishes:wishes},null,2);
-    openModal('<h3>Settings</h3>'+
-      field("Default starting location","s_home","text",home,"OPO")+
-      '<div class="hint">Your home base — prefilled as the origin of new trips and used for the distance on each card.</div>'+
-      '<div class="field"><label>Units</label><select id="s_units"><option value="metric"'+(settings.units==="imperial"?"":" selected")+'>Metric — km &amp; °C</option><option value="imperial"'+(settings.units==="imperial"?" selected":"")+'>US — miles &amp; °F</option></select></div>'+
-      '<div class="hint">Used for the trip distance and destination weather on each card.</div>'+
-      field("Worker URL","s_worker","text",settings.workerUrl,"https://travel-sync.you.workers.dev","(blank = local only)")+
-      '<div class="hint">When set, trips load from your worker and new trips post to it. Blank keeps everything on this device. <span class="status local" id="status" style="vertical-align:middle;margin-left:4px"><span class="dot"></span>Local</span></div>'+
-      '<h4 style="margin-top:20px">Connect Google Calendar &amp; Gmail</h4>'+
-      field("Google client ID","s_gid","text","","1234….apps.googleusercontent.com")+
-      field("Google client secret","s_gsecret","password","","GOCSPX-…","stored on your worker only")+
-      '<div class="hint">One-time setup at <b>console.cloud.google.com</b>: create a project, enable the <b>Google Calendar API</b> and <b>Gmail API</b>, then under Credentials create an <b>OAuth client ID (Web application)</b> with:<br>· Authorised JavaScript origin: <b>'+esc(settings.workerUrl||location.origin)+'</b><br>· Authorised redirect URI: <b>'+esc((settings.workerUrl||location.origin)+"/google/callback")+'</b><br>Then in <b>Audience</b> (OAuth consent screen) hit <b>Publish app</b> — in Testing mode Google cuts the connection after 7 days.<br>Paste the client ID and secret here, Save, then hit Connect Google and approve access.<br><b>Tip:</b> forward any confirmation email to yourself with <b>+trip</b> added before the @ (e.g. you<b>+trip</b>@yourdomain.com) and the next sync files it — whatever the sender.</div>'+
-      '<div class="modal-actions act-row"><button class="btn" id="gSave">Save</button><button class="btn solid" id="gConnect">Connect Google</button><button class="btn" id="gTest">Test connection</button><button class="btn" id="gRescan">Re-scan inbox</button><button class="btn" id="gReset">Clean re-import</button><button class="btn" id="gTrace">Trace email</button><button class="btn" id="gClear" style="border-color:rgba(255,90,53,.4);color:var(--coral)">Disconnect</button></div>'+
-      '<div id="gStatus" class="hint" style="font-size:14px;line-height:1.55;margin-top:10px">Checking connection…</div>'+
-      field("Anthropic API key (email parsing)","s_akey","password","","sk-ant-…","stored on your worker only")+
-      '<div class="hint">Reads each booking email and turns it into a trip plan. Get a key at <b>console.anthropic.com</b> → API Keys. Uses the cheapest model (Haiku) — a parsed email costs a fraction of a cent.</div>'+
-      '<div class="modal-actions act-row"><button class="btn" id="aSave">Save key</button></div>'+
-      '<h4>Backup &amp; import</h4>'+
+    var gOrigin=esc(settings.workerUrl||location.origin);
+    var gRedirect=esc((settings.workerUrl||location.origin)+"/google/callback");
+    var gHint=isZH()
+      ?('前往 <b>console.cloud.google.com</b> 完成一次性設定：建立專案，啟用 <b>Google Calendar API</b> 與 <b>Gmail API</b>，並在憑證中建立 <b>OAuth 用戶端 ID（網頁應用程式）</b>：<br>· 已授權的 JavaScript 來源：<b>'+gOrigin+'</b><br>· 已授權的重新導向 URI：<b>'+gRedirect+'</b><br>接著在 <b>OAuth 同意畫面</b> 點擊 <b>發布應用程式</b>。<br>將用戶端編號與密鑰貼於此處儲存，再點擊「連結 Google」同意存取授權。<br><b>秘訣：</b>轉發任何確認信給自己，並在 @ 前加上 <b>+trip</b>（例如：you<b>+trip</b>@yourdomain.com），下次同步即可自動歸檔！')
+      :('One-time setup at <b>console.cloud.google.com</b>: create a project, enable the <b>Google Calendar API</b> and <b>Gmail API</b>, then under Credentials create an <b>OAuth client ID (Web application)</b> with:<br>· Authorised JavaScript origin: <b>'+gOrigin+'</b><br>· Authorised redirect URI: <b>'+gRedirect+'</b><br>Then in <b>Audience</b> (OAuth consent screen) hit <b>Publish app</b> — in Testing mode Google cuts the connection after 7 days.<br>Paste the client ID and secret here, Save, then hit Connect Google and approve access.<br><b>Tip:</b> forward any confirmation email to yourself with <b>+trip</b> added before the @ (e.g. you<b>+trip</b>@yourdomain.com) and the next sync files it — whatever the sender.');
+    openModal('<h3>'+(isZH()?"設定":"Settings")+'</h3>'+
+      '<div class="field"><label>'+(isZH()?"語言 (Language)":"Language")+'</label><select id="s_lang"><option value="zh-TW"'+(isZH()?" selected":"")+'>繁體中文 (Traditional Chinese)</option><option value="en"'+(!isZH()?" selected":"")+'>English</option></select></div>'+
+      field(isZH()?"預設出發基地 (Default starting location)":"Default starting location","s_home","text",home,"OPO")+
+      '<div class="hint">'+(isZH()?"你的常駐城市——將自動填入新旅程的出發地，並用於計算卡片上的飛行距離。":"Your home base — prefilled as the origin of new trips and used for the distance on each card.")+'</div>'+
+      '<div class="field"><label>'+(isZH()?"度量單位 (Units)":"Units")+'</label><select id="s_units"><option value="metric"'+(settings.units==="imperial"?"":" selected")+'>'+(isZH()?"公制 — 公里 (km) 與 攝氏 (°C)":"Metric — km &amp; °C")+'</option><option value="imperial"'+(settings.units==="imperial"?" selected":"")+'>'+(isZH()?"美制 — 英哩 (mi) 與 華氏 (°F)":"US — miles &amp; °F")+'</option></select></div>'+
+      '<div class="hint">'+(isZH()?"用於計算各旅程的飛行距離以及目的地的預測氣溫。":"Used for the trip distance and destination weather on each card.")+'</div>'+
+      field(isZH()?"Worker 雲端同步網址 (Worker URL)":"Worker URL","s_worker","text",settings.workerUrl,"https://travel-sync.you.workers.dev",isZH()?"(留空 = 僅保存在本機)":"(blank = local only)")+
+      '<div class="hint">'+(isZH()?"設定後，旅程資料將與你的 Worker 雲端同步。留空則僅保存在此裝置本機。":"When set, trips load from your worker and new trips post to it. Blank keeps everything on this device.")+' <span class="status local" id="status" style="vertical-align:middle;margin-left:4px"><span class="dot"></span>Local</span></div>'+
+      '<h4 style="margin-top:20px">'+(isZH()?"連結 Google 行事曆與 Gmail":"Connect Google Calendar &amp; Gmail")+'</h4>'+
+      field(isZH()?"Google 用戶端編號 (Client ID)":"Google client ID","s_gid","text","","1234….apps.googleusercontent.com")+
+      field(isZH()?"Google 用戶端密鑰 (Client Secret)":"Google client secret","s_gsecret","password","",isZH()?"僅加密儲存於你的 Worker":"GOCSPX-…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
+      '<div class="hint">'+gHint+'</div>'+
+      '<div class="modal-actions act-row"><button class="btn" id="gSave">'+(isZH()?"儲存":"Save")+'</button><button class="btn solid" id="gConnect">'+(isZH()?"連結 Google":"Connect Google")+'</button><button class="btn" id="gTest">'+(isZH()?"測試連線":"Test connection")+'</button><button class="btn" id="gRescan">'+(isZH()?"重新掃描信箱":"Re-scan inbox")+'</button><button class="btn" id="gReset">'+(isZH()?"全新重新匯入":"Clean re-import")+'</button><button class="btn" id="gTrace">'+(isZH()?"郵件診斷":"Trace email")+'</button><button class="btn" id="gClear" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"解除綁定":"Disconnect")+'</button></div>'+
+      '<div id="gStatus" class="hint" style="font-size:14px;line-height:1.55;margin-top:10px">'+(isZH()?"檢查連線狀態中…":"Checking connection…")+'</div>'+
+      field(isZH()?"Anthropic API 金鑰（郵件智慧解析）":"Anthropic API key (email parsing)","s_akey","password","","sk-ant-…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
+      '<div class="hint">'+(isZH()?"自動解析預訂郵件並建立行程規劃。前往 <b>console.anthropic.com</b> → API Keys 取得金鑰。採用最平價的 Haiku 模型，每封郵件僅花費極少費用。":"Reads each booking email and turns it into a trip plan. Get a key at <b>console.anthropic.com</b> → API Keys. Uses the cheapest model (Haiku) — a parsed email costs a fraction of a cent.")+'</div>'+
+      '<div class="modal-actions act-row"><button class="btn" id="aSave">'+(isZH()?"儲存金鑰":"Save key")+'</button></div>'+
+      '<h4>'+(isZH()?"備份與匯入":"Backup &amp; import")+'</h4>'+
       '<div class="field"><textarea id="exp" readonly class="mono" style="min-height:90px">'+esc(snap)+'</textarea></div>'+
-      '<div class="modal-actions" style="margin-top:0"><button class="btn" id="copyJson">Copy data</button><button class="btn" id="dlJson">Download</button><button class="btn" id="icsFeed">Copy calendar feed link</button></div>'+
-      '<div class="hint">The feed link works in ANY calendar app — paste it under “Subscribe by URL” / “From internet” in Apple, Google or Outlook and your trips appear and stay updated. No Google connection needed.</div>'+
-      '<div class="hint" id="snapList" style="margin-top:12px">Loading snapshots…</div>'+
-      '<div class="field" style="margin-top:18px"><label>Paste trips to merge in</label><textarea id="imp" class="mono" placeholder=\'[{"from":"OPO","to":"GRU","start":"2026-10-02","end":"2026-10-12","label":"São Paulo"}]\' style="min-height:80px"></textarea><div class="err" id="imperr"></div></div>'+
-      '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:16px"><button class="btn" id="logoutBtn">Log out on this device</button><div class="hint" style="margin-top:8px">Ends your session here — you’ll sign in again next time. Handy on a shared or borrowed device.</div></div>'+
-      '<div style="margin-top:14px"><button class="btn" id="clearBtn" style="border-color:rgba(255,90,53,.4);color:var(--coral)">Clear all data</button></div>'+
-      '<div class="modal-actions"><button class="btn" id="cancelBtn">Close</button><button class="btn solid" id="saveSet">Save</button></div>'+
+      '<div class="modal-actions" style="margin-top:0"><button class="btn" id="copyJson">'+(isZH()?"複製 JSON 資料":"Copy data")+'</button><button class="btn" id="dlJson">'+(isZH()?"下載檔案":"Download")+'</button><button class="btn" id="icsFeed">'+(isZH()?"複製日曆訂閱網址":"Copy calendar feed link")+'</button></div>'+
+      '<div class="hint">'+(isZH()?"日曆訂閱網址可用於任何日曆 App——在 Apple 行事曆、Google 日曆或 Outlook 貼入「透過 URL 訂閱」，旅程即自動保持同步。":"The feed link works in ANY calendar app — paste it under “Subscribe by URL” / “From internet” in Apple, Google or Outlook and your trips appear and stay updated. No Google connection needed.")+'</div>'+
+      '<div class="hint" id="snapList" style="margin-top:12px">'+(isZH()?"載入雲端自動快照中…":"Loading snapshots…")+'</div>'+
+      '<div class="field" style="margin-top:18px"><label>'+(isZH()?"貼上 JSON 旅程以進行合併匯入":"Paste trips to merge in")+'</label><textarea id="imp" class="mono" placeholder=\'[{"from":"TPE","to":"NRT","start":"2026-10-02","end":"2026-10-12","label":"Tokyo"}]\' style="min-height:80px"></textarea><div class="err" id="imperr"></div></div>'+
+      '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:16px"><button class="btn" id="logoutBtn">'+(isZH()?"在此裝置登出":"Log out on this device")+'</button><div class="hint" style="margin-top:8px">'+(isZH()?"結束此裝置的工作階段——下次開啟時需重新登入。在公共或借用裝置上特別實用。":"Ends your session here — you’ll sign in again next time. Handy on a shared or borrowed device.")+'</div></div>'+
+      '<div style="margin-top:14px"><button class="btn" id="clearBtn" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"清除所有資料":"Clear all data")+'</button></div>'+
+      '<div class="modal-actions"><button class="btn" id="cancelBtn">'+(isZH()?"關閉":"Close")+'</button><button class="btn solid" id="saveSet">'+(isZH()?"儲存":"Save")+'</button></div>'+
       '<div class="hint" style="margin-top:14px;text-align:right">build '+BUILD+'</div>');
     document.getElementById("cancelBtn").onclick=closeModal;
     document.getElementById("copyJson").onclick=function(){copyText(JSON.stringify({version:2,home:home,trips:trips,wishes:wishes}),"Data copied");};
     document.getElementById("dlJson").onclick=function(){var b=new Blob([JSON.stringify({version:2,home:home,trips:trips,wishes:wishes},null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="travel.json";document.body.appendChild(a);a.click();document.body.removeChild(a);toast("Downloaded");};
-    document.getElementById("clearBtn").onclick=async function(){if(!confirm("Delete all trips, plans and watches on this device?"))return;trips=[];wishes=[];openSet={};await save("trips",trips);await save("wishes",wishes);closeModal();render();toast("Cleared");};
+    document.getElementById("clearBtn").onclick=async function(){if(!confirm(isZH()?"確定要清除此裝置上的所有旅程、細項與追蹤資料嗎？":"Delete all trips, plans and watches on this device?"))return;trips=[];wishes=[];openSet={};await save("trips",trips);await save("wishes",wishes);closeModal();render();toast(isZH()?"資料已清除":"Cleared");};
     document.getElementById("logoutBtn").onclick=doLogout;
     // Base URL of your worker (the app's own origin when served from it).
     function apiBase(){return settings.workerUrl||location.origin;}
@@ -1224,57 +1318,58 @@
       if(!id||!sec){toast("Paste both the client ID and the secret");return;}
       setGStatus("Saving…");
       try{var r=await fetch(apiBase()+"/settings/google",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({clientId:id,clientSecret:sec})});
-        var d=await r.json();if(!r.ok){toast(d.error||"Could not save");setGStatus("");return;}
-        document.getElementById("s_gsecret").value="";toast("Google client saved — now hit Connect");await loadGStatus();}
-      catch(e){toast("Worker not reachable");}
+        var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存":"Could not save"));setGStatus("");return;}
+        document.getElementById("s_gsecret").value="";toast(isZH()?"Google 用戶端已儲存——現在請點擊「連結 Google」":"Google client saved — now hit Connect");await loadGStatus();}
+      catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
     };
     document.getElementById("gConnect").onclick=function(){
       // token travels in the URL: this is a navigation, not a fetch, so it can't
       // carry the X-Auth header and may lack the session cookie (PWA, old login)
       window.open(apiBase()+"/google/connect?t="+encodeURIComponent(authToken||""),"_blank");
-      setGStatus("Waiting for Google… approve access in the new tab, then reopen Settings.");
+      setGStatus(isZH()?"等待 Google 授權中…請在新分頁核准存取權限，完成後重新開啟設定。":"Waiting for Google… approve access in the new tab, then reopen Settings.");
     };
     document.getElementById("gTest").onclick=async function(){
-      setGStatus("Testing each stage…");
+      setGStatus(isZH()?"正在測試各階段連線…":"Testing each stage…");
       try{var r=await fetch(apiBase()+"/google/test",{headers:authHeaders()});var d=await r.json();
-        if(!d.ok){setGStatus('<span style="color:var(--coral)">○ '+esc(d.error||"Not connected")+'</span>');return;}
+        if(!d.ok){setGStatus('<span style="color:var(--coral)">○ '+esc(d.error||(isZH()?"尚未連結":"Not connected"))+'</span>');return;}
         var bits=[];
         bits.push(d.calendar.ok
-          ?'<span style="color:var(--green)">● Calendar OK — '+d.calendar.upcoming+' upcoming event'+(d.calendar.upcoming===1?"":"s")+'</span>'+(d.calendar.sample&&d.calendar.sample.length?'<br><span class="opt">'+d.calendar.sample.map(esc).join(" · ")+'</span>':'')
-          :'<span style="color:var(--coral)">○ Calendar: '+esc(d.calendar.error||"failed")+'</span> — is the Google Calendar API enabled in your Cloud project?');
+          ?('<span style="color:var(--green)">● '+(isZH()?'日曆連線正常 — 即將到來的活動：'+d.calendar.upcoming+' 個':'Calendar OK — '+d.calendar.upcoming+' upcoming event'+(d.calendar.upcoming===1?"":"s"))+'</span>'+(d.calendar.sample&&d.calendar.sample.length?'<br><span class="opt">'+d.calendar.sample.map(esc).join(" · ")+'</span>':''))
+          :('<span style="color:var(--coral)">○ '+(isZH()?'日曆：':'Calendar: ')+esc(d.calendar.error||(isZH()?"失敗":"failed"))+'</span> — '+(isZH()?'請確認 Google Cloud 專案是否已啟用 Calendar API？':'is the Google Calendar API enabled in your Cloud project?')));
         bits.push(d.gmail.ok
-          ?'<span style="color:var(--green)">● Gmail OK</span> <span class="opt">'+esc(d.gmail.email||"")+'</span>'
-          :'<span style="color:var(--coral)">○ Gmail: '+esc(d.gmail.error||"failed")+'</span> — is the Gmail API enabled in your Cloud project?');
+          ?('<span style="color:var(--green)">● '+(isZH()?'Gmail 連線正常':'Gmail OK')+'</span> <span class="opt">'+esc(d.gmail.email||"")+'</span>')
+          :('<span style="color:var(--coral)">○ '+(isZH()?'Gmail：':'Gmail: ')+esc(d.gmail.error||(isZH()?"失敗":"failed"))+'</span> — '+(isZH()?'請確認 Google Cloud 專案是否已啟用 Gmail API？':'is the Gmail API enabled in your Cloud project?')));
+        var parseCount = isZH() ? ('目前已掃描 ' + d.seenEmails + ' 封郵件') : (d.seenEmails + ' emails scanned so far');
         bits.push(d.anthropicKeySet
-          ?'<span style="color:var(--green)">● Email parsing on</span> <span class="opt">('+d.seenEmails+' emails scanned so far)</span>'
-          :'<span style="color:var(--amber)">◐ Email parsing OFF</span> — paste your Anthropic API key below and Save, then hit Re-scan inbox.');
+          ? ('<span style="color:var(--green)">● ' + (isZH() ? '郵件智慧解析已啟用' : 'Email parsing on') + '</span> <span class="opt">(' + parseCount + ')</span>')
+          : ('<span style="color:var(--amber)">◐ ' + (isZH() ? '郵件智慧解析未啟用' : 'Email parsing OFF') + '</span> — ' + (isZH() ? '請在下方貼入 Anthropic API 金鑰並儲存，然後點擊「重新掃描信箱」。' : 'paste your Anthropic API key below and Save, then hit Re-scan inbox.')));
         if(d.unfiled&&d.unfiled.length){
-          bits.push('<span style="color:var(--amber)">◐ Parsed but not filed — no trip covers their dates:</span><br><span class="opt">'+d.unfiled.map(function(u){return esc(u.name)+' ('+esc(u.start)+(u.end&&u.end!==u.start?' – '+esc(u.end):'')+')';}).join(" · ")+'</span> — create or widen a trip around those dates and Re-scan.');
+          bits.push('<span style="color:var(--amber)">◐ '+(isZH()?'已解析但尚未歸檔 — 日期未落在任何旅程中：':'Parsed but not filed — no trip covers their dates:')+'</span><br><span class="opt">'+d.unfiled.map(function(u){return esc(u.name)+' ('+esc(u.start)+(u.end&&u.end!==u.start?' – '+esc(u.end):'')+')';}).join(" · ")+'</span> — '+(isZH()?'請建立涵蓋該日期的旅程後重新掃描。':'create or widen a trip around those dates and Re-scan.'));
         }
         setGStatus(bits.join("<br>"));
-      }catch(e){setGStatus('<span style="color:var(--faint)">Worker not reachable.</span>');}
+      }catch(e){setGStatus('<span style="color:var(--faint)">'+(isZH()?"無法連線至 Worker。":"Worker not reachable.")+'</span>');}
     };
     document.getElementById("aSave").onclick=async function(){
       var k=val("s_akey");
-      if(!k){toast("Paste the sk-ant- key first");return;}
+      if(!k){toast(isZH()?"請先貼上 sk-ant- 金鑰":"Paste the sk-ant- key first");return;}
       try{var r=await fetch(apiBase()+"/settings/anthropickey",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({key:k})});
-        var d=await r.json();if(!r.ok){toast(d.error||"Could not save");return;}
-        document.getElementById("s_akey").value="";toast("Key saved — now hit Re-scan inbox");}
-      catch(e){toast("Worker not reachable");}
+        var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存":"Could not save"));return;}
+        document.getElementById("s_akey").value="";toast(isZH()?"金鑰已儲存——現在請點擊「重新掃描信箱」":"Key saved — now hit Re-scan inbox");}
+      catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
     };
     document.getElementById("gTrace").onclick=async function(){
-      toast("Tracing\u2026 result appears above the buttons");
-      setGStatus("Tracing your newest forwarded / matching email through every stage\u2026");
+      toast(isZH()?"郵件診斷中…結果將顯示於按鈕上方":"Tracing\u2026 result appears above the buttons");
+      setGStatus(isZH()?"正在對您最新轉發/符合條件的郵件執行完整診斷…":"Tracing your newest forwarded / matching email through every stage\u2026");
       try{var r=await fetch(apiBase()+"/gmail/trace",{headers:authHeaders()});var d=await r.json();
-        if(!d.ok){setGStatus('<span style="color:var(--coral)">\u25cb '+esc(d.error||"Trace failed")+'</span>');return;}
+        if(!d.ok){setGStatus('<span style="color:var(--coral)">\u25cb '+esc(d.error||(isZH()?"診斷失敗":"Trace failed"))+'</span>');return;}
         var L=[];
-        if(d.plusAddress)L.push('Forward address: <b>'+esc(d.plusAddress)+'</b>'+(d.plusMatches!==undefined?' \u2014 '+d.plusMatches+' email'+(d.plusMatches===1?"":"s")+' found there':''));
-        if(d.fallbackQueryUsed)L.push('<span class="opt">No +trip mail found \u2014 traced the newest booking-search match instead.</span>');
-        if(d.textLength!==undefined)L.push('Read '+d.textLength+' characters of text'+(d.alreadySeen?' <span style="color:var(--amber)">(this email is marked as already processed \u2014 Re-scan inbox to clear that)</span>':''));
-        if(d.parsed)L.push('Parsed: <b>'+esc(d.parsed.name||"?")+'</b> ('+esc(d.parsed.type||"?")+', '+esc(d.parsed.start||"?")+(d.parsed.end&&d.parsed.end!==d.parsed.start?' \u2013 '+esc(d.parsed.end):'')+')');
+        if(d.plusAddress)L.push((isZH()?'轉發地址：':'Forward address: ')+'<b>'+esc(d.plusAddress)+'</b>'+(d.plusMatches!==undefined?(isZH()?' — 在此找到 '+d.plusMatches+' 封信件':' \u2014 '+d.plusMatches+' email'+(d.plusMatches===1?"":"s")+' found there'):''));
+        if(d.fallbackQueryUsed)L.push('<span class="opt">'+(isZH()?'未找到 +trip 信件 — 改為診斷最新符合預訂搜尋的信件。':'No +trip mail found \u2014 traced the newest booking-search match instead.')+'</span>');
+        if(d.textLength!==undefined)L.push((isZH()?'已讀取 '+d.textLength+' 字元內容':'Read '+d.textLength+' characters of text')+(d.alreadySeen?(isZH()?' <span style="color:var(--amber)">(此信件已被標記為已處理 — 可點擊「重新掃描信箱」清除)</span>':' <span style="color:var(--amber)">(this email is marked as already processed \u2014 Re-scan inbox to clear that)</span>'):''));
+        if(d.parsed)L.push((isZH()?'已解析：':'Parsed: ')+'<b>'+esc(d.parsed.name||"?")+'</b> ('+esc(d.parsed.type||"?")+", "+esc(d.parsed.start||"?")+(d.parsed.end&&d.parsed.end!==d.parsed.start?' \u2013 '+esc(d.parsed.end):'')+')');
         L.push((d.step==="done"&&d.result.indexOf("Would file")===0?'<span style="color:var(--green)">\u25cf ':'<span style="color:var(--amber)">\u25d0 ')+esc(d.result)+'</span>');
         setGStatus(L.join("<br>"));
-      }catch(e){setGStatus('<span style="color:var(--faint)">Worker not reachable.</span>');}
+      }catch(e){setGStatus('<span style="color:var(--faint)">'+(isZH()?"無法連線至 Worker。":"Worker not reachable.")+'</span>');}
     };
     // ONE tap does the whole job: (optionally clean first,) re-scan, then keep
     // running sync passes until the inbox is drained. Drained = a pass marked
@@ -1285,16 +1380,16 @@
       for(i=0;i<btnIds.length;i++){el=document.getElementById(btnIds[i]);if(el)el.disabled=true;}
       try{
         if(clean){
-          setGStatus('Removing auto-imported plans…');
+          setGStatus(isZH()?'正在清除自動匯入的規劃…':'Removing auto-imported plans…');
           var rr=await fetch(apiBase()+"/plans/reset",{method:"POST",headers:authHeaders()});
           var dd=await rr.json().catch(function(){return{};});
-          if(!rr.ok){setGStatus('<span style="color:var(--coral)">○ '+esc(dd.error||"Could not clean")+'</span>');return;}
-          setGStatus('Removed '+(dd.removed||0)+' imported plan'+(dd.removed===1?'':'s')+' — re-importing fresh…');
+          if(!rr.ok){setGStatus('<span style="color:var(--coral)">○ '+esc(dd.error||(isZH()?"無法清除":"Could not clean"))+'</span>');return;}
+          setGStatus(isZH()?('已清除 '+(dd.removed||0)+' 個匯入細項 — 正在重新匯入…'):('Removed '+(dd.removed||0)+' imported plan'+(dd.removed===1?'':'s')+' — re-importing fresh…'));
           await refresh();
         }else{
-          setGStatus('Re-reading the last year of email from scratch…');
+          setGStatus(isZH()?'正在從頭重新讀取過去一年的郵件…':'Re-reading the last year of email from scratch…');
           var r0=await fetch(apiBase()+"/gmail/rescan",{method:"POST",headers:authHeaders()});
-          if(!r0.ok){setGStatus('<span style="color:var(--coral)">○ Could not start the re-scan</span>');return;}
+          if(!r0.ok){setGStatus('<span style="color:var(--coral)">○ '+(isZH()?"無法啟動重新掃描":"Could not start the re-scan")+'</span>');return;}
         }
         // Pass 1 is a full sync (calendar + email); every pass after that
         // is a cheap email-only sync, so the Worker's outbound-call cap can
@@ -1303,8 +1398,12 @@
         var before=planCount(),newPlans=0,newTrips=0,pass=0,MAX=12,drained=false,parserDown=false,left=null,g=null;
         while(pass<MAX){
           pass++;
-          setGStatus('Sync pass '+pass+(left!==null?' — '+left+' emails still queued':' — reading new emails')+'… <span class="opt">'+
-            (newPlans||newTrips?'('+(newTrips?newTrips+' new trip'+(newTrips>1?'s':'')+', ':'')+newPlans+' new plan'+(newPlans===1?'':'s')+' so far)':'(you can close this — the rest finishes by itself in the background)')+'</span>');
+          var passPrompt = isZH()
+            ? ('同步輪次 '+pass+(left!==null?' — 尚有 '+left+' 封郵件排隊中':' — 正在讀取新郵件')+'… <span class="opt">'+
+              (newPlans||newTrips?'('+(newTrips?newTrips+' 趟新旅程, ':'')+newPlans+' 個新細項已匯入)':'(您可以關閉此視窗 — 其餘會在背景自動完成)')+'</span>')
+            : ('Sync pass '+pass+(left!==null?' — '+left+' emails still queued':' — reading new emails')+'… <span class="opt">'+
+              (newPlans||newTrips?'('+(newTrips?newTrips+' new trip'+(newTrips>1?'s':'')+', ':'')+newPlans+' new plan'+(newPlans===1?'':'s')+' so far)':'(you can close this — the rest finishes by itself in the background)')+'</span>');
+          setGStatus(passPrompt);
           var stats=null;
           try{var sr=await fetch(apiBase()+"/sync"+(pass>1?"?only=gmail":""),{method:"POST",headers:authHeaders()});stats=await sr.json();}catch(e){}
           await refresh();
@@ -1318,75 +1417,81 @@
           // g missing (stage crashed mid-pass): keep going, the next email-only pass is cheap
         }
         var bits=[];
-        if(newTrips)bits.push(newTrips+' new trip'+(newTrips>1?'s':''));
-        if(newPlans)bits.push(newPlans+' new plan'+(newPlans>1?'s':''));
+        if(newTrips)bits.push(isZH()?(newTrips+' 趟新旅程'):(newTrips+' new trip'+(newTrips>1?'s':'')));
+        if(newPlans)bits.push(isZH()?(newPlans+' 個新細項'):(newPlans+' new plan'+(newPlans>1?'s':'')));
         var out=drained
-          ?'<span style="color:var(--green)">● Done after '+pass+' pass'+(pass>1?'es':'')+' — '+(bits.length?bits.join(', '):'nothing new found')+'. Every matching email has been read.</span>'
-          :'<span style="color:var(--amber)">◐ Stopped after '+pass+' pass'+(pass>1?'es':'')+' — '+(bits.length?bits.join(', '):'nothing new yet')+'.</span>';
-        if(parserDown)out+='<br><span style="color:var(--coral)">○ The email parser could not be reached — check the Anthropic API key under Email parsing, then tap Re-scan inbox again.</span>';
-        else if(!drained)out+='<br><span style="color:var(--amber)">◐ '+(left!==null?left+' matching emails still queued':'The inbox may hold more')+' — no action needed: they import automatically in the background over the next hours. (Tap Re-scan inbox to finish now instead.)</span>';
+          ?(isZH()
+            ? ('<span style="color:var(--green)">● 完成（共執行 '+pass+' 輪）— '+(bits.length?bits.join('、'):'無新增預訂')+ '。所有符合的郵件皆已讀取完畢。</span>')
+            : ('<span style="color:var(--green)">● Done after '+pass+' pass'+(pass>1?'es':'')+' — '+(bits.length?bits.join(', '):'nothing new found')+'. Every matching email has been read.</span>'))
+          :(isZH()
+            ? ('<span style="color:var(--amber)">◐ 已在第 '+pass+' 輪暫停 — '+(bits.length?bits.join('、'):'目前無新增項目')+ '。</span>')
+            : ('<span style="color:var(--amber)">◐ Stopped after '+pass+' pass'+(pass>1?'es':'')+' — '+(bits.length?bits.join(', '):'nothing new yet')+'.</span>'));
+        if(parserDown)out+='<br><span style="color:var(--coral)">○ '+(isZH()?'無法連線至郵件解析服務 — 請檢查「郵件智慧解析」下方的 Anthropic API 金鑰，然後再次點擊「重新掃描信箱」。':'The email parser could not be reached — check the Anthropic API key under Email parsing, then tap Re-scan inbox again.')+'</span>';
+        else if(!drained)out+='<br><span style="color:var(--amber)">◐ '+(left!==null?(isZH()?'尚有 '+left+' 封符合的郵件排隊中':left+' matching emails still queued'):(isZH()?'收件匣中可能還有更多信件':'The inbox may hold more'))+' — '+(isZH()?'無需其他操作：系統會在接下來的數小時內於背景自動匯入。（亦可隨時點擊「重新掃描信箱」立即處理）':'no action needed: they import automatically in the background over the next hours. (Tap Re-scan inbox to finish now instead.)')+'</span>';
         if(g&&g.unfiled>0){
           var uf=null;
           try{var tr=await fetch(apiBase()+"/google/test",{headers:authHeaders()});uf=(await tr.json()).unfiled;}catch(e){}
-          if(uf&&uf.length)out+='<br><span style="color:var(--amber)">◐ Parsed but not filed — no trip covers their dates:</span><br><span class="opt">'+
+          if(uf&&uf.length)out+='<br><span style="color:var(--amber)">◐ '+(isZH()?'已解析但尚未歸檔 — 日期未落在任何旅程中：':'Parsed but not filed — no trip covers their dates:')+'</span><br><span class="opt">'+
             uf.map(function(u){return esc(u.name)+' ('+esc(u.start)+(u.end&&u.end!==u.start?' – '+esc(u.end):'')+')';}).join(' · ')+
-            '</span> — create or widen a trip around those dates, then tap Re-scan inbox once more.';
+            '</span> — '+(isZH()?'請建立涵蓋該日期的旅程後，再次點擊「重新掃描信箱」。':'create or widen a trip around those dates, then tap Re-scan inbox once more.');
         }
         setGStatus(out);
-        toast(bits.length?('Inbox imported — '+bits.join(', ')+' ✓'):(drained?'Inbox scanned — nothing new found':'Scan stopped early — see Settings for why'));
-      }catch(e){setGStatus('<span style="color:var(--faint)">Worker not reachable.</span>');}
+        toast(bits.length?(isZH()?('收件匣已匯入 — '+bits.join('、')+' ✓'):('Inbox imported — '+bits.join(', ')+' ✓')):(drained?(isZH()?'收件匣已掃描完畢 — 未發現新預訂':'Inbox scanned — nothing new found'):(isZH()?'掃描提早結束 — 請參閱設定說明':'Scan stopped early — see Settings for why')));
+      }catch(e){setGStatus('<span style="color:var(--faint)">'+(isZH()?"無法連線至 Worker。":"Worker not reachable.")+'</span>');}
       finally{for(i=0;i<btnIds.length;i++){el=document.getElementById(btnIds[i]);if(el)el.disabled=false;}}
     }
     document.getElementById("gReset").onclick=function(){
-      if(!confirm("Remove ALL auto-imported plans from every trip and re-import them fresh through the relevance filter? Plans you added by hand stay."))return;
+      if(!confirm(isZH()?"確定要清除所有旅程中「自動匯入」的細項，並透過智慧過濾重新匯入嗎？（你手動新增的細項將完整保留）":"Remove ALL auto-imported plans from every trip and re-import them fresh through the relevance filter? Plans you added by hand stay."))return;
       inboxPipeline(true);
     };
     document.getElementById("gRescan").onclick=function(){inboxPipeline(false);};
     document.getElementById("gClear").onclick=async function(){
-      if(!confirm("Disconnect Google? Trips stay; calendar and Gmail just stop feeding them until you connect again."))return;
+      if(!confirm(isZH()?"確定要解除與 Google 的連結嗎？旅程將完整保留，僅暫停日曆與 Gmail 的自動匯入。":"Disconnect Google? Trips stay; calendar and Gmail just stop feeding them until you connect again."))return;
       try{await fetch(apiBase()+"/settings/google",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({})});
-        toast("Google disconnected");await loadGStatus();}
-      catch(e){toast("Worker not reachable");}
+        toast(isZH()?"Google 已解除連結":"Google disconnected");await loadGStatus();}
+      catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
     };
     loadGStatus();
     updateStatusChip();   // the Local/Synced chip now lives here
     // Weekly snapshots: list what the worker has kept and offer one-tap restore.
     async function loadSnaps(){
       var el=document.getElementById("snapList");if(!el)return;
-      if(!settings.workerUrl){el.textContent="Automatic snapshots live on your worker — set a Worker URL above first.";return;}
+      if(!settings.workerUrl){el.textContent=isZH()?"雲端自動快照需搭配 Worker 運作 — 請先於上方填寫 Worker 網址。":"Automatic snapshots live on your worker — set a Worker URL above first.";return;}
       try{var r=await fetch(apiBase()+"/backups",{headers:authHeaders()});var d=await r.json();
-        if(!r.ok){el.textContent="Sign in to see snapshots.";return;}
-        if(!d.backups||!d.backups.length){el.innerHTML="<b>Automatic snapshots:</b> a full copy of your data is kept every Sunday (last 4 weeks). None yet — the first lands this Sunday.";return;}
-        el.innerHTML="<b>Automatic snapshots</b> — restore replaces everything with that copy (the current data is snapshotted first, so a restore is undoable):<br>"+
-          d.backups.map(function(b){var dd=new Date(b.at);return '<button class="btn" style="margin:6px 6px 0 0" data-restore="'+b.slot+'">'+dd.toLocaleDateString()+' · '+b.trips+' trips</button>';}).join("");
+        if(!r.ok){el.textContent=isZH()?"請先登入以檢視快照。":"Sign in to see snapshots.";return;}
+        if(!d.backups||!d.backups.length){el.innerHTML=isZH()?"<b>自動快照：</b>每週日系統會自動完整備份你的所有資料（保留最近 4 週）。目前尚無快照 — 首份快照將於本週日建立。":"<b>Automatic snapshots:</b> a full copy of your data is kept every Sunday (last 4 weeks). None yet — the first lands this Sunday.";return;}
+        el.innerHTML=(isZH()?"<b>雲端自動快照</b> — 還原將套用該份備份（當前資料會先自動備份，隨時可復原）：<br>":"<b>Automatic snapshots</b> — restore replaces everything with that copy (the current data is snapshotted first, so a restore is undoable):<br>")+
+          d.backups.map(function(b){var dd=new Date(b.at);return '<button class="btn" style="margin:6px 6px 0 0" data-restore="'+b.slot+'">'+dd.toLocaleDateString(isZH()?"zh-TW":"en-US")+(isZH()?(' · '+b.trips+' 趟旅程'):(' · '+b.trips+' trips'))+'</button>';}).join("");
         el.querySelectorAll("[data-restore]").forEach(function(btn){btn.onclick=async function(){
-          if(!confirm("Replace ALL current trips and plans with this snapshot ("+btn.textContent.trim()+")?"))return;
+          if(!confirm((isZH()?"確定要使用此快照（":"Replace ALL current trips and plans with this snapshot (")+btn.textContent.trim()+(isZH()?"）替換目前所有的旅程與細項嗎？":")?")))return;
           try{var rr=await fetch(apiBase()+"/backups/restore",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({slot:btn.dataset.restore})});
             var dd2=await rr.json();
-            if(rr.ok){toast("Restored "+dd2.trips+" trips ✓");closeModal();await refresh();}
-            else toast(dd2.error||"Could not restore");}
-          catch(e){toast("Worker not reachable");}
+            if(rr.ok){toast(isZH()?("已還原 "+dd2.trips+" 趟旅程 ✓"):("Restored "+dd2.trips+" trips ✓"));closeModal();await refresh();}
+            else toast(dd2.error||(isZH()?"無法還原":"Could not restore"));}
+          catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
         };});
-      }catch(e){el.textContent="Worker not reachable.";}
+      }catch(e){el.textContent=isZH()?"無法連線至 Worker。":"Worker not reachable.";}
     }
     loadSnaps();
     document.getElementById("icsFeed").onclick=async function(){
-      if(!settings.workerUrl){toast("Needs Synced mode — set a Worker URL first");return;}
+      if(!settings.workerUrl){toast(isZH()?"日曆訂閱功能需啟用雲端同步模式 — 請先填寫 Worker 網址":"Needs Synced mode — set a Worker URL first");return;}
       try{var r=await fetch(apiBase()+"/ics/token",{method:"POST",headers:authHeaders()});var d=await r.json();
-        if(!r.ok||!d.url){toast(d.error||"Could not create the feed");return;}
-        copyText(d.url,"Feed link copied — paste it into your calendar app");}
-      catch(e){toast("Worker not reachable");}
+        if(!r.ok||!d.url){toast(d.error||(isZH()?"無法建立日曆訂閱":"Could not create the feed"));return;}
+        copyText(d.url,isZH()?"日曆訂閱網址已複製 — 請貼入日曆 App 中的「透過網址訂閱」":"Feed link copied — paste it into your calendar app");}
+      catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
     };
     document.getElementById("saveSet").onclick=async function(){
       var imp=val("imp");
+      var chosenLang = val("s_lang") || "zh-TW";
+      if(chosenLang !== LANG) setLang(chosenLang);
       home=(val("s_home")||"OPO").toUpperCase();settings.workerUrl=val("s_worker").replace(/\/+$/,"");settings.units=val("s_units")||"metric";
       await save("home",home);await save("settings",settings);
       if(imp)doImport(imp);
       closeModal();updateStatusChip();
-      if(settings.workerUrl){toast("Syncing...");await refresh();}else{render();toast("Saved");}
+      if(settings.workerUrl){toast(isZH()?"同步中…":"Syncing...");await refresh();}else{render();toast(isZH()?"設定已儲存":"Saved");}
     };
   };
-  function doImport(raw){var err=document.getElementById("imperr");if(err)err.textContent="";var data;try{data=JSON.parse(raw);}catch(e){if(err)err.textContent="Not valid JSON.";return;}
+  function doImport(raw){var err=document.getElementById("imperr");if(err)err.textContent="";var data;try{data=JSON.parse(raw);}catch(e){if(err)err.textContent=isZH()?"無效的 JSON 格式。":"Not valid JSON.";return;}
     var inT=Array.isArray(data)?data:(data.trips||[]);var have={};trips.forEach(function(t){have[tripSig(t)]=1;});
     inT.forEach(function(t){if(!t)return;var nt={id:uid(),from:t.from||t.origin||"",to:t.to||t.destination||t.city||"",start:norm(t.start||t.startDate||t.arrival),end:norm(t.end||t.endDate||t.departure),label:t.label||t.title||t.name||"",notes:t.notes||"",segments:t.segments||[]};if(!nt.start||!nt.end)return;if(!have[tripSig(nt)]){trips.push(nt);have[tripSig(nt)]=1;}});
     if(!Array.isArray(data)&&data.wishes)data.wishes.forEach(function(w){if(w)wishes.push({id:uid(),from:w.from||"",dest:w.dest||"",days:w.days||"",month:w.month||"",budget:w.budget||"",note:w.note||""});});
@@ -1404,7 +1509,7 @@
     authToken="";
     try{ localStorage.removeItem("travel:auth"); localStorage.removeItem("travel:trips"); }catch(e){}
     trips=[]; closeModal(); render();
-    if(settings.workerUrl){ toast("Signed out"); await refresh(); }
+    if(settings.workerUrl){ toast(isZH()?"已在此裝置登出":"Signed out"); await refresh(); }
     else { location.reload(); }
   }
   // Session token is kept for 30 days, then a fresh sign-in is asked for.
@@ -1422,26 +1527,26 @@
       var create=mode==="create";
       authScrim.innerHTML=
         '<div class="auth-card"><div class="auth-mark">'+plane(30,"color:var(--coral)")+'</div>'+
-        '<h2>'+(create?"Set up your hub":"Welcome back")+'</h2>'+
-        '<p>'+(create?"Create your login - email and a password. You’ll use it on each device.":"Sign in to unlock your travel hub.")+'</p>'+
-        '<input id="authEmail" type="email" placeholder="Email" autocomplete="email" inputmode="email">'+
-        '<input id="authInput" type="password" placeholder="Password" autocomplete="'+(create?"new-password":"current-password")+'" style="margin-top:10px">'+
+        '<h2>'+(create?(isZH()?"建立個人旅遊中樞":"Set up your hub"):(isZH()?"歡迎回來":"Welcome back"))+'</h2>'+
+        '<p>'+(create?(isZH()?"建立登入資訊——信箱與密碼。你將在各裝置上使用此帳號登入。":"Create your login - email and a password. You’ll use it on each device."):(isZH()?"請登入以解鎖你的旅遊中樞。":"Sign in to unlock your travel hub."))+'</p>'+
+        '<input id="authEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
+        '<input id="authInput" type="password" placeholder="'+(isZH()?"密碼":"Password")+'" autocomplete="'+(create?"new-password":"current-password")+'" style="margin-top:10px">'+
         '<div class="auth-err" id="authErr"></div>'+
-        '<button class="btn solid" id="authBtn">'+(create?"Create login":"Sign in")+'</button>'+
-        '<div class="auth-foot">Stays signed in for 30 days on this device.</div></div>';
+        '<button class="btn solid" id="authBtn">'+(create?(isZH()?"建立帳號":"Create login"):(isZH()?"登入":"Sign in"))+'</button>'+
+        '<div class="auth-foot">'+(isZH()?"在此裝置保持登入 30 天。":"Stays signed in for 30 days on this device.")+'</div></div>';
       authScrim.classList.add("show");
       var email=document.getElementById("authEmail"),input=document.getElementById("authInput"),btn=document.getElementById("authBtn"),err=document.getElementById("authErr");
       setTimeout(function(){email.focus();},50);
       async function submit(){
         var em=email.value.trim(),pw=input.value;
-        if(!em){err.textContent="Enter your email";return;}
-        if(!pw){err.textContent="Enter a password";return;}
+        if(!em){err.textContent=isZH()?"請輸入電子信箱":"Enter your email";return;}
+        if(!pw){err.textContent=isZH()?"請輸入密碼":"Enter a password";return;}
         btn.disabled=true;err.textContent="";
         try{
           var res=await fetch(settings.workerUrl+"/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,password:pw})});
           if(res.ok){var d=await res.json();authToken=d.token;saveAuth(authToken);authScrim.classList.remove("show");resolve(true);return;}
-          err.textContent=create?"Could not set up - try again":"Wrong email or password";
-        }catch(e){err.textContent="Network error - try again";}
+          err.textContent=create?(isZH()?"無法建立帳號，請再試一次":"Could not set up - try again"):(isZH()?"信箱或密碼錯誤":"Wrong email or password");
+        }catch(e){err.textContent=isZH()?"網路連線錯誤，請重試":"Network error - try again";}
         btn.disabled=false;
       }
       btn.onclick=submit;
@@ -1538,6 +1643,8 @@
       save("trips",trips);save("wishes",wishes);save("home",home);
     }
     ensureIds();
+    updateStaticTexts();
+    document.documentElement.lang = isZH() ? "zh-Hant-TW" : "en";
     updateStatusChip();
     if(settings.workerUrl){
       render();

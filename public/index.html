@@ -62,7 +62,7 @@
      per-image author + license). Funchal, Barcelona, Amsterdam, Lisbon, Paris,
      New York, Athens. CC licenses vary; keep this credit or replace with your
      own images to drop the attribution requirement. -->
-<div style="min-height: 100vh; background: #ECE7DC; color: #16130C; font-family: 'Archivo', sans-serif; overflow-x: hidden;">
+<div style="min-height: 100vh; background: #ECE7DC; color: #16130C; font-family: 'Archivo', -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Heiti TC", "Microsoft JhengHei", sans-serif; overflow-x: hidden;">
 
   <!-- ============ NAV ============ -->
   <nav style="max-width: 1200px; margin: 0 auto; padding: 22px clamp(20px, 4vw, 40px); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
@@ -70,27 +70,29 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
       <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -.02em;">RoamRadar</span>
     </div>
-    <a href="#get" style="font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 14px; color: #F4EFE4; background: #16130C; text-decoration: none; padding: 11px 22px; border-radius: 999px; transition: transform .15s ease, box-shadow .15s ease;" class="tw-h1">Download</a>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="/app" style="font-family: inherit; font-weight: 700; font-size: 13px; color: #16130C; background: #FFFFFF; border: 1px solid rgba(22,19,12,.15); text-decoration: none; padding: 9px 18px; border-radius: 999px; transition: transform .15s ease, box-shadow .15s ease;" class="tw-h1" id="navOpenApp" data-i18n="navOpenApp">Open App</a>
+      <button id="langToggleBtn" style="font-family: inherit; font-weight: 700; font-size: 13px; color: #16130C; background: #FFFFFF; border: 1px solid rgba(22,19,12,.15); padding: 9px 16px; border-radius: 999px; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease;" class="tw-h1" aria-label="Toggle language">繁體中文</button>
+      <a href="#get" style="font-family: inherit; font-weight: 700; font-size: 14px; color: #F4EFE4; background: #16130C; text-decoration: none; padding: 11px 22px; border-radius: 999px; transition: transform .15s ease, box-shadow .15s ease;" class="tw-h1" id="navDl" data-i18n="navDl">Download</a>
+    </div>
   </nav>
 
   <!-- ============ HERO ============ -->
   <header style="max-width: 1060px; margin: 0 auto; padding: 46px clamp(20px, 4vw, 40px) 90px; text-align: center;">
-    <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; letter-spacing: .32em; color: #1E40FF; animation: riseIn .6s ease both;">DEPARTURES &amp; MEMORIES</div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; letter-spacing: .32em; color: #1E40FF; animation: riseIn .6s ease both;" data-i18n="heroEyebrow">DEPARTURES &amp; MEMORIES</div>
     <h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(52px, 8.6vw, 100px); line-height: .96; letter-spacing: -.035em; margin: 18px 0 0; animation: riseIn .6s ease .06s both;">
-      Home to<br>all your
-      <span style="display: inline-block; width: .72em; height: .72em; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: .18em; box-shadow: 0 10px 24px -12px rgba(22,19,12,.4); vertical-align: -.02em; margin: 0 .05em;"><span style="display: flex; width: 100%; height: 100%; align-items: center; justify-content: center;"><svg width="62%" height="62%" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg></span></span>
-      <span style="color: #FF5A35;">trips</span>
+      <span data-i18n="heroH1">Home to<br>all your <span style="display: inline-block; width: .72em; height: .72em; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: .18em; box-shadow: 0 10px 24px -12px rgba(22,19,12,.4); vertical-align: -.02em; margin: 0 .05em;"><span style="display: flex; width: 100%; height: 100%; align-items: center; justify-content: center;"><svg width="62%" height="62%" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg></span></span> <span style="color: #FF5A35;">trips</span></span>
     </h1>
     <div style="display: inline-flex; gap: 6px; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 999px; padding: 6px; margin-top: 30px; animation: riseIn .6s ease .12s both;">
-      <span style="font-weight: 600; font-size: 14px; color: #F4EFE4; background: #16130C; padding: 9px 18px; border-radius: 999px;">Upcoming</span>
-      <span style="font-weight: 600; font-size: 14px; color: #756D5E; padding: 9px 18px; border-radius: 999px;">Past</span>
-      <span style="font-weight: 600; font-size: 14px; color: #756D5E; padding: 9px 18px; border-radius: 999px;">Wishlist</span>
+      <span style="font-weight: 600; font-size: 14px; color: #F4EFE4; background: #16130C; padding: 9px 18px; border-radius: 999px;" data-i18n="tabUp">Upcoming</span>
+      <span style="font-weight: 600; font-size: 14px; color: #756D5E; padding: 9px 18px; border-radius: 999px;" data-i18n="tabPast">Past</span>
+      <span style="font-weight: 600; font-size: 14px; color: #756D5E; padding: 9px 18px; border-radius: 999px;" data-i18n="tabWish">Wishlist</span>
     </div>
-    <p style="font-size: 17px; line-height: 1.5; color: #756D5E; max-width: 520px; margin: 22px auto 0; text-wrap: pretty; animation: riseIn .6s ease .18s both;">RoamRadar keeps every flight, stay and ride on one living timeline - from booked, to boarding, to bragging.</p>
+    <p style="font-size: 17px; line-height: 1.5; color: #756D5E; max-width: 520px; margin: 22px auto 0; text-wrap: pretty; animation: riseIn .6s ease .18s both;" data-i18n="heroDesc">RoamRadar keeps every flight, stay and ride on one living timeline - from booked, to boarding, to bragging.</p>
     <div style="margin-top: 26px; animation: riseIn .6s ease .24s both;">
-      <a href="#get" style="display: inline-block; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 16px; color: #F4EFE4; background: #16130C; text-decoration: none; padding: 15px 30px; border-radius: 999px; transition: transform .15s ease, box-shadow .15s ease;" class="tw-h2">Download the app</a>
+      <a href="#get" style="display: inline-block; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 16px; color: #F4EFE4; background: #16130C; text-decoration: none; padding: 15px 30px; border-radius: 999px; transition: transform .15s ease, box-shadow .15s ease;" class="tw-h2" data-i18n="heroCta">Download the app</a>
       
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .2em; color: #A39A89; margin-top: 14px;">FREE ON THE WEB · IOS COMING SOON</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .2em; color: #A39A89; margin-top: 14px;" data-i18n="heroBadge">FREE ON THE WEB · IOS COMING SOON</div>
       
     </div>
 
@@ -101,33 +103,33 @@
       <div style="max-width: 800px; margin: 0 auto; background: #F6F3EC; border: 1px solid rgba(22,19,12,.12); border-radius: 26px; padding: clamp(20px, 4vw, 34px); box-shadow: 0 40px 80px -40px rgba(22,19,12,.5); text-align: left; position: relative; z-index: 1;">
         <div class="tw-dash-top" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
           <div>
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .3em; color: #1E40FF;">DEPARTURES &amp; MEMORIES</div>
-            <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 30px; letter-spacing: .16em; margin-top: 6px;">TRAVEL</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .3em; color: #1E40FF;" data-i18n="dashEyebrow">DEPARTURES &amp; MEMORIES</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 30px; letter-spacing: .16em; margin-top: 6px;" data-i18n="dashTravel">TRAVEL</div>
           </div>
           <div style="display: flex; gap: 8px;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: .14em; color: #756D5E; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 8px 13px; border-radius: 999px;">LOCAL</span>
-            <span style="font-weight: 600; font-size: 13px; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 8px 15px; border-radius: 999px;">Share</span>
-            <span style="font-weight: 600; font-size: 13px; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 8px 15px; border-radius: 999px;">Settings</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: .14em; color: #756D5E; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 8px 13px; border-radius: 999px;" data-i18n="dashLocal">LOCAL</span>
+            <span style="font-weight: 600; font-size: 13px; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 8px 15px; border-radius: 999px;" data-i18n="dashShare">Share</span>
+            <span style="font-weight: 600; font-size: 13px; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 8px 15px; border-radius: 999px;" data-i18n="dashSet">Settings</span>
           </div>
         </div>
-        <p style="font-size: 14px; color: #756D5E; margin: 10px 0 0;">Every trip, with its flights, stays and rides on one timeline.</p>
+        <p style="font-size: 14px; color: #756D5E; margin: 10px 0 0;" data-i18n="dashDesc">Every trip, with its flights, stays and rides on one timeline.</p>
 
         <div class="tw-dash-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 18px;">
           <div style="background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 16px; padding: 16px 18px;">
             <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 28px; line-height: .9;">12</div>
-            <div style="font-size: 12.5px; color: #756D5E; margin-top: 7px;">trips logged</div>
+            <div style="font-size: 12.5px; color: #756D5E; margin-top: 7px;" data-i18n="dashTripsLogged">trips logged</div>
           </div>
           <div style="background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 16px; padding: 16px 18px;">
             <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 28px; line-height: .9;">8</div>
-            <div style="font-size: 12.5px; color: #756D5E; margin-top: 7px;">upcoming</div>
+            <div style="font-size: 12.5px; color: #756D5E; margin-top: 7px;" data-i18n="dashUpcoming">upcoming</div>
           </div>
           <div style="background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 16px; padding: 16px 18px;">
             <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 28px; line-height: .9;">78</div>
-            <div style="font-size: 12.5px; color: #756D5E; margin-top: 7px;">days away in 2026</div>
+            <div style="font-size: 12.5px; color: #756D5E; margin-top: 7px;" data-i18n="dashDaysAway">days away in 2026</div>
           </div>
           <div style="background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 16px; padding: 16px 18px;">
             <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 17px; line-height: 1.4; letter-spacing: .02em;">FNC · in 80d</div>
-            <div style="font-size: 12.5px; color: #756D5E; margin-top: 4px;">next trip</div>
+            <div style="font-size: 12.5px; color: #756D5E; margin-top: 4px;" data-i18n="dashNextTrip">next trip</div>
           </div>
         </div>
 
@@ -145,13 +147,13 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="color: #16130C; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
             <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 20px;">FNC</span>
             <span style="flex: 2;"></span>
-            <span style="font-weight: 600; font-size: 13px; border: 1px solid rgba(22,19,12,.12); padding: 7px 14px; border-radius: 999px;">Edit</span>
+            <span style="font-weight: 600; font-size: 13px; border: 1px solid rgba(22,19,12,.12); padding: 7px 14px; border-radius: 999px;" data-i18n="dashEdit">Edit</span>
           </div>
           <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 18px; margin-top: 12px;">Build Days - Madeira</div>
           <div style="display: flex; align-items: center; gap: 8px; margin-top: 9px;">
             <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #756D5E;">15-18 Sep 2026</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: #F4F0E7; border: 1px solid rgba(22,19,12,.12); padding: 4px 10px; border-radius: 999px;">4 days</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #1E40FF; background: rgba(30,64,255,.08); padding: 4px 10px; border-radius: 999px;">in 80 days</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: #F4F0E7; border: 1px solid rgba(22,19,12,.12); padding: 4px 10px; border-radius: 999px;" data-i18n="dashDays">4 days</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #1E40FF; background: rgba(30,64,255,.08); padding: 4px 10px; border-radius: 999px;" data-i18n="dashInDays">in 80 days</span>
           </div>
         </div>
       </div>
@@ -161,12 +163,12 @@
   <!-- ============ PANEL 1 · TIMELINE ============ -->
   <section class="tw-split" style="display: grid; grid-template-columns: 1fr 1fr;">
     <div class="tw-split-left" style="background: #E7EBFC; display: flex; align-items: center; justify-content: center; padding: 80px 40px; min-height: 560px;">
-      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;"><span style="color: #1E40FF;">Flights, stays</span> &amp; everything in between.</h2>
+      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p1Left"><span style="color: #1E40FF;">Flights, stays</span> &amp; everything in between.</h2>
     </div>
     <div class="tw-split-right" style="background: #1E40FF; display: flex; align-items: center; justify-content: center; padding: 64px 32px; min-height: 560px; position: relative;">
       <div style="width: min(460px, 100%); display: flex; flex-direction: column; gap: 20px; align-items: center;">
         
-          <span style="align-self: flex-end; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #F4EFE4; background: #16130C; padding: 8px 14px; border-radius: 999px; transform: rotate(2deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.5);">4 PLANS · ZERO TABS</span>
+          <span style="align-self: flex-end; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #F4EFE4; background: #16130C; padding: 8px 14px; border-radius: 999px; transform: rotate(2deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.5);" data-i18n="p1Badge">4 PLANS · ZERO TABS</span>
         
       <div style="width: 100%; background: #FFFFFF; border-radius: 20px; padding: 22px 24px; box-shadow: 0 34px 70px -30px rgba(10,16,60,.7);">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -211,7 +213,7 @@
             <span class="tw-plan-date" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: nowrap;">18 Sep</span>
           </div>
         </div>
-        <span style="display: inline-block; font-weight: 700; font-size: 13px; color: #1E40FF; background: rgba(30,64,255,.08); padding: 9px 16px; border-radius: 999px; margin-top: 6px;">+ Add plan</span>
+        <span style="display: inline-block; font-weight: 700; font-size: 13px; color: #1E40FF; background: rgba(30,64,255,.08); padding: 9px 16px; border-radius: 999px; margin-top: 6px;" data-i18n="p1AddPlan">+ Add plan</span>
       </div>
       </div>
     </div>
@@ -220,17 +222,17 @@
   <!-- ============ PANEL 3 · COUNTDOWN ============ -->
   <section class="tw-split" style="display: grid; grid-template-columns: 1fr 1fr;">
     <div class="tw-split-left" style="background: #FFE9E2; display: flex; align-items: center; justify-content: center; padding: 80px 40px; min-height: 560px;">
-      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;"><span style="color: #FF5A35;">Counting down</span> from the day you book.</h2>
+      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p2Left"><span style="color: #FF5A35;">Counting down</span> from the day you book.</h2>
     </div>
     <div class="tw-split-right" style="background: #FF5A35; display: flex; align-items: center; justify-content: center; padding: 64px 32px; min-height: 560px;">
       <div style="width: min(440px, 100%); background: #16130C; color: #F4EFE4; border-radius: 22px; padding: 30px 32px; box-shadow: 0 40px 80px -32px rgba(80,15,0,.75);">
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
-          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: #FFFFFF; background: #FF5A35; padding: 6px 12px; border-radius: 999px;">NEXT TRIP</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: #FFFFFF; background: #FF5A35; padding: 6px 12px; border-radius: 999px;" data-i18n="p2Next">NEXT TRIP</span>
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(244,239,228,.6);">15-18 SEP 2026</span>
         </div>
         <div style="display: flex; align-items: baseline; gap: 16px; margin-top: 24px;">
           <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 104px; line-height: .8; letter-spacing: -.03em;">80</span>
-          <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.1;">days to<br><span style="color: #FF5A35;">Funchal</span></span>
+          <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.1;" data-i18n="p2DaysTo">days to<br><span style="color: #FF5A35;">Funchal</span></span>
         </div>
         <div style="display: flex; align-items: center; gap: 14px; margin-top: 28px;">
           <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 24px;">OPO</span>
@@ -238,7 +240,7 @@
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; animation: floatPlane 3s ease-in-out infinite; flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
           <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 24px;">FNC</span>
         </div>
-        <span style="display: inline-block; font-weight: 700; font-size: 14px; color: #16130C; background: #F4EFE4; padding: 12px 22px; border-radius: 999px; margin-top: 26px;">Open itinerary -&gt;</span>
+        <span style="display: inline-block; font-weight: 700; font-size: 14px; color: #16130C; background: #F4EFE4; padding: 12px 22px; border-radius: 999px; margin-top: 26px;" data-i18n="p2Open">Open itinerary -&gt;</span>
       </div>
     </div>
   </section>
@@ -246,17 +248,17 @@
   <!-- ============ PANEL 4 · MEMORIES ============ -->
   <section class="tw-split" style="display: grid; grid-template-columns: 1fr 1fr;">
     <div class="tw-split-left" style="background: #F7EDDA; display: flex; align-items: center; justify-content: center; padding: 80px 40px; min-height: 560px;">
-      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;"><span style="color: #C97F16;">Memories</span> that file themselves.</h2>
+      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p3Left"><span style="color: #C97F16;">Memories</span> that file themselves.</h2>
     </div>
     <div class="tw-split-right" style="background: #E89A2B; display: flex; align-items: center; justify-content: center; padding: 64px 32px; min-height: 560px;">
       <div style="width: min(430px, 100%); display: flex; flex-direction: column; gap: 20px;">
         
-          <span style="align-self: flex-start; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #16130C; background: #F4EFE4; padding: 8px 14px; border-radius: 999px; transform: rotate(-2deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.4);">ROUTES · DAY COUNTS</span>
+          <span style="align-self: flex-start; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #16130C; background: #F4EFE4; padding: 8px 14px; border-radius: 999px; transform: rotate(-2deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.4);" data-i18n="p3Badge">ROUTES · DAY COUNTS</span>
         
         <div style="background: #FFFFFF; border-radius: 20px; padding: 22px 24px; box-shadow: 0 34px 70px -30px rgba(90,50,0,.65);">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: #A39A89;">PAST · 2025</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #756D5E;">2 trips · 9 days</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: #A39A89;" data-i18n="p3Past">PAST · 2025</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #756D5E;" data-i18n="p3Summary">2 trips · 9 days</span>
           </div>
           <div style="display: grid; grid-template-columns: 62px 1fr auto; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(22,19,12,.08); margin-top: 8px;">
             <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Barcelona_City_View_from_Sagrada_Fam%C3%ADlia_-_2013.07_-_panoramio.jpg?width=300" alt="Barcelona" style="width: 62px; height: 62px; object-fit: cover; border-radius: 12px;">
@@ -288,7 +290,7 @@
   <!-- ============ PANEL 5 · PRIVATE ============ -->
   <section class="tw-split" style="display: grid; grid-template-columns: 1fr 1fr;">
     <div class="tw-split-left" style="background: #ECE6FB; display: flex; align-items: center; justify-content: center; padding: 80px 40px; min-height: 560px;">
-      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;"><span style="color: #7C4DFF;">Private</span> until you post it.</h2>
+      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p4Left"><span style="color: #7C4DFF;">Private</span> until you post it.</h2>
     </div>
     <div class="tw-split-right" style="background: #7C4DFF; display: flex; align-items: center; justify-content: center; padding: 64px 32px; min-height: 560px;">
       <div style="width: min(420px, 100%); display: flex; flex-direction: column; gap: 18px;">
@@ -301,8 +303,8 @@
         </div>
         <div style="background: #FFFFFF; border-radius: 20px; padding: 26px 28px; box-shadow: 0 34px 70px -28px rgba(30,10,80,.8);">
           <span style="display: inline-flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .14em; color: #1B8A57; background: rgba(27,138,87,.1); border: 1px solid rgba(27,138,87,.28); padding: 7px 12px; border-radius: 999px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #1B8A57;"></span>LOCAL</span>
-          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -.02em; margin-top: 14px;">Your plans are nobody's business.</div>
-          <p style="font-size: 14px; line-height: 1.5; color: #756D5E; margin: 10px 0 0;">Trips are saved on your device and that is where they stay. Nothing goes online unless you share it yourself.</p>
+          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -.02em; margin-top: 14px;" data-i18n="p4Title">Your plans are nobody's business.</div>
+          <p style="font-size: 14px; line-height: 1.5; color: #756D5E; margin: 10px 0 0;" data-i18n="p4Desc">Trips are saved on your device and that is where they stay. Nothing goes online unless you share it yourself.</p>
         </div>
       </div>
     </div>
@@ -310,8 +312,8 @@
 
   <!-- ============ DARK SHOWCASE · SHARE ============ -->
   <section style="background: #16130C; color: #F4EFE4; padding: 100px clamp(20px, 4vw, 40px) 0;">
-    <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(38px, 5.6vw, 64px); line-height: 1.02; letter-spacing: -.03em; text-align: center; margin: 0;">Your year,<br><span style="color: #FF5A35;">ready for the grid</span></h2>
-    <p style="font-size: 16px; color: rgba(244,239,228,.65); text-align: center; max-width: 460px; margin: 18px auto 0; line-height: 1.5;">One tap turns your trips into a 4:5 travel log - screenshot it, caption it, post it.</p>
+    <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(38px, 5.6vw, 64px); line-height: 1.02; letter-spacing: -.03em; text-align: center; margin: 0;" data-i18n="p5Heading">Your year,<br><span style="color: #FF5A35;">ready for the grid</span></h2>
+    <p style="font-size: 16px; color: rgba(244,239,228,.65); text-align: center; max-width: 460px; margin: 18px auto 0; line-height: 1.5;" data-i18n="p5Sub">One tap turns your trips into a 4:5 travel log - screenshot it, caption it, post it.</p>
 
     <div style="max-width: 880px; margin: 54px auto 0; background: #FF5A35; border-radius: 30px; padding: clamp(22px, 4vw, 40px); box-shadow: 0 50px 100px -50px rgba(255,90,53,.55);">
       <div class="tw-frame-row" style="display: flex; gap: 24px; align-items: stretch; justify-content: center;">
@@ -320,7 +322,7 @@
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .24em; color: rgba(244,239,228,.55);">TRAVEL!</div>
-              <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 32px; line-height: .95; letter-spacing: -.02em; margin-top: 8px;">2026<br>Travel log</div>
+              <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 32px; line-height: .95; letter-spacing: -.02em; margin-top: 8px;" data-i18n="p5CardTitle">2026<br>Travel log</div>
             </div>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(45deg); margin-top: 4px;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
           </div>
@@ -404,45 +406,45 @@
             </div>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(244,239,228,.14); padding-top: 14px; margin-top: 18px;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .06em; color: rgba(244,239,228,.7);">7 TRIPS · 34 DAYS</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .06em; color: rgba(244,239,228,.7);" data-i18n="p5Summary">7 TRIPS · 34 DAYS</span>
             <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #FF5A35;">@yourhandle</span>
           </div>
         </div>
         <!-- side panel -->
         <div style="width: min(260px, 100%); background: #FFFFFF; color: #16130C; border-radius: 20px; padding: 26px 24px; display: flex; flex-direction: column; box-shadow: 0 30px 60px -28px rgba(0,0,0,.5);">
           <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .22em; color: #A39A89;">SHARE</div>
-          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 23px; letter-spacing: -.02em; margin-top: 10px;">Ready for the grid</div>
-          <p style="font-size: 13.5px; line-height: 1.5; color: #756D5E; margin: 10px 0 0; flex: 1;">A 4:5 recap of every trip. Screenshot the card or grab the caption - then drop both into Instagram.</p>
-          <span style="display: block; text-align: center; font-weight: 700; font-size: 14px; color: #F4EFE4; background: #16130C; padding: 12px 0; border-radius: 999px; margin-top: 18px;">Copy caption</span>
-          <span style="display: block; text-align: center; font-weight: 600; font-size: 14px; color: #16130C; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 11px 0; border-radius: 999px; margin-top: 8px;">Close</span>
+          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 23px; letter-spacing: -.02em; margin-top: 10px;" data-i18n="p5SideTitle">Ready for the grid</div>
+          <p style="font-size: 13.5px; line-height: 1.5; color: #756D5E; margin: 10px 0 0; flex: 1;" data-i18n="p5SideDesc">A 4:5 recap of every trip. Screenshot the card or grab the caption - then drop both into Instagram.</p>
+          <span style="display: block; text-align: center; font-weight: 700; font-size: 14px; color: #F4EFE4; background: #16130C; padding: 12px 0; border-radius: 999px; margin-top: 18px;" data-i18n="p5Copy">Copy caption</span>
+          <span style="display: block; text-align: center; font-weight: 600; font-size: 14px; color: #16130C; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 11px 0; border-radius: 999px; margin-top: 8px;" data-i18n="p5Close">Close</span>
         </div>
       </div>
     </div>
 
     <!-- ============ FEATURE WORD LIST ============ -->
     <div style="max-width: 880px; margin: 110px auto 0;">
-      <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.2;">Everything<br><span style="color: #FF5A35;">a traveler needs</span></div>
+      <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.2;" data-i18n="featHeader">Everything<br><span style="color: #FF5A35;">a traveler needs</span></div>
       <div style="margin-top: 34px; display: flex; flex-direction: column; gap: 6px;">
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08;">Trip countdowns</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .84;">Plan timelines</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .7;">Flight numbers</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .57;">Hotel check-ins</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .46;">Airport pickups</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .36;">Past-trip archive</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .28;">Instagram-ready logs</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .2;">Local &amp; private</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .14;">Web + iOS</div>
+        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08;" data-i18n="feat1">Trip countdowns</div>
+        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .84;" data-i18n="feat2">Plan timelines</div>
+        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .7;" data-i18n="feat3">Flight numbers</div>
+        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .57;" data-i18n="feat4">Hotel check-ins</div>
+        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .46;" data-i18n="feat5">Airport pickups</div>
+        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .36;" data-i18n="feat6">Past-trip archive</div>
+        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .28;" data-i18n="feat7">Instagram-ready logs</div>
+        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .2;" data-i18n="feat8">Local &amp; private</div>
+        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .14;" data-i18n="feat9">Web + iOS</div>
       </div>
-      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(244,239,228,.45); margin-top: 26px;">The itinerary goes on...</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(244,239,228,.45); margin-top: 26px;" data-i18n="featFooter">The itinerary goes on...</div>
     </div>
 
     <!-- ============ GIANT CTA ============ -->
     <div id="get" style="padding: 110px 0 90px; text-align: center;">
       <a href="https://github.com/giovannibrees/travel-roamradar" target="_blank" rel="noopener" style="display: flex; align-items: center; justify-content: center; width: min(760px, 100%); height: clamp(150px, 22vw, 220px); margin: 0 auto; background: #1E40FF; border-radius: 999px; text-decoration: none; transition: transform .2s ease, box-shadow .2s ease; box-shadow: 0 40px 90px -40px rgba(30,64,255,.8);" class="tw-h3">
-        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(26px, 4vw, 40px); letter-spacing: -.02em; color: #F4EFE4;">Get RoamRadar on GitHub</span>
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(26px, 4vw, 40px); letter-spacing: -.02em; color: #F4EFE4;" data-i18n="ctaBtn">Get RoamRadar on GitHub</span>
       </a>
 
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .22em; color: rgba(244,239,228,.5); margin-top: 26px;">OPEN-SOURCE · SELF-HOSTED · FREE TO RUN</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .22em; color: rgba(244,239,228,.5); margin-top: 26px;" data-i18n="ctaBadge">OPEN-SOURCE · SELF-HOSTED · FREE TO RUN</div>
 
     </div>
 
@@ -458,12 +460,189 @@
         </div>
         <div style="font-size: 13.5px; color: rgba(244,239,228,.45); text-align: center;">Created with <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; vertical-align: -2px;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"></path></svg> for travel, by <a href="https://www.giovannibrees.com" target="_blank" rel="noopener" target="_blank" rel="noopener" style="color: inherit; font-weight: inherit; text-decoration: underline;" class="tw-h4">Giovanni Brees</a></div>
         <div style="background: #FF5A35; border-radius: 16px; padding: 18px 22px; display: flex; align-items: center; gap: 12px;">
-          <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; line-height: 1.1; color: #FFFFFF;">A more<br>traveled you</span>
+          <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; line-height: 1.1; color: #FFFFFF;" data-i18n="footerSlogan">A more<br>traveled you</span>
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style="color: #FFFFFF; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
         </div>
       </div>
     </footer>
   </section>
 </div>
+
+<script>
+(function() {
+  "use strict";
+  var DICT = {
+    "en": {
+      langBtn: "繁體中文",
+      navOpenApp: "Open App",
+      navDl: "Download",
+      heroEyebrow: "DEPARTURES &amp; MEMORIES",
+      heroH1: 'Home to<br>all your <span style="display: inline-block; width: .72em; height: .72em; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: .18em; box-shadow: 0 10px 24px -12px rgba(22,19,12,.4); vertical-align: -.02em; margin: 0 .05em;"><span style="display: flex; width: 100%; height: 100%; align-items: center; justify-content: center;"><svg width="62%" height="62%" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg></span></span> <span style="color: #FF5A35;">trips</span>',
+      tabUp: "Upcoming",
+      tabPast: "Past",
+      tabWish: "Wishlist",
+      heroDesc: "RoamRadar keeps every flight, stay and ride on one living timeline - from booked, to boarding, to bragging.",
+      heroCta: "Download the app",
+      heroBadge: "FREE ON THE WEB · IOS COMING SOON",
+      dashEyebrow: "DEPARTURES &amp; MEMORIES",
+      dashTravel: "TRAVEL",
+      dashLocal: "LOCAL",
+      dashShare: "Share",
+      dashSet: "Settings",
+      dashDesc: "Every trip, with its flights, stays and rides on one timeline.",
+      dashTripsLogged: "trips logged",
+      dashUpcoming: "upcoming",
+      dashDaysAway: "days away in 2026",
+      dashNextTrip: "next trip",
+      dashTabUp: "Upcoming",
+      dashTabPast: "Past",
+      dashTabWish: "Wishlist",
+      dashEdit: "Edit",
+      dashDays: "4 days",
+      dashInDays: "in 80 days",
+      p1Left: '<span style="color: #1E40FF;">Flights, stays</span> &amp; everything in between.',
+      p1Badge: "4 PLANS · ZERO TABS",
+      p1AddPlan: "+ Add plan",
+      p2Left: '<span style="color: #FF5A35;">Counting down</span> from the day you book.',
+      p2Next: "NEXT TRIP",
+      p2DaysTo: 'days to<br><span style="color: #FF5A35;">Funchal</span>',
+      p2Open: "Open itinerary -&gt;",
+      p3Left: '<span style="color: #C97F16;">Memories</span> that file themselves.',
+      p3Badge: "ROUTES · DAY COUNTS",
+      p3Past: "PAST · 2025",
+      p3Summary: "2 trips · 9 days",
+      p3Days: "DAYS",
+      p4Left: '<span style="color: #7C4DFF;">Private</span> until you post it.',
+      p4Title: "Your plans are nobody's business.",
+      p4Desc: "Trips are saved on your device and that is where they stay. Nothing goes online unless you share it yourself.",
+      p5Heading: 'Your year,<br><span style="color: #FF5A35;">ready for the grid</span>',
+      p5Sub: "One tap turns your trips into a 4:5 travel log - screenshot it, caption it, post it.",
+      p5CardTitle: "2026<br>Travel log",
+      p5Summary: "7 TRIPS · 34 DAYS",
+      p5SideTitle: "Ready for the grid",
+      p5SideDesc: "A 4:5 recap of every trip. Screenshot the card or grab the caption - then drop both into Instagram.",
+      p5Copy: "Copy caption",
+      p5Close: "Close",
+      featHeader: 'Everything<br><span style="color: #FF5A35;">a traveler needs</span>',
+      feat1: "Trip countdowns",
+      feat2: "Plan timelines",
+      feat3: "Flight numbers",
+      feat4: "Hotel check-ins",
+      feat5: "Airport pickups",
+      feat6: "Past-trip archive",
+      feat7: "Instagram-ready logs",
+      feat8: "Local &amp; private",
+      feat9: "Web + iOS",
+      featFooter: "The itinerary goes on...",
+      ctaBtn: "Get RoamRadar on GitHub",
+      ctaBadge: "OPEN-SOURCE · SELF-HOSTED · FREE TO RUN",
+      footerSlogan: "A more<br>traveled you"
+    },
+    "zh-TW": {
+      langBtn: "English",
+      navOpenApp: "開啟應用程式",
+      navDl: "下載 App",
+      heroEyebrow: "啟程與回憶",
+      heroH1: '收藏你所有<br><span style="color: #FF5A35;">旅程</span>的家 <span style="display: inline-block; width: .72em; height: .72em; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: .18em; box-shadow: 0 10px 24px -12px rgba(22,19,12,.4); vertical-align: -.02em; margin: 0 .05em;"><span style="display: flex; width: 100%; height: 100%; align-items: center; justify-content: center;"><svg width="62%" height="62%" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg></span></span>',
+      tabUp: "即將出發",
+      tabPast: "歷史回憶",
+      tabWish: "心願清單",
+      heroDesc: "RoamRadar 將你的所有航班、住宿與交通接駁收納在同一條動態時間軸——從預訂、登機，到留下回憶。",
+      heroCta: "取得應用程式",
+      heroBadge: "網頁版免費使用 · IOS 版即將推出",
+      dashEyebrow: "啟程與回憶",
+      dashTravel: "旅遊時間軸",
+      dashLocal: "本機模式",
+      dashShare: "分享",
+      dashSet: "設定",
+      dashDesc: "所有航班、住宿與交通接駁，整合於單一時間軸。",
+      dashTripsLogged: "筆旅程記錄",
+      dashUpcoming: "趟即將啟程",
+      dashDaysAway: "天在 2026 旅途中",
+      dashNextTrip: "下一趟旅程",
+      dashTabUp: "即將出發",
+      dashTabPast: "歷史回憶",
+      dashTabWish: "心願清單",
+      dashEdit: "編輯",
+      dashDays: "4 天",
+      dashInDays: "還有 80 天",
+      p1Left: '<span style="color: #1E40FF;">航班、住宿</span>，與旅途中的點點滴滴。',
+      p1Badge: "4 項規劃 · 告別雜亂分頁",
+      p1AddPlan: "+ 新增細項",
+      p2Left: '從預訂那一刻起，<span style="color: #FF5A35;">貼心倒數</span>每一天。',
+      p2Next: "下一趟旅程",
+      p2DaysTo: '天後啟程<br><span style="color: #FF5A35;">豐沙爾 (FNC)</span>',
+      p2Open: "查看完整行程 -&gt;",
+      p3Left: '旅途的<span style="color: #C97F16;">美好回憶</span>，自動整理歸檔。',
+      p3Badge: "旅行軌跡 · 天數統計",
+      p3Past: "歷史旅程 · 2025",
+      p3Summary: "2 趟旅程 · 9 天",
+      p3Days: "天",
+      p4Left: '在主動發布前，<span style="color: #7C4DFF;">完全屬於個人隱私</span>。',
+      p4Title: "你的行程安排，無需向任何人交代。",
+      p4Desc: "所有旅程皆保存在你的裝置本機，除非你主動分享，否則資料絕不上傳任何伺服器。",
+      p5Heading: '整年精彩足跡，<br><span style="color: #FF5A35;">隨時發布社群</span>',
+      p5Sub: "一鍵將你的所有旅程轉換為 4:5 比例的精美旅行日誌——直接截圖、複製文案、發到 Instagram。",
+      p5CardTitle: "2026<br>旅行日誌",
+      p5Summary: "7 趟旅程 · 34 天",
+      p5SideTitle: "專為限時動態打造",
+      p5SideDesc: "每趟旅程的精選回顧卡片。截圖或複製文案，直接分享至 Instagram 限時動態。",
+      p5Copy: "複製貼文文案",
+      p5Close: "關閉",
+      featHeader: '旅人所需的一切，<br><span style="color: #FF5A35;">全都在此</span>',
+      feat1: "出發倒數計時",
+      feat2: "動態時間軸規劃",
+      feat3: "航班班機號碼",
+      feat4: "飯店入住與門禁資訊",
+      feat5: "機場接送接駁",
+      feat6: "歷史旅程足跡歸檔",
+      feat7: "美型社群分享日誌",
+      feat8: "本機隱私保護",
+      feat9: "網頁版與 iOS 即將推出",
+      featFooter: "旅程還在繼續……",
+      ctaBtn: "在 GitHub 上取得 RoamRadar",
+      ctaBadge: "開源 · 自託管 · 免費執行",
+      footerSlogan: "遇見更有<br>遠見的自己"
+    }
+  };
+
+  function getLang() {
+    try {
+      var saved = localStorage.getItem("travel:lang");
+      if (saved === "zh-TW" || saved === "en") return saved;
+      if (navigator.language && navigator.language.toLowerCase().indexOf("zh") === 0) return "zh-TW";
+    } catch(e) {}
+    return "zh-TW";
+  }
+
+  function applyLang(lang) {
+    var d = DICT[lang] || DICT["en"];
+    document.documentElement.lang = (lang === "zh-TW" ? "zh-Hant-TW" : "en");
+    var btn = document.getElementById("langToggleBtn");
+    if (btn) btn.textContent = d.langBtn;
+    
+    document.querySelectorAll("[data-i18n]").forEach(function(el) {
+      var k = el.getAttribute("data-i18n");
+      if (d[k] !== undefined) el.innerHTML = d[k];
+    });
+
+    try {
+      localStorage.setItem("travel:lang", lang);
+    } catch(e) {}
+  }
+
+  var currentLang = getLang();
+  applyLang(currentLang);
+
+  var toggleBtn = document.getElementById("langToggleBtn");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", function() {
+      currentLang = (currentLang === "zh-TW" ? "en" : "zh-TW");
+      applyLang(currentLang);
+    });
+  }
+})();
+</script>
+
 </body>
 </html>

@@ -1,7 +1,7 @@
 {
-  "name": "RoamRadar",
+  "name": "RoamRadar 旅遊雷達",
   "short_name": "RoamRadar",
-  "description": "Every trip - its flights, stays and plans - on one living timeline.",
+  "description": "Every trip on one living timeline · 將所有航班、住宿與交通接駁整合於動態旅程時間軸。",
   "start_url": "/app",
   "scope": "/",
   "display": "standalone",

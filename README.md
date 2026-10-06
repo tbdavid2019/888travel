@@ -6,6 +6,7 @@
 ![Self-hosted](https://img.shields.io/badge/self--hosted-yes-1B8A57.svg)
 ![Built with AI agents](https://img.shields.io/badge/built%20with-AI%20agents-FF5A35.svg)
 ![Cloudflare Workers](https://img.shields.io/badge/runs%20on-Cloudflare%20Workers-F38020.svg)
+![i18n](https://img.shields.io/badge/i18n-%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87%20%7C%20English-blueviolet.svg)
 
 <p align="center">
   <img src="docs/screenshots/travel-demo.gif" alt="Walkthrough: trip card with photo, year calendar, and been-there world map" width="300">
@@ -38,6 +39,11 @@ type, emergency numbers, and one-tap "add to any calendar."
   Google (below) and let bookings flow in on their own.
 - 🛟 **Your hand-made plans are sacred** — no automatic sync ever changes or
   deletes a plan you added yourself.
+
+**🌐 Multi-language & Localized (多語系與在地化)**
+- 🇹🇼 **繁體中文 & English** — One-tap seamless language toggle in the header navigation and Settings modal, with automatic persistence (`localStorage`).
+- ✍️ **Optimized typography** — Beautiful CJK font stack (`PingFang TC`, `Noto Sans TC`, `Microsoft JhengHei`) tuned for crisp readability across mobile and desktop.
+- 📆 **Localized date formats & categories** — Flights, hotels, rides, itinerary timeline, and year wrapped stats natively adapted for traditional Chinese travel vocabulary.
 
 **Planning & overview**
 - 🗓️ **Calendar overview** — a 3 / 6 / 12-month view of exactly when you're away,
@@ -239,25 +245,23 @@ optional and only makes trips fill themselves in from your existing bookings.
 A single Cloudflare Worker serving a vanilla-JavaScript front end, with one KV
 namespace for storage. No framework, no build step.
 
+**Does RoamRadar support multiple languages?**
+Yes! RoamRadar provides full bilingual support for **繁體中文 (Traditional Chinese)** and **English**, easily switchable with one tap directly from the navigation bar or Settings.
+
 **Who made RoamRadar?**
 [Giovanni Brees](https://www.giovannibrees.com), a founder and AI-first
 entrepreneur. His AI development agent built the app from scratch, with Claude
 Fable and Codex reviewing the code and Claude handling the visual design.
 
-## Author
+## Acknowledgments & Credits / 特別鳴謝
 
-Created by **[Giovanni Brees](https://www.giovannibrees.com)** - a founder and
-AI-first entrepreneur building and writing at the edge of AI agents and
-automation. RoamRadar is one of his experiments in shipping complete, useful
-software with AI agents.
-
-- Website: https://www.giovannibrees.com
-- LinkedIn: https://www.linkedin.com/in/giovannibrees/
-- Podcast, *The Zero-Employee Company*: https://open.spotify.com/show/033TuF4FmEurDDvBZlOAYr
+- **Original Creator (原作者)**: A huge thank you to **[Giovanni Brees](https://www.giovannibrees.com)** for designing, architecting, and open-sourcing the original [RoamRadar](https://github.com/giovannibrees/travel-roamradar). His work on single-tenant self-hosted architecture and AI-first engineering created an extraordinary foundation for personal travel management.
+  - Website: https://www.giovannibrees.com
+  - LinkedIn: https://www.linkedin.com/in/giovannibrees/
+  - Podcast, *The Zero-Employee Company*: https://open.spotify.com/show/033TuF4FmEurDDvBZlOAYr
+- **Traditional Chinese Localization & Enhancements (繁體中文在地化分支)**: Maintained by [tbdavid2019](https://github.com/tbdavid2019) with comprehensive i18n support, East Asian typography craft improvements, and bilingual landing page & PWA integration.
 
 ## License
 
 [PolyForm Noncommercial 1.0.0](LICENSE) — free to run, modify, and self-host for
 any **noncommercial** purpose. You may not sell it or use it commercially.
-
-</content>
