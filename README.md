@@ -82,7 +82,7 @@ type, emergency numbers, and one-tap "add to any calendar."
 
 ### 1. Click the button
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/giovannibrees/travel-roamradar)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tbdavid2019/travel-roamradar)
 
 This copies the repo into **your** GitHub, creates the Worker in **your**
 Cloudflare account, and **auto-creates the KV namespace** it needs. (Free plan
@@ -146,7 +146,7 @@ parts that don't need the network).
 <summary>Prefer the command line? (optional)</summary>
 
 ```bash
-git clone https://github.com/giovannibrees/travel-roamradar && cd travel-roamradar
+git clone https://github.com/tbdavid2019/travel-roamradar && cd travel-roamradar
 npm i -g wrangler && wrangler login
 wrangler kv namespace create TRIPS      # paste the id into wrangler.toml
 wrangler deploy
