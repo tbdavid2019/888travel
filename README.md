@@ -1,9 +1,9 @@
-# ✈️ RoamRadar 旅遊雷達 · 個人專屬雲端旅遊行程中樞
+# ✈️ 888漫步旅遊 · 888RoamTravel — 個人專屬雲端旅遊行程中樞
 
 > **一個免費、開源、100% 個人自架的單頁式旅遊行程管理中心。**  
-> 將所有航班、住宿、租車、交通接駁、倒數計時、願望清單與過往足跡整合在單一動態旅程時間軸。支援 Google 行事曆與 Gmail 郵件自動匯入（由 Claude AI 智慧解析）。完全託管於您個人的 Cloudflare Worker 雲端帳戶，無須共用伺服器，資料隱私 100% 操之在己。  
+> 將所有航班、住宿、租車、交通接駁、倒數計時、願望清單與過往足跡整合在單一動態旅程時間軸。支援 Google 行事曆、Gmail 智慧解析（支援 Gemini / OpenAI / Groq / DeepSeek / Claude Haiku 等任意相容模型），以及 Resend 信箱 OTP 驗證碼登入。完全託管於您個人的 Cloudflare Worker 雲端帳戶，無須共用伺服器，資料隱私 100% 操之在己。  
 > 
-> *A free, open-source, self-hosted personal travel app running entirely on your own Cloudflare Worker account. Built with AI agents by [Giovanni Brees](https://www.giovannibrees.com), enhanced with full Traditional Chinese (繁體中文) & English i18n by [tbdavid2019](https://github.com/tbdavid2019).*
+> *A free, open-source, self-hosted personal travel hub running entirely on your own Cloudflare Worker account. Original architecture by [Giovanni Brees](https://www.giovannibrees.com), enhanced with full Traditional Chinese (繁體中文) & English i18n, Universal OpenAI-compatible LLMs, Resend OTP Login, and CJK Craft Typography by [tbdavid2019](https://github.com/tbdavid2019).*
 
 ---
 
@@ -11,11 +11,13 @@
 ![Self-hosted](https://img.shields.io/badge/self--hosted-yes-1B8A57.svg)
 ![Runs on Cloudflare Workers](https://img.shields.io/badge/runs%20on-Cloudflare%20Workers-F38020.svg)
 ![i18n](https://img.shields.io/badge/i18n-繁體中文%20%7C%20English-blueviolet.svg)
+![LLM Supported](https://img.shields.io/badge/LLM-Gemini%20%7C%20OpenAI%20%7C%20Groq%20%7C%20Claude-blue.svg)
+![Resend OTP](https://img.shields.io/badge/Email%20Auth-Resend%20OTP-1B8A57.svg)
 ![PWA Ready](https://img.shields.io/badge/PWA-installable-success.svg)
 ![Vanilla JS](https://img.shields.io/badge/stack-Vanilla%20JS%20(No%20Build)-yellow.svg)
 
 <p align="center">
-  <img src="docs/screenshots/travel-demo.gif" alt="RoamRadar 介面展示：旅程卡片、年度行事曆與足跡世界地圖" width="340">
+  <img src="docs/screenshots/travel-demo.gif" alt="888漫步旅遊 介面展示：旅程卡片、年度行事曆與足跡世界地圖" width="340">
 </p>
 
 ---
@@ -34,17 +36,16 @@
 
 ### 🌐 全站雙語與在地化體驗 (Full i18n & Localized)
 - **繁體中文 & English 一鍵無縫切換**：在頂部導覽列或「設定」視窗中隨時切換，全站文案即時更新，並自動於本地記憶偏好（`localStorage`）。
-- **極致 CJK 字型排版**：全面針對繁體中文讀者優化字型備援（`-apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei"`），在 iOS、macOS、Windows 與 Android 皆具備最舒適的閱讀質感。
+- **極致 CJK 字型排版工藝 (Impeccable Craft)**：全面針對繁體中文讀者優化字型備援與排版間距，徹底修正英文字型寬鬆字距（`.22em`）在方塊中文字上散亂的問題；為複雜筆劃漢字（如體、鑑、鐵、鬱）提供清晰的最小字級（12px~13px）與舒適行高（1.6~1.7）。
 - **在地化日期與名詞**：符合台灣與繁體中文閱讀習慣的日期區間（如 `2026年 9月15日 – 9月18日`）、行程分類（航班、飯店住宿、租車、機場接駁、鐵路列車、餐廳活動）。
 
-### 🧳 旅程與細項規劃 (Trips & Plans)
-- **結構化細項掛載**：每趟旅程可附加多筆航班、住宿、接駁與自由備忘筆記。
-- **手動規劃神聖不可侵犯**：使用者手動輸入的行程具備最高優先權，任何雲端自動同步排程絕不覆蓋或刪除手動資料。
-- **倒數計時與狀態分頁**：即將啟程（Upcoming）、歷史回憶（Past）、足跡地圖（Been there）、時間軸（Timeline）與行事曆（Calendar），並附帶「想去的目的地（Wishlist）」機票追蹤清單。
+### 🔐 雙重認證守門：密碼登入與信箱 OTP 驗證碼 (Password & Email OTP)
+- **密碼保護**：初次架設一鍵建立管理員信箱與密碼，產生 256 位元安全 Session。
+- **Resend 一次性安全驗證碼 (Email OTP)**：整合 [Resend](https://resend.com) API，支援發送 6 位數一次性登入碼至您的管理員信箱。有效期限 10 分鐘，具備 60 秒冷卻重發與防暴力嘗試安全防護。
 
-### 🤖 智慧自動匯入 (Smart Import via Google & Claude AI)
+### 🤖 智慧自動匯入 (Universal LLM & Gmail Parsing)
+- **多模型與 OpenAI 相容 LLM 支援**：全面支援 **Google Gemini**（`gemini-2.0-flash`）、**OpenAI**（`gpt-4o-mini`）、**Groq**（極速推論 `llama-3.3-70b`）、**DeepSeek**（`deepseek-chat`）、**Anthropic Claude**（`claude-haiku-4-5`）或任何自訂 OpenAI 相容 Base URL。
 - **Google 日曆雙向串接**：自動讀取行程相關預訂，並在個人日曆上寫入整合旅程區塊。
-- **Gmail 訂單智慧解析**：連接 Anthropic Claude AI（預設使用平價 Haiku 模型），自動解析過去一年收件匣預訂信件（機票航班號、轉機地點、飯店門禁密碼、入住時間、租車取還地點）。
 - **「+trip」轉發必成備案**：無法自動辨識的小民宿或旅行社確認信，只需轉發給自己並在 `@` 前加上 `+trip`（例如 `you+trip@domain.com`），系統背景每小時定時排程自動解析歸檔。轉發飯店自動建立旅程，轉發機票自動建立跨期旅程。
 
 ### 📲 行動裝置與社交分享 (Mobile & Sharing)
@@ -122,10 +123,17 @@ RoamRadar 是一套 Progressive Web App (PWA)。加入主畫面後即可全螢�
 
 ## ⚙️ 外部服務連接指引 (可選)
 
-RoamRadar 本身支援純手動維護所有行程。如需開啟自動匯入功能，可於 App 內的 **「設定 (Settings)」** 視窗進行設定：
+888漫步旅遊 本身支援純手動維護所有行程。如需開啟自動匯入或 OTP 郵件登入功能，可於 App 內的 **「設定 (Settings)」** 視窗進行設定，金鑰將直接安全儲存於您的 Cloudflare KV（或透過 Worker Secrets）：
 
 - **Google 行事曆與 Gmail**：至 [Google Cloud Console](https://console.cloud.google.com/) 啟用 Calendar API 與 Gmail API，建立網頁版 OAuth 用戶端（App 設定視窗內會直接提供您需填寫的來源與重導向 URI）。貼上 Client ID 與 Secret 後點擊「連結 Google」即可。
-- **Anthropic Claude 郵件智慧解析**：至 [Anthropic Console](https://console.anthropic.com/) 取得 API Key（`sk-ant-...`），貼入「設定」內的郵件智慧解析欄位。採用最平價的 Claude Haiku 模型，每封郵件解析費用不到美金千分之一分。
+- **多模型 LLM 智慧郵件解析 (Universal LLM)**：
+  - 支援 **Google Gemini**、**OpenAI**、**Groq**、**DeepSeek**、**Anthropic Claude** 或 **自訂 OpenAI 相容服務**。
+  - 在 App 設定的「郵件智慧解析」下拉選單中選擇提供者，系統將自動預填推薦之 Base URL 與模型名稱（例如 Gemini 預填 `gemini-2.0-flash`、OpenAI 預填 `gpt-4o-mini`、Groq 預填 `llama-3.3-70b`、Anthropic 預填 `claude-haiku-4-5`）。
+  - 貼上您的 API Key 點擊「儲存 LLM 設定」即可。亦可透過 Worker Secrets 靜態配置：`LLM_API_KEY`、`LLM_BASE_URL`、`LLM_MODEL`、`LLM_PROVIDER`。
+- **Resend 郵件寄送與 OTP 驗證碼 (Email Delivery & OTP)**：
+  - 至 [Resend](https://resend.com/api-keys) 免費建立 API Key（`re_...`）。
+  - 貼入 App 設定內的「Resend API 金鑰」與「寄件者地址」（若未設定網域可直接使用預設 `888RoamTravel <onboarding@resend.dev>`）。
+  - 點擊「發送測試郵件」確認連線成功，後續登入即可享受 6 位數免密碼 OTP 安全驗證碼！亦可透過 Worker Secrets 靜態配置：`RESEND_API_KEY`、`RESEND_FROM`。
 
 ---
 

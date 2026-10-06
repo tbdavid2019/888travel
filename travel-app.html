@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RoamRadar</title>
+<title>888漫步旅遊 · 888RoamTravel</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#ECE7DC">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="RoamRadar">
+<meta name="apple-mobile-web-app-title" content="888漫步旅遊">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
@@ -311,17 +311,98 @@
   @media(max-width:760px){.cal-grid{grid-template-columns:1fr}}
   .auth-scrim{position:fixed;inset:0;background:var(--canvas);display:none;align-items:center;justify-content:center;padding:24px;z-index:90}
   .auth-scrim.show{display:flex}
-  .auth-card{width:100%;max-width:360px;text-align:center;animation:riseIn .5s ease both}
+  .auth-card{width:100%;max-width:380px;text-align:center;animation:riseIn .5s ease both}
   .auth-mark{margin-bottom:14px}
-  .auth-card h2{font-family:var(--display);font-weight:800;font-size:34px;letter-spacing:-.02em;margin:0 0 8px}
-  .auth-card p{color:var(--muted);font-size:15px;line-height:1.5;margin:0 0 20px}
-  .auth-card input{width:100%;font-family:var(--body);font-size:16px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px 16px;outline:none;text-align:center}
+  .auth-card h2{font-family:var(--display);font-weight:800;font-size:32px;letter-spacing:-.02em;margin:0 0 8px}
+  .auth-card p{color:var(--muted);font-size:14px;line-height:1.55;margin:0 0 18px}
+  .auth-card input{width:100%;font-family:var(--body);font-size:15px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:13px 16px;outline:none;text-align:center}
   .auth-card input:focus{border-color:var(--cobalt);background:#fff}
-  .auth-card .btn{width:100%;justify-content:center;padding:14px;font-weight:700;font-size:15px;margin-top:14px}
+  .auth-card .btn{width:100%;justify-content:center;padding:13px;font-weight:700;font-size:15px;margin-top:12px}
   .auth-err{color:var(--coral);font-size:13px;min-height:16px;margin-top:8px}
   .auth-foot{color:var(--faint);font-size:12px;margin-top:14px}
+  .auth-tabs{display:flex;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:18px}
+  .auth-tab{flex:1;font-family:var(--body);font-size:13px;font-weight:600;padding:8px 12px;border:none;background:transparent;color:var(--muted);border-radius:999px;cursor:pointer;transition:all .15s ease}
+  .auth-tab.active{background:var(--card);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  .auth-otp-row{display:flex;gap:8px;margin-top:10px}
+  .auth-otp-row input{flex:1}
+  .auth-otp-row .btn{width:auto;flex-shrink:0;padding:12px 16px;font-size:13px;margin:0}
+  .otp-code-input{letter-spacing:6px;font-weight:700;font-size:22px;font-family:var(--mono)}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--cream);font-size:13px;font-weight:500;padding:12px 20px;border-radius:999px;opacity:0;transition:.22s;z-index:80;pointer-events:none}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ===================== CJK & Chinese Typography Enhancements ===================== */
+  html[lang*="zh"] {
+    --display: "PingFang TC", "Noto Sans TC", "Heiti TC", "Microsoft JhengHei", -apple-system, sans-serif;
+    --body: "PingFang TC", "Noto Sans TC", "Heiti TC", "Microsoft JhengHei", -apple-system, system-ui, sans-serif;
+  }
+  html[lang*="zh"] body {
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+  }
+  html[lang*="zh"] .brand h1 {
+    font-size: clamp(38px, 6.5vw, 68px);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+  html[lang*="zh"] .brand p {
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 520px;
+  }
+  /* Override wide Latin uppercase tracking and tiny fonts for Chinese */
+  html[lang*="zh"] .pill-next,
+  html[lang*="zh"] .hero-date,
+  html[lang*="zh"] .stat .l,
+  html[lang*="zh"] .listhead h2,
+  html[lang*="zh"] .c-date,
+  html[lang*="zh"] .c-dur,
+  html[lang*="zh"] .c-badge,
+  html[lang*="zh"] .toggle .lbl,
+  html[lang*="zh"] .plan .type,
+  html[lang*="zh"] .modal h3,
+  html[lang*="zh"] .modal h4,
+  html[lang*="zh"] .status,
+  html[lang*="zh"] .field label {
+    letter-spacing: 0.03em !important;
+    text-transform: none !important;
+  }
+  html[lang*="zh"] .plan .type {
+    font-size: 12px;
+    padding: 3px 10px;
+  }
+  html[lang*="zh"] .stat .l {
+    font-size: 12px;
+  }
+  html[lang*="zh"] .c-dur,
+  html[lang*="zh"] .c-badge {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+  html[lang*="zh"] .pill-next {
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+  html[lang*="zh"] .listhead h2 {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  html[lang*="zh"] .modal h3 {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  html[lang*="zh"] .modal h4 {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  html[lang*="zh"] .tripnote,
+  html[lang*="zh"] .plan .sub,
+  html[lang*="zh"] .hint {
+    line-height: 1.6;
+  }
+  html[lang*="zh"] .hero-count .lab div {
+    font-size: 20px;
+    line-height: 1.25;
+  }
 
   @media(max-width:760px){
     body{padding:22px 16px 56px}
@@ -354,7 +435,7 @@
 <div class="wrap">
   <header class="topbar">
     <div class="brand">
-      <h1>RoamRadar</h1>
+      <h1 id="appTitle">888漫步旅遊</h1>
       <p id="brandDesc">Every trip - its flights, stays and rides - on one living timeline.</p>
     </div>
     <div class="ctl">
@@ -635,7 +716,7 @@
     var dt=function(d){return d.replace(/-/g,"");};
     var dtEnd=function(d){var x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()+1);return x.toISOString().slice(0,10).replace(/-/g,"");};
     var desc=(t.segments||[]).map(function(s){return (s.type||"")+": "+(s.name||"");}).join("\\n");
-    return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//RoamRadar//EN","BEGIN:VEVENT","UID:"+t.id+"@travel",
+    return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//888RoamTravel//EN","BEGIN:VEVENT","UID:"+t.id+"@travel",
       "DTSTART;VALUE=DATE:"+dt(t.start),"DTEND;VALUE=DATE:"+dtEnd(t.end),
       "SUMMARY:Trip: "+((t.label||codeify(t.to)||"Travel").replace(/[,;]/g," ")),"DESCRIPTION:"+desc,"END:VEVENT","END:VCALENDAR"].join("\r\n");
   }
@@ -654,6 +735,9 @@
 
   
   function updateStaticTexts(){
+    var at = document.getElementById("appTitle");
+    if(at) at.textContent = isZH() ? "888漫步旅遊" : "888RoamTravel";
+    document.title = isZH() ? "888漫步旅遊 · 888RoamTravel" : "888RoamTravel · 888漫步旅遊";
     var bd = document.getElementById("brandDesc");
     if(bd) bd.textContent = isZH() ? "將所有航班、住宿與交通接駁，整合於動態旅程時間軸。" : "Every trip - its flights, stays and rides - on one living timeline.";
     var lb = document.getElementById("langBtn");
@@ -1281,9 +1365,28 @@
       '<div class="hint">'+gHint+'</div>'+
       '<div class="modal-actions act-row"><button class="btn" id="gSave">'+(isZH()?"儲存":"Save")+'</button><button class="btn solid" id="gConnect">'+(isZH()?"連結 Google":"Connect Google")+'</button><button class="btn" id="gTest">'+(isZH()?"測試連線":"Test connection")+'</button><button class="btn" id="gRescan">'+(isZH()?"重新掃描信箱":"Re-scan inbox")+'</button><button class="btn" id="gReset">'+(isZH()?"全新重新匯入":"Clean re-import")+'</button><button class="btn" id="gTrace">'+(isZH()?"郵件診斷":"Trace email")+'</button><button class="btn" id="gClear" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"解除綁定":"Disconnect")+'</button></div>'+
       '<div id="gStatus" class="hint" style="font-size:14px;line-height:1.55;margin-top:10px">'+(isZH()?"檢查連線狀態中…":"Checking connection…")+'</div>'+
-      field(isZH()?"Anthropic API 金鑰（郵件智慧解析）":"Anthropic API key (email parsing)","s_akey","password","","sk-ant-…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
-      '<div class="hint">'+(isZH()?"自動解析預訂郵件並建立行程規劃。前往 <b>console.anthropic.com</b> → API Keys 取得金鑰。採用最平價的 Haiku 模型，每封郵件僅花費極少費用。":"Reads each booking email and turns it into a trip plan. Get a key at <b>console.anthropic.com</b> → API Keys. Uses the cheapest model (Haiku) — a parsed email costs a fraction of a cent.")+'</div>'+
-      '<div class="modal-actions act-row"><button class="btn" id="aSave">'+(isZH()?"儲存金鑰":"Save key")+'</button></div>'+
+      '<h4 style="margin-top:24px">'+(isZH()?"郵件智慧解析（LLM 模型設定）":"Smart Email Parsing (LLM Settings)")+'</h4>'+
+      '<div class="field"><label>'+(isZH()?"LLM 服務提供者 (LLM Provider)":"LLM Provider")+'</label><select id="s_llm_provider">'+
+        '<option value="gemini">Google Gemini (相容 OpenAI 端點)</option>'+
+        '<option value="openai">OpenAI (GPT-4o mini)</option>'+
+        '<option value="groq">Groq (極速 Llama 3.3)</option>'+
+        '<option value="deepseek">DeepSeek (高 CP 值)</option>'+
+        '<option value="anthropic">Anthropic Claude (原生 Messages API)</option>'+
+        '<option value="custom">'+(isZH()?"自訂 OpenAI 相容服務 (Custom)":"Custom OpenAI-Compatible")+'</option>'+
+      '</select></div>'+
+      field(isZH()?"API 端點網址 (Base URL)":"API Base URL","s_llm_base","text","","https://generativelanguage.googleapis.com/v1beta/openai",isZH()?"(Anthropic 留空即可)":"(blank for Anthropic)")+
+      field(isZH()?"模型名稱 (Model)":"Model Name","s_llm_model","text","","gemini-2.0-flash")+
+      field(isZH()?"API 金鑰 (API Key)":"API Key","s_llm_key","password","",isZH()?"僅儲存於你的 Worker":"stored on your worker only",isZH()?"僅存於 Worker 端":"stored on your worker only")+
+      '<div class="hint">'+(isZH()?"支援 Google Gemini、OpenAI、Groq、DeepSeek、Anthropic 及任何相容 OpenAI 的 API 端點。切換上方提供者將自動預填推薦的 Base URL 與模型名稱。":"Supports Google Gemini, OpenAI, Groq, DeepSeek, Anthropic, or any OpenAI-compatible API base URL. Switching provider auto-fills recommended settings.")+'</div>'+
+      '<div class="modal-actions act-row"><button class="btn" id="llmSave">'+(isZH()?"儲存 LLM 設定":"Save LLM Config")+'</button></div>'+
+      '<div id="llmStatus" class="hint" style="margin-top:8px"></div>'+
+
+      '<h4 style="margin-top:24px">'+(isZH()?"Resend 郵件寄送服務（OTP 登入與通知）":"Resend Email Delivery (OTP &amp; Alerts)")+'</h4>'+
+      field(isZH()?"Resend API 金鑰 (API Key)":"Resend API Key","s_resend_key","password","","re_123456…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
+      field(isZH()?"寄件者地址 (From Address)":"From Address","s_resend_from","text","","888RoamTravel <onboarding@resend.dev>",isZH()?"(需符合 Resend 驗證網域或使用預設)":"(verified domain or onboarding@resend.dev)")+
+      '<div class="hint">'+(isZH()?"用於發送 6 位數 OTP 登入驗證碼及重要行程提醒。前往 <b>resend.com/api-keys</b> 取得金鑰。若未綁定自有網域，可直接使用預設寄件地址。":"Used to send 6-digit OTP login verification codes and trip updates. Get a free key at <b>resend.com/api-keys</b>. You can use the default onboarding address if you haven't verified a custom domain.")+'</div>'+
+      '<div class="modal-actions act-row"><button class="btn" id="resendSave">'+(isZH()?"儲存 Resend 設定":"Save Resend Config")+'</button><button class="btn" id="resendTest">'+(isZH()?"發送測試郵件":"Send Test Email")+'</button></div>'+
+      '<div id="resendStatus" class="hint" style="margin-top:8px"></div>'+
       '<h4>'+(isZH()?"備份與匯入":"Backup &amp; import")+'</h4>'+
       '<div class="field"><textarea id="exp" readonly class="mono" style="min-height:90px">'+esc(snap)+'</textarea></div>'+
       '<div class="modal-actions" style="margin-top:0"><button class="btn" id="copyJson">'+(isZH()?"複製 JSON 資料":"Copy data")+'</button><button class="btn" id="dlJson">'+(isZH()?"下載檔案":"Download")+'</button><button class="btn" id="icsFeed">'+(isZH()?"複製日曆訂閱網址":"Copy calendar feed link")+'</button></div>'+
@@ -1311,8 +1414,81 @@
         else setGStatus('<span style="color:var(--coral)">○ Not connected</span> — add your OAuth client below.');
         var gi=document.getElementById("s_gid");                 // show the saved client id, so "did it save?" is visible
         if(gi&&!gi.value&&d.googleClientId)gi.value=d.googleClientId;
+
+        // Populate and display LLM status
+        var lp=document.getElementById("s_llm_provider"), lb=document.getElementById("s_llm_base"), lm=document.getElementById("s_llm_model"), ls=document.getElementById("llmStatus");
+        if(lp && d.llmProvider) lp.value = d.llmProvider;
+        if(lb && d.llmBaseUrl !== undefined && !lb.value) lb.value = d.llmBaseUrl;
+        if(lm && d.llmModel && !lm.value) lm.value = d.llmModel;
+        if(ls){
+          ls.innerHTML = (d.llmConfigured || d.anthropicKeySet)
+            ? ('<span style="color:var(--green)">● '+(isZH()?'已啟用智慧解析':'Smart parsing active')+'</span> <span class="opt">('+(d.llmProvider||"provider")+' · '+(d.llmModel||"model")+(d.llmSource==="secret"?' · secret':'')+')</span>')
+            : ('<span style="color:var(--amber)">◐ '+(isZH()?'尚未設定金鑰 — 郵件智慧解析未啟用':'Key not configured — parsing OFF')+'</span>');
+        }
+
+        // Populate and display Resend status
+        var rf=document.getElementById("s_resend_from"), rs=document.getElementById("resendStatus");
+        if(rf && d.resendFrom && !rf.value) rf.value = d.resendFrom;
+        if(rs){
+          rs.innerHTML = d.resendConfigured
+            ? ('<span style="color:var(--green)">● '+(isZH()?'Resend 郵件已就緒':'Resend ready')+'</span> <span class="opt">('+(d.resendFrom||"default")+(d.resendSource==="secret"?' · secret':'')+')</span>')
+            : ('<span style="color:var(--amber)">◐ '+(isZH()?'尚未設定 Resend API 金鑰 — 信箱 OTP 登入暫不可用':'Resend key not set — OTP login unavailable')+'</span>');
+        }
       }catch(e){setGStatus('<span style="color:var(--faint)">Worker not reachable.</span>');}
     }
+
+    var LLM_PRESETS = {
+      gemini: { base: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-2.0-flash" },
+      openai: { base: "https://api.openai.com/v1", model: "gpt-4o-mini" },
+      groq: { base: "https://api.groq.com/openai/v1", model: "llama-3.3-70b-versatile" },
+      deepseek: { base: "https://api.deepseek.com/v1", model: "deepseek-chat" },
+      anthropic: { base: "", model: "claude-haiku-4-5" },
+      custom: { base: "", model: "" }
+    };
+    var provSelect = document.getElementById("s_llm_provider");
+    if(provSelect){
+      provSelect.onchange = function(){
+        var p = provSelect.value;
+        if(LLM_PRESETS[p]){
+          var bEl = document.getElementById("s_llm_base"), mEl = document.getElementById("s_llm_model");
+          if(bEl) bEl.value = LLM_PRESETS[p].base;
+          if(mEl) mEl.value = LLM_PRESETS[p].model;
+        }
+      };
+    }
+
+    document.getElementById("llmSave").onclick=async function(){
+      var p=val("s_llm_provider")||"openai", b=val("s_llm_base"), m=val("s_llm_model"), k=val("s_llm_key");
+      try{
+        var r=await fetch(apiBase()+"/settings/llm",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({provider:p,baseUrl:b,model:m,apiKey:k})});
+        var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存 LLM 設定":"Could not save LLM config"));return;}
+        document.getElementById("s_llm_key").value="";
+        toast(isZH()?"LLM 設定已儲存 ✓":"LLM config saved ✓");
+        await loadGStatus();
+      }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+    };
+
+    document.getElementById("resendSave").onclick=async function(){
+      var k=val("s_resend_key"), f=val("s_resend_from");
+      try{
+        var r=await fetch(apiBase()+"/settings/resend",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({apiKey:k,from:f})});
+        var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存 Resend 設定":"Could not save Resend config"));return;}
+        document.getElementById("s_resend_key").value="";
+        toast(isZH()?"Resend 設定已儲存 ✓":"Resend config saved ✓");
+        await loadGStatus();
+      }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+    };
+
+    document.getElementById("resendTest").onclick=async function(){
+      toast(isZH()?"發送測試信中…":"Sending test email…");
+      try{
+        var r=await fetch(apiBase()+"/settings/resend/test",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({})});
+        var d=await r.json();
+        if(!r.ok){toast(d.error||(isZH()?"測試信寄送失敗":"Send test failed"));return;}
+        toast(isZH()?("測試信已成功寄出至 "+d.to+" ✓"):("Test email sent to "+d.to+" ✓"));
+      }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+    };
+
     document.getElementById("gSave").onclick=async function(){
       var id=val("s_gid"),sec=val("s_gsecret");
       if(!id||!sec){toast("Paste both the client ID and the secret");return;}
@@ -1340,22 +1516,14 @@
           ?('<span style="color:var(--green)">● '+(isZH()?'Gmail 連線正常':'Gmail OK')+'</span> <span class="opt">'+esc(d.gmail.email||"")+'</span>')
           :('<span style="color:var(--coral)">○ '+(isZH()?'Gmail：':'Gmail: ')+esc(d.gmail.error||(isZH()?"失敗":"failed"))+'</span> — '+(isZH()?'請確認 Google Cloud 專案是否已啟用 Gmail API？':'is the Gmail API enabled in your Cloud project?')));
         var parseCount = isZH() ? ('目前已掃描 ' + d.seenEmails + ' 封郵件') : (d.seenEmails + ' emails scanned so far');
-        bits.push(d.anthropicKeySet
+        bits.push((d.llmConfigured || d.anthropicKeySet)
           ? ('<span style="color:var(--green)">● ' + (isZH() ? '郵件智慧解析已啟用' : 'Email parsing on') + '</span> <span class="opt">(' + parseCount + ')</span>')
-          : ('<span style="color:var(--amber)">◐ ' + (isZH() ? '郵件智慧解析未啟用' : 'Email parsing OFF') + '</span> — ' + (isZH() ? '請在下方貼入 Anthropic API 金鑰並儲存，然後點擊「重新掃描信箱」。' : 'paste your Anthropic API key below and Save, then hit Re-scan inbox.')));
+          : ('<span style="color:var(--amber)">◐ ' + (isZH() ? '郵件智慧解析未啟用' : 'Email parsing OFF') + '</span> — ' + (isZH() ? '請在上方設定 LLM API 金鑰並儲存，然後點擊「重新掃描信箱」。' : 'configure your LLM API key above and Save, then hit Re-scan inbox.')));
         if(d.unfiled&&d.unfiled.length){
           bits.push('<span style="color:var(--amber)">◐ '+(isZH()?'已解析但尚未歸檔 — 日期未落在任何旅程中：':'Parsed but not filed — no trip covers their dates:')+'</span><br><span class="opt">'+d.unfiled.map(function(u){return esc(u.name)+' ('+esc(u.start)+(u.end&&u.end!==u.start?' – '+esc(u.end):'')+')';}).join(" · ")+'</span> — '+(isZH()?'請建立涵蓋該日期的旅程後重新掃描。':'create or widen a trip around those dates and Re-scan.'));
         }
         setGStatus(bits.join("<br>"));
       }catch(e){setGStatus('<span style="color:var(--faint)">'+(isZH()?"無法連線至 Worker。":"Worker not reachable.")+'</span>');}
-    };
-    document.getElementById("aSave").onclick=async function(){
-      var k=val("s_akey");
-      if(!k){toast(isZH()?"請先貼上 sk-ant- 金鑰":"Paste the sk-ant- key first");return;}
-      try{var r=await fetch(apiBase()+"/settings/anthropickey",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({key:k})});
-        var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存":"Could not save"));return;}
-        document.getElementById("s_akey").value="";toast(isZH()?"金鑰已儲存——現在請點擊「重新掃描信箱」":"Key saved — now hit Re-scan inbox");}
-      catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
     };
     document.getElementById("gTrace").onclick=async function(){
       toast(isZH()?"郵件診斷中…結果將顯示於按鈕上方":"Tracing\u2026 result appears above the buttons");
@@ -1525,19 +1693,89 @@
   function showAuth(mode){
     return new Promise(function(resolve){
       var create=mode==="create";
-      authScrim.innerHTML=
-        '<div class="auth-card"><div class="auth-mark">'+plane(30,"color:var(--coral)")+'</div>'+
-        '<h2>'+(create?(isZH()?"建立個人旅遊中樞":"Set up your hub"):(isZH()?"歡迎回來":"Welcome back"))+'</h2>'+
-        '<p>'+(create?(isZH()?"建立登入資訊——信箱與密碼。你將在各裝置上使用此帳號登入。":"Create your login - email and a password. You’ll use it on each device."):(isZH()?"請登入以解鎖你的旅遊中樞。":"Sign in to unlock your travel hub."))+'</p>'+
-        '<input id="authEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
-        '<input id="authInput" type="password" placeholder="'+(isZH()?"密碼":"Password")+'" autocomplete="'+(create?"new-password":"current-password")+'" style="margin-top:10px">'+
-        '<div class="auth-err" id="authErr"></div>'+
-        '<button class="btn solid" id="authBtn">'+(create?(isZH()?"建立帳號":"Create login"):(isZH()?"登入":"Sign in"))+'</button>'+
-        '<div class="auth-foot">'+(isZH()?"在此裝置保持登入 30 天。":"Stays signed in for 30 days on this device.")+'</div></div>';
+      if(create){
+        authScrim.innerHTML=
+          '<div class="auth-card"><div class="auth-mark">'+plane(30,"color:var(--coral)")+'</div>'+
+          '<h2>'+(isZH()?"建立個人旅遊中樞":"Set up your hub")+'</h2>'+
+          '<p>'+(isZH()?"建立登入資訊——信箱與密碼。你將在各裝置上使用此帳號登入。":"Create your login - email and a password. You’ll use it on each device.")+'</p>'+
+          '<input id="authEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
+          '<input id="authInput" type="password" placeholder="'+(isZH()?"密碼":"Password")+'" autocomplete="new-password" style="margin-top:10px">'+
+          '<div class="auth-err" id="authErr"></div>'+
+          '<button class="btn solid" id="authBtn">'+(isZH()?"建立帳號":"Create login")+'</button>'+
+          '<div class="auth-foot">'+(isZH()?"在此裝置保持登入 30 天。":"Stays signed in for 30 days on this device.")+'</div></div>';
+      } else {
+        authScrim.innerHTML=
+          '<div class="auth-card"><div class="auth-mark">'+plane(30,"color:var(--coral)")+'</div>'+
+          '<h2>'+(isZH()?"歡迎回來":"Welcome back")+'</h2>'+
+          '<p>'+(isZH()?"請登入以解鎖你的旅遊中樞。":"Sign in to unlock your travel hub.")+'</p>'+
+          '<div class="auth-tabs">'+
+            '<button class="auth-tab active" id="tabPw">'+(isZH()?"密碼登入":"Password")+'</button>'+
+            '<button class="auth-tab" id="tabOtp">'+(isZH()?"信箱驗證碼 (OTP)":"Email OTP")+'</button>'+
+          '</div>'+
+          '<div id="authPwForm">'+
+            '<input id="authEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
+            '<input id="authInput" type="password" placeholder="'+(isZH()?"密碼":"Password")+'" autocomplete="current-password" style="margin-top:10px">'+
+            '<div class="auth-err" id="authErr"></div>'+
+            '<button class="btn solid" id="authBtn">'+(isZH()?"登入":"Sign in")+'</button>'+
+          '</div>'+
+          '<div id="authOtpForm" style="display:none">'+
+            '<div class="auth-otp-row">'+
+              '<input id="authOtpEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
+              '<button class="btn" id="sendOtpBtn">'+(isZH()?"取得驗證碼":"Send code")+'</button>'+
+            '</div>'+
+            '<input id="authOtpCode" type="text" class="otp-code-input" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="margin-top:10px">'+
+            '<div class="hint" style="margin-top:6px;font-size:12px">'+(isZH()?"輸入信箱收到的 6 位數一次性驗證碼":"Enter 6-digit code sent to your email")+'</div>'+
+            '<div class="auth-err" id="authOtpErr"></div>'+
+            '<button class="btn solid" id="verifyOtpBtn">'+(isZH()?"驗證並登入":"Verify &amp; Sign in")+'</button>'+
+          '</div>'+
+          '<div class="auth-foot">'+(isZH()?"在此裝置保持登入 30 天。":"Stays signed in for 30 days on this device.")+'</div></div>';
+      }
       authScrim.classList.add("show");
+
+      if(create){
+        var email=document.getElementById("authEmail"),input=document.getElementById("authInput"),btn=document.getElementById("authBtn"),err=document.getElementById("authErr");
+        setTimeout(function(){email.focus();},50);
+        async function submit(){
+          var em=email.value.trim(),pw=input.value;
+          if(!em){err.textContent=isZH()?"請輸入電子信箱":"Enter your email";return;}
+          if(!pw){err.textContent=isZH()?"請輸入密碼":"Enter a password";return;}
+          btn.disabled=true;err.textContent="";
+          try{
+            var res=await fetch(settings.workerUrl+"/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,password:pw})});
+            if(res.ok){var d=await res.json();authToken=d.token;saveAuth(authToken);authScrim.classList.remove("show");resolve(true);return;}
+            err.textContent=isZH()?"無法建立帳號，請再試一次":"Could not set up - try again";
+          }catch(e){err.textContent=isZH()?"網路連線錯誤，請重試":"Network error - try again";}
+          btn.disabled=false;
+        }
+        btn.onclick=submit;
+        email.onkeydown=function(e){if(e.key==="Enter")input.focus();};
+        input.onkeydown=function(e){if(e.key==="Enter")submit();};
+        return;
+      }
+
+      // Login Mode (Tabs: Password vs OTP)
+      var tabPw=document.getElementById("tabPw"),tabOtp=document.getElementById("tabOtp");
+      var pwForm=document.getElementById("authPwForm"),otpForm=document.getElementById("authOtpForm");
       var email=document.getElementById("authEmail"),input=document.getElementById("authInput"),btn=document.getElementById("authBtn"),err=document.getElementById("authErr");
+      var otpEmail=document.getElementById("authOtpEmail"),otpCode=document.getElementById("authOtpCode"),sendBtn=document.getElementById("sendOtpBtn"),verifyBtn=document.getElementById("verifyOtpBtn"),otpErr=document.getElementById("authOtpErr");
+
+      tabPw.onclick=function(){
+        tabPw.classList.add("active");tabOtp.classList.remove("active");
+        pwForm.style.display="";otpForm.style.display="none";
+        err.textContent="";if(otpEmail.value&&!email.value)email.value=otpEmail.value;
+        email.focus();
+      };
+      tabOtp.onclick=function(){
+        tabOtp.classList.add("active");tabPw.classList.remove("active");
+        pwForm.style.display="none";otpForm.style.display="";
+        otpErr.textContent="";if(email.value&&!otpEmail.value)otpEmail.value=email.value;
+        otpEmail.focus();
+      };
+
       setTimeout(function(){email.focus();},50);
-      async function submit(){
+
+      // Password Login Submit
+      async function submitPw(){
         var em=email.value.trim(),pw=input.value;
         if(!em){err.textContent=isZH()?"請輸入電子信箱":"Enter your email";return;}
         if(!pw){err.textContent=isZH()?"請輸入密碼":"Enter a password";return;}
@@ -1545,13 +1783,80 @@
         try{
           var res=await fetch(settings.workerUrl+"/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,password:pw})});
           if(res.ok){var d=await res.json();authToken=d.token;saveAuth(authToken);authScrim.classList.remove("show");resolve(true);return;}
-          err.textContent=create?(isZH()?"無法建立帳號，請再試一次":"Could not set up - try again"):(isZH()?"信箱或密碼錯誤":"Wrong email or password");
+          var d=await res.json().catch(function(){return{};});
+          err.textContent=d.error||(isZH()?"信箱或密碼錯誤":"Wrong email or password");
         }catch(e){err.textContent=isZH()?"網路連線錯誤，請重試":"Network error - try again";}
         btn.disabled=false;
       }
-      btn.onclick=submit;
+      btn.onclick=submitPw;
       email.onkeydown=function(e){if(e.key==="Enter")input.focus();};
-      input.onkeydown=function(e){if(e.key==="Enter")submit();};
+      input.onkeydown=function(e){if(e.key==="Enter")submitPw();};
+
+      // OTP Send Code
+      var otpCooldownTimer=null;
+      function startCooldown(sec){
+        var remain=sec;
+        sendBtn.disabled=true;
+        sendBtn.textContent=remain+"s";
+        if(otpCooldownTimer)clearInterval(otpCooldownTimer);
+        otpCooldownTimer=setInterval(function(){
+          remain--;
+          if(remain<=0){
+            clearInterval(otpCooldownTimer);
+            sendBtn.disabled=false;
+            sendBtn.textContent=isZH()?"重新取得":"Resend";
+          } else {
+            sendBtn.textContent=remain+"s";
+          }
+        },1000);
+      }
+
+      sendBtn.onclick=async function(){
+        var em=otpEmail.value.trim();
+        if(!em||!em.includes("@")){otpErr.textContent=isZH()?"請輸入有效的電子信箱":"Enter a valid email";return;}
+        sendBtn.disabled=true;otpErr.textContent=isZH()?"發送中…":"Sending…";
+        try{
+          var res=await fetch(settings.workerUrl+"/auth/otp/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em})});
+          var d=await res.json().catch(function(){return{};});
+          if(res.ok){
+            otpErr.style.color="var(--green)";
+            otpErr.textContent=d.message||(isZH()?"驗證碼已寄出至信箱 ✓":"Code sent to your email ✓");
+            startCooldown(60);
+            otpCode.focus();
+            setTimeout(function(){otpErr.style.color="";},4000);
+            return;
+          }
+          sendBtn.disabled=false;
+          sendBtn.textContent=isZH()?"取得驗證碼":"Send code";
+          otpErr.style.color="var(--coral)";
+          otpErr.textContent=d.error||(isZH()?"無法發送驗證碼":"Could not send code");
+        }catch(e){
+          sendBtn.disabled=false;
+          sendBtn.textContent=isZH()?"取得驗證碼":"Send code";
+          otpErr.style.color="var(--coral)";
+          otpErr.textContent=isZH()?"網路錯誤，請重試":"Network error - try again";
+        }
+      };
+
+      // OTP Verify Submit
+      async function submitOtp(){
+        var em=otpEmail.value.trim(),cd=otpCode.value.trim();
+        if(!em){otpErr.textContent=isZH()?"請輸入電子信箱":"Enter your email";return;}
+        if(!cd||cd.length<6){otpErr.textContent=isZH()?"請輸入 6 位數驗證碼":"Enter 6-digit code";return;}
+        verifyBtn.disabled=true;otpErr.textContent="";
+        try{
+          var res=await fetch(settings.workerUrl+"/auth/otp/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,code:cd})});
+          var d=await res.json().catch(function(){return{};});
+          if(res.ok){
+            if(otpCooldownTimer)clearInterval(otpCooldownTimer);
+            authToken=d.token;saveAuth(authToken);authScrim.classList.remove("show");resolve(true);return;
+          }
+          otpErr.textContent=d.error||(isZH()?"驗證碼錯誤，請重新確認":"Incorrect code");
+        }catch(e){otpErr.textContent=isZH()?"網路連線錯誤，請重試":"Network error - try again";}
+        verifyBtn.disabled=false;
+      }
+      verifyBtn.onclick=submitOtp;
+      otpCode.onkeydown=function(e){if(e.key==="Enter")submitOtp();};
     });
   }
   async function ensureAuth(){

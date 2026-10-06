@@ -7,6 +7,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.2.0] - 2026-10-06
+
+### Added / 新增功能
+- **全方位品牌重塑 (Rebranding to 888漫步旅遊 · 888RoamTravel)**：
+  - 繁體中文正式名稱定名為 **「888漫步旅遊」**，英文名稱定名為 **「888RoamTravel」**。
+  - 全面更新於 PWA Manifest、Web App 導覽列與動態標題、形象官網、ICS 日曆訂閱名稱（`X-WR-CALNAME`）與所有文件。
+- **多模型與 OpenAI 相容 LLM 智慧郵件解析 (Universal LLM Provider Expansion)**：
+  - 突破原先僅支援 Anthropic 單一廠商的限制，全面支援任何 OpenAI 相容端點（OpenAI-Compatible Base URL）：
+    - **Google Gemini**（透過官方 OpenAI 相容端點 `https://generativelanguage.googleapis.com/v1beta/openai`，搭配 `gemini-2.0-flash`）
+    - **OpenAI**（`gpt-4o-mini` 等）
+    - **Groq**（極速推論 `llama-3.3-70b-versatile`）
+    - **DeepSeek**（`deepseek-chat` 高 CP 值模型）
+    - **Anthropic Claude**（原生 Messages API，預設 `claude-haiku-4-5`）
+    - **自訂端點 (Custom)**（支援 Ollama、LocalAI、OpenRouter 等自建或第三方推論服務）
+  - 「設定」彈窗內建提供者選單，切換時自動帶入推薦之 Base URL 與模型名稱；亦可透過 Worker 環境變數（`LLM_BASE_URL`、`LLM_API_KEY`、`LLM_MODEL`、`LLM_PROVIDER`）無介面靜態配置。
+- **Resend API 郵件寄送服務整合 (Resend API Integration)**：
+  - 支援串接 [Resend](https://resend.com) API（`RESEND_API_KEY`、`RESEND_FROM`），具備伺服器端寄送與發送測試信驗證功能。
+  - 「設定」視窗可即時設定 API Key 與寄件者地址，並提供「發送測試郵件」一鍵連線驗證。
+- **信箱一次性驗證碼登入 (Email OTP Login)**：
+  - 登入畫面提供「密碼登入」與「信箱驗證碼 (OTP)」雙模式切換。
+  - 支援發送 6 位數數字安全驗證碼至管理員信箱，具備 10 分鐘有效期限（TTL 600s）、60 秒防刷重發冷卻計時器與 5 次錯誤防暴力嘗試防護。
+  - 驗證成功後無縫派發等同密碼認證之 30 天 HttpOnly Session Cookie 與 X-Auth Token。
+
+### Changed / 改善與優化
+- **中英文字級與字體工藝調教 (CJK Typography & Impeccable Craft)**：
+  - 針對中文字元筆劃繁複且為全形方塊字之特性進行深度排版校準：
+    - 徹底移除直接套用英文字元之寬鬆字距（如 `.22em` / `.32em`），繁體中文統一校準為自然且緊湊的 `0.02em ~ 0.05em`。
+    - 提升所有標籤、徽章（Badges）、規劃類型、月份日期之最小字級至 12px ~ 13px，杜絕中文字元糊成一團的反模式。
+    - 調整漢語標題行高（`line-height: 1.15 ~ 1.25`）與文字行高（`1.6 ~ 1.7`），徹底防止中文字元破音字、上下筆劃被裁切之問題。
+    - 自適配響應式標題字級，避免中文字元在手機狹小螢幕上溢出。
+- **後端安全與 CORS 標頭放行**：
+  - Worker CORS 標頭全面補齊 `X-Auth`，確保跨域或 API 呼叫順暢無阻。
+
+---
+
 ## [2.1.0] - 2026-10-06
 
 ### Added / 新增功能

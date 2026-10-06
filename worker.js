@@ -18,7 +18,15 @@ export default {
     // --- Password gate. The password is set in-app and stored hashed in KV; no
     // dashboard secret needed. Once set, /trips and /sync require the X-Auth token.
     if (url.pathname === "/auth/status" && request.method === "GET") {
-      return cors(json({ set: !!(await env.TRIPS.get("auth")) }));
+      const authSet = !!(await env.TRIPS.get("auth"));
+      const authEmail = (await env.TRIPS.get("auth_email")) || null;
+      const resendKey = await getResendKey(env);
+      return cors(json({
+        set: authSet,
+        email: authEmail ? maskEmail(authEmail) : null,
+        fullEmail: authEmail,
+        resendConfigured: !!resendKey
+      }));
     }
     if (url.pathname === "/auth/login" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
@@ -38,6 +46,102 @@ export default {
       if (!storedEmail) { await env.TRIPS.put("auth_email", email); } // migrate a password-only setup
       else if (storedEmail !== email) return cors(json({ error: "wrong email or password" }, 401));
       return okLogin(hash);
+    }
+    // --- OTP Login Flow (Email verification code via Resend)
+    if (url.pathname === "/auth/otp/send" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      const email = ((body && body.email) || "").trim().toLowerCase();
+      if (!email || !email.includes("@")) return cors(json({ error: "請輸入有效的電子信箱 / Valid email required" }, 400));
+      
+      const storedAuth = await env.TRIPS.get("auth");
+      const storedEmail = (await env.TRIPS.get("auth_email")) || "";
+      
+      // If instance already has a registered admin email, verify the request matches it
+      if (storedAuth && storedEmail && storedEmail.toLowerCase() !== email) {
+        return cors(json({ error: "此信箱非已註冊的管理員信箱 / Email not recognized for this instance" }, 403));
+      }
+
+      const resendKey = await getResendKey(env);
+      if (!resendKey) {
+        return cors(json({ error: "尚未設定 Resend API 金鑰，請先使用密碼登入並於設定頁面配置 Resend / Resend API key not configured" }, 400));
+      }
+
+      // Check cooldown (60 seconds)
+      const cooldown = await env.TRIPS.get("otp_cd:" + email);
+      if (cooldown) {
+        return cors(json({ error: "請求過於頻繁，請等待 60 秒後再重新發送 / Please wait 60s before requesting another code" }, 429));
+      }
+
+      // Generate 6-digit numeric OTP code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      await env.TRIPS.put("otp:" + email, JSON.stringify({ code, attempts: 0, createdAt: Date.now() }), { expirationTtl: 600 });
+      await env.TRIPS.put("otp_cd:" + email, "1", { expirationTtl: 60 });
+
+      try {
+        await sendEmailViaResend(env, {
+          to: email,
+          subject: `【888漫步旅遊 / 888RoamTravel】您的登入驗證碼：${code}`,
+          text: `您好！\n\n您的 888漫步旅遊 (888RoamTravel) 登入驗證碼為：\n\n${code}\n\n驗證碼有效期為 10 分鐘。如果您並未要求此驗證碼，請忽略此郵件。`,
+          html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC',sans-serif;max-width:480px;margin:0 auto;background:#ECE7DC;padding:36px 24px;border-radius:18px;">
+            <div style="background:#FFFFFF;border-radius:14px;padding:32px 28px;box-shadow:0 12px 36px rgba(22,19,12,0.08);text-align:center;">
+              <div style="font-size:20px;font-weight:800;color:#16130C;margin-bottom:8px;">888漫步旅遊 · 888RoamTravel</div>
+              <div style="font-size:14px;color:#756D5E;margin-bottom:24px;">一次性登入安全驗證碼 (One-Time Password)</div>
+              <div style="background:#F6F2E9;border:1px solid rgba(22,19,12,0.1);border-radius:10px;padding:18px;margin:18px 0;">
+                <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;font-size:36px;font-weight:800;letter-spacing:8px;color:#FF5A35;line-height:1;">${code}</div>
+              </div>
+              <div style="font-size:13px;color:#756D5E;line-height:1.6;margin-top:16px;">
+                此驗證碼於 <b>10 分鐘內有效</b>。<br>
+                若您並未主動索取此登入驗證碼，請忽略此郵件。
+              </div>
+            </div>
+          </div>`
+        });
+        return cors(json({ ok: true, message: "驗證碼已寄出至您的信箱，10 分鐘內有效。" }));
+      } catch (err) {
+        return cors(json({ error: "寄送驗證碼失敗：" + (err && err.message ? err.message : String(err)) }, 500));
+      }
+    }
+    if (url.pathname === "/auth/otp/verify" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      const email = ((body && body.email) || "").trim().toLowerCase();
+      const code = ((body && body.code) || "").trim();
+      if (!email || !code) return cors(json({ error: "信箱與驗證碼皆為必填 / Email and code required" }, 400));
+
+      const otpRaw = await env.TRIPS.get("otp:" + email);
+      if (!otpRaw) return cors(json({ error: "驗證碼不存在或已過期，請重新索取 / Invalid or expired code" }, 400));
+
+      let otpData;
+      try { otpData = JSON.parse(otpRaw); } catch(e) { otpData = null; }
+      if (!otpData || !otpData.code) return cors(json({ error: "驗證碼格式異常，請重新索取 / Invalid code state" }, 400));
+
+      if ((otpData.attempts || 0) >= 5) {
+        await env.TRIPS.delete("otp:" + email);
+        return cors(json({ error: "驗證碼嘗試錯誤次數過多，已失效，請重新索取 / Too many attempts" }, 400));
+      }
+
+      if (otpData.code !== code) {
+        otpData.attempts = (otpData.attempts || 0) + 1;
+        await env.TRIPS.put("otp:" + email, JSON.stringify(otpData), { expirationTtl: 600 });
+        return cors(json({ error: "驗證碼不正確，請重新檢查 / Incorrect verification code" }, 401));
+      }
+
+      // Verification succeeded: remove OTP
+      await env.TRIPS.delete("otp:" + email);
+
+      let storedHash = await env.TRIPS.get("auth");
+      const storedEmail = await env.TRIPS.get("auth_email");
+      if (!storedHash) {
+        // First-time setup via OTP! Mint a random session hash
+        storedHash = await sha256(crypto.randomUUID() + "-" + Date.now());
+        await env.TRIPS.put("auth", storedHash);
+        await env.TRIPS.put("auth_email", email);
+        ctx.waitUntil(pingInstallCount(env));
+        return okLogin(storedHash);
+      }
+      if (!storedEmail) {
+        await env.TRIPS.put("auth_email", email);
+      }
+      return okLogin(storedHash);
     }
     // Log out: expire the session cookie. Public (needs no auth) - it only clears.
     if (url.pathname === "/auth/logout" && request.method === "POST") {
@@ -116,13 +220,15 @@ export default {
     if (blocked) return cors(blocked);
 
     // --- App settings snapshot the front end reads to show connection status.
-    // Google and Anthropic connect in-app (keys saved to YOUR OWN KV, used only
+    // Google, LLM and Resend connect in-app (keys saved to YOUR OWN KV, used only
     // server-side, never returned to the browser in full) or via dashboard
     // secrets, which always win.
     if (url.pathname === "/settings" && request.method === "GET") {
       const gClient = await googleClient(env);
       const gRefresh = env.GOOGLE_REFRESH_TOKEN || (await env.TRIPS.get("g_refresh")) || "";
       const gIcs = (await env.TRIPS.get("g_ics")) || "";
+      const llm = await getLLMConfig(env);
+      const resend = await getResendConfig(env);
       return cors(json({
         googleClientSet: !!gClient,
         googleClientId: gClient ? gClient.id : null,
@@ -131,6 +237,18 @@ export default {
         gcalIcsSet: !!gIcs,
         gcalIcsMask: gIcs ? maskIcs(gIcs) : null,
         gmailEmail: (await env.TRIPS.get("g_email")) || null,
+        // LLM Configuration
+        llmProvider: llm.provider,
+        llmBaseUrl: llm.baseUrl,
+        llmModel: llm.model,
+        llmConfigured: !!llm.apiKey,
+        llmSource: llm.source,
+        // Backward-compat flag
+        anthropicKeySet: !!llm.apiKey,
+        // Resend Configuration
+        resendConfigured: !!resend.apiKey,
+        resendFrom: resend.from,
+        resendSource: resend.source,
       }));
     }
 
@@ -156,15 +274,105 @@ export default {
       await env.TRIPS.put("g_client", JSON.stringify({ id, secret }));
       return cors(json({ ok: true }));
     }
-    // The Anthropic key that powers email parsing - pasted in-app,
-    // self-host friendly. A dashboard secret always wins.
+
+    // Universal LLM Configuration (OpenAI compatible Base URL, Gemini, Groq, DeepSeek, Anthropic)
+    if (url.pathname === "/settings/llm" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      const provider = ((body && body.provider) || "openai").trim().toLowerCase();
+      const baseUrl = ((body && body.baseUrl) || "").trim();
+      const apiKey = ((body && body.apiKey) || "").replace(/\s+/g, "");
+      const model = ((body && body.model) || "").trim();
+
+      if (!apiKey && !baseUrl && !model) {
+        // Clear custom configuration
+        await env.TRIPS.delete("llm_config");
+        await env.TRIPS.delete("anthropic_key");
+        delete env._llmConfig;
+        return cors(json({ ok: true, cleared: true }));
+      }
+
+      // If user is setting a new key or updating config
+      const existing = await getLLMConfig(env);
+      const newConfig = {
+        provider: provider || existing.provider || "openai",
+        baseUrl: baseUrl !== undefined ? baseUrl : existing.baseUrl,
+        apiKey: apiKey || existing.apiKey || "",
+        model: model || existing.model || ""
+      };
+
+      if (!newConfig.apiKey) {
+        return cors(json({ error: "API 金鑰為必填欄位 / API key is required" }, 400));
+      }
+
+      await env.TRIPS.put("llm_config", JSON.stringify(newConfig));
+      delete env._llmConfig;
+      return cors(json({ ok: true }));
+    }
+
+    // Legacy Anthropic key endpoint (backward compatible)
     if (url.pathname === "/settings/anthropickey" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
       const key = ((body && body.key) || "").replace(/\s+/g, "");
-      if (key === "") { await env.TRIPS.delete("anthropic_key"); return cors(json({ ok: true })); }
+      if (key === "") {
+        await env.TRIPS.delete("anthropic_key");
+        await env.TRIPS.delete("llm_config");
+        delete env._llmConfig;
+        return cors(json({ ok: true }));
+      }
       if (!/^sk-ant-/.test(key)) return cors(json({ error: "An Anthropic API key starts with sk-ant- (console.anthropic.com -> API Keys)." }, 400));
       await env.TRIPS.put("anthropic_key", key);
+      await env.TRIPS.put("llm_config", JSON.stringify({ provider: "anthropic", baseUrl: "", apiKey: key, model: "claude-haiku-4-5" }));
+      delete env._llmConfig;
       return cors(json({ ok: true }));
+    }
+
+    // Resend Email Delivery Settings
+    if (url.pathname === "/settings/resend" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      const apiKey = ((body && body.apiKey) || "").replace(/\s+/g, "");
+      const from = ((body && body.from) || "").trim();
+
+      if (apiKey === "") {
+        await env.TRIPS.delete("resend_config");
+        await env.TRIPS.delete("resend_key");
+        delete env._resendConfig;
+        return cors(json({ ok: true, cleared: true }));
+      }
+
+      if (!apiKey.startsWith("re_")) {
+        return cors(json({ error: "Resend API Key 通常以 re_ 開頭，請至 resend.com/api-keys 取得 / Resend API key usually starts with re_" }, 400));
+      }
+
+      const resendData = { apiKey, from: from || "888RoamTravel <onboarding@resend.dev>" };
+      await env.TRIPS.put("resend_config", JSON.stringify(resendData));
+      delete env._resendConfig;
+      return cors(json({ ok: true }));
+    }
+
+    // Test Resend Email Sending
+    if (url.pathname === "/settings/resend/test" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      const storedEmail = await env.TRIPS.get("auth_email");
+      const targetEmail = ((body && body.to) || storedEmail || "").trim();
+      if (!targetEmail) return cors(json({ error: "請指定接收測試信的信箱 / Target email required" }, 400));
+
+      try {
+        const res = await sendEmailViaResend(env, {
+          to: targetEmail,
+          subject: "【888漫步旅遊 / 888RoamTravel】Resend 郵件寄送測試成功！",
+          text: `恭喜！您的 888漫步旅遊 (888RoamTravel) Resend 郵件服務已成功連線！\n發送時間：${new Date().toLocaleString()}`,
+          html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'PingFang TC',sans-serif;max-width:480px;margin:0 auto;background:#ECE7DC;padding:32px 20px;border-radius:16px;">
+            <div style="background:#FFF;border-radius:12px;padding:28px 24px;text-align:center;">
+              <h3 style="color:#1B8A57;margin:0 0 12px;">✓ Resend 郵件寄送測試成功</h3>
+              <p style="color:#756D5E;font-size:14px;line-height:1.6;margin:0 0 16px;">恭喜！您的 888漫步旅遊 (888RoamTravel) 郵件發送服務已正常啟用，後續可用於 OTP 驗證碼登入及行程通知。</p>
+              <div style="font-size:12px;color:#A39A89;">測試時間：${new Date().toISOString()}</div>
+            </div>
+          </div>`
+        });
+        return cors(json({ ok: true, id: res.id, to: targetEmail }));
+      } catch (err) {
+        return cors(json({ ok: false, error: err.message || String(err) }, 500));
+      }
     }
     // What can the Google connection actually see? Split by stage, so "no travel
     // info appeared" points at the exact culprit.
@@ -722,53 +930,208 @@ async function ingestFromGmail(store, env, maxEmails) {
   return out;
 }
 
-// Anthropic key: dashboard secret wins, else the one pasted in-app (KV).
-async function anthropicKey(env) {
-  if (env._akey !== undefined) return env._akey;
-  return (env._akey = env.ANTHROPIC_API_KEY || (await env.TRIPS.get("anthropic_key")) || "");
+// Universal LLM Config: supports Anthropic and any OpenAI-compatible base URL (Gemini, Groq, OpenAI, DeepSeek, etc.)
+async function getLLMConfig(env) {
+  if (env._llmConfig) return env._llmConfig;
+  let kvConfig = null;
+  try {
+    const raw = await env.TRIPS.get("llm_config");
+    if (raw) kvConfig = JSON.parse(raw);
+  } catch (e) {}
+
+  const envApiKey = env.LLM_API_KEY || env.ANTHROPIC_API_KEY || env.OPENAI_API_KEY || "";
+  const envBaseUrl = env.LLM_BASE_URL || "";
+  const envModel = env.LLM_MODEL || "";
+  const envProvider = env.LLM_PROVIDER || "";
+
+  let apiKey = envApiKey || (kvConfig && kvConfig.apiKey) || (await env.TRIPS.get("anthropic_key")) || "";
+  let baseUrl = envBaseUrl || (kvConfig && kvConfig.baseUrl) || "";
+  let model = envModel || (kvConfig && kvConfig.model) || "";
+  let provider = envProvider || (kvConfig && kvConfig.provider) || "";
+
+  // Infer provider if not specified
+  if (!provider) {
+    if (baseUrl.includes("generativelanguage.googleapis.com")) provider = "gemini";
+    else if (baseUrl.includes("api.groq.com")) provider = "groq";
+    else if (baseUrl.includes("api.deepseek.com")) provider = "deepseek";
+    else if (apiKey.startsWith("sk-ant-") && !baseUrl) provider = "anthropic";
+    else if (baseUrl || apiKey.startsWith("sk-")) provider = "openai";
+    else provider = "anthropic";
+  }
+
+  // Sensible default models
+  if (!model) {
+    if (provider === "anthropic") model = "claude-haiku-4-5";
+    else if (provider === "gemini") model = "gemini-2.0-flash";
+    else if (provider === "groq") model = "llama-3.3-70b-versatile";
+    else if (provider === "deepseek") model = "deepseek-chat";
+    else model = "gpt-4o-mini";
+  }
+
+  // Default OpenAI-compatible base URLs
+  if (!baseUrl && provider !== "anthropic") {
+    if (provider === "gemini") baseUrl = "https://generativelanguage.googleapis.com/v1beta/openai";
+    else if (provider === "groq") baseUrl = "https://api.groq.com/openai/v1";
+    else if (provider === "deepseek") baseUrl = "https://api.deepseek.com/v1";
+    else if (provider === "openai") baseUrl = "https://api.openai.com/v1";
+  }
+
+  const source = (envApiKey || envBaseUrl || envModel) ? "secret" : (kvConfig || await env.TRIPS.get("anthropic_key")) ? "in-app" : "none";
+
+  return (env._llmConfig = { provider, baseUrl, apiKey, model, source });
 }
+
+// Backward compatible alias
+async function anthropicKey(env) {
+  const llm = await getLLMConfig(env);
+  return llm.apiKey;
+}
+
+// Resend Configuration and Sending Helper
+async function getResendConfig(env) {
+  if (env._resendConfig) return env._resendConfig;
+  let kvConfig = null;
+  try {
+    const raw = await env.TRIPS.get("resend_config");
+    if (raw) kvConfig = JSON.parse(raw);
+  } catch (e) {}
+
+  const apiKey = env.RESEND_API_KEY || (kvConfig && kvConfig.apiKey) || (await env.TRIPS.get("resend_key")) || "";
+  const from = env.RESEND_FROM || (kvConfig && kvConfig.from) || (await env.TRIPS.get("resend_from")) || "888RoamTravel <onboarding@resend.dev>";
+  const source = env.RESEND_API_KEY ? "secret" : (apiKey ? "in-app" : "none");
+
+  return (env._resendConfig = { apiKey, from, source });
+}
+
+async function getResendKey(env) {
+  const cfg = await getResendConfig(env);
+  return cfg.apiKey;
+}
+
+function maskEmail(e) {
+  if (!e || !e.includes("@")) return e || "";
+  const parts = e.split("@");
+  const name = parts[0];
+  const dom = parts[1];
+  const maskedName = name.length <= 2 ? name[0] + "***" : name.slice(0, 2) + "***" + name.slice(-1);
+  return maskedName + "@" + dom;
+}
+
+async function sendEmailViaResend(env, { to, subject, html, text }) {
+  const cfg = await getResendConfig(env);
+  if (!cfg.apiKey) throw new Error("Resend API key not configured");
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${cfg.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: cfg.from,
+      to: Array.isArray(to) ? to : [to],
+      subject,
+      html,
+      text: text || "",
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    throw new Error(`Resend API error (${res.status}): ${errText}`);
+  }
+  return await res.json();
+}
+
 // Returns an ARRAY of segment objects (a return ticket = one per flight, so
 // nothing in the email is lost; empty = "this email is not a booking"), or
 // undefined ("could not ask" - no key / API down; caller retries later).
 async function extractSegments(env, emailText, deliberate) {
-  const akey = await anthropicKey(env);
-  if (!akey) return undefined;
-  let res;
+  const llm = await getLLMConfig(env);
+  if (!llm.apiKey) return undefined;
+
+  const sysInstruction = "You are an expert travel booking confirmation extractor. From the travel email provided, extract booking details and return ONLY a valid JSON array of objects conforming to this schema:\n"
+    + '[{"type":"flight|hotel|car|ride|rail|other","name":"","city":"","start":"YYYY-MM-DD","end":"YYYY-MM-DD","address":"","conf":"","note":""}].\n'
+    + "Rules:\n"
+    + "- Return ONLY the raw JSON array. Never wrap in markdown codeblocks (no ```json). No introductory or concluding text.\n"
+    + "- One object per bookable item: a return ticket = one object per flight (outbound AND return), a hotel stay = ONE object for the whole stay. Max 5 objects.\n"
+    + "- city = the destination city of the booking (for a flight: the arrival city).\n"
+    + '- note = the ONE line a traveller needs at a glance: flights -> flight number, route and times incl. layovers (e.g. "TP1479 OPO-LIS 07:10 · LIS-GIG 09:55"); '
+    + "hotels -> check-in time and any door/PIN/keyless entry code; transfers -> pickup time, meeting point, driver name/phone; restaurants/meetings -> time and who/what.\n"
+    + (deliberate
+      ? "- The traveller forwarded this email ON PURPOSE to file it into their travel app. Even if it is not a standard confirmation (a message from a hotel, an itinerary, a reminder), return one object with everything known: the venue/hotel name, city, any dates, and the useful details in note. Leave start/end empty rather than guessing. Return [] only if there is truly nothing travel-related.\n"
+      : "- If it is not a real booking, return [].\n");
+
+  const userPrompt = "Here is the email content to parse:\n\n" + emailText.slice(0, 8000);
+
+  let rawContent = "";
   try {
-    res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "x-api-key": akey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-haiku-4-5",   // cheapest current model - plenty for short JSON extraction
-      max_tokens: 700,
-      messages: [{
-        role: "user",
-        content: "From this travel confirmation email, return ONLY a JSON array of objects "
-          + '[{"type":"flight|hotel|car|ride|rail|other","name":"","city":"","start":"YYYY-MM-DD","end":"YYYY-MM-DD","address":"","conf":"","note":""}]. '
-          + "One object per bookable item: a return ticket = one object per flight (outbound AND return), a hotel stay = ONE object for the whole stay. Max 5 objects. "
-          + "city = the destination city of the booking (for a flight: the arrival city). "
-          + 'note = the ONE line a traveller needs at a glance: flights -> flight number, route and times incl. layovers (e.g. "TP1479 OPO-LIS 07:10 \u00b7 LIS-GIG 09:55"); '
-          + 'hotels -> check-in time and any door/PIN/keyless entry code; transfers -> pickup time, meeting point, driver name/phone; restaurants/meetings -> time and who/what. '
-          + (deliberate
-            ? "The traveller forwarded this email ON PURPOSE to file it into their travel app. Even if it is not a standard confirmation (a message from a hotel, an itinerary, a reminder), return one object with everything known: the venue/hotel name, city, any dates, and the useful details in note. Leave start/end empty rather than guessing. Return [] only if there is truly nothing travel-related. "
-            : "If it is not a real booking, return []. ")
-          + "No prose.\n\n" + emailText.slice(0, 6000),
-      }],
-    }),
-    });
-  } catch (e) { return undefined; }
-  if (!res.ok) return undefined;
-  const data = await res.json();
-  const txt = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
+    if (llm.provider === "anthropic" || (!llm.baseUrl && llm.apiKey.startsWith("sk-ant-"))) {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": llm.apiKey,
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          model: llm.model || "claude-haiku-4-5",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: sysInstruction + "\n\n" + userPrompt }]
+        })
+      });
+      if (!res.ok) return undefined;
+      const data = await res.json();
+      rawContent = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
+    } else {
+      // OpenAI-compatible (Gemini via OpenAI-compat URL, Groq, OpenAI, DeepSeek, LocalAI, Ollama, etc.)
+      const baseUrl = (llm.baseUrl || "https://api.openai.com/v1").replace(/\/+$/, "");
+      const endpoint = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${llm.apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: llm.model || "gpt-4o-mini",
+          temperature: 0.1,
+          messages: [
+            { role: "system", content: sysInstruction },
+            { role: "user", content: userPrompt }
+          ]
+        })
+      });
+      if (!res.ok) return undefined;
+      const data = await res.json();
+      rawContent = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+    }
+  } catch (e) {
+    return undefined;
+  }
+
+  if (!rawContent) return [];
+
   let parsed;
-  try { parsed = JSON.parse(txt.replace(/```json|```/g, "").trim()); } catch (_) { return []; }
+  try {
+    const cleaned = rawContent.replace(/```json\s*|```\s*/gi, "").trim();
+    parsed = JSON.parse(cleaned);
+  } catch (_) {
+    const match = rawContent.match(/\[\s*\{[\s\S]*\}\s*\]/);
+    if (match) {
+      try { parsed = JSON.parse(match[0]); } catch (e) { return []; }
+    } else {
+      return [];
+    }
+  }
+
   const list = (Array.isArray(parsed) ? parsed : parsed ? [parsed] : []).filter((o) => o && typeof o === "object");
   const dup = {};
   for (const o of list) {
-    o.start = norm(o.start); o.end = norm(o.end);
-    // Both legs of one ticket share a confirmation code; suffix the copies so
-    // addSegment's conf-dedupe cannot collapse the return flight into the outbound.
-    if (o.conf) { if (dup[o.conf]) o.conf = o.conf + "#" + (++dup[o.conf]); else dup[o.conf] = 1; }
+    o.start = norm(o.start);
+    o.end = norm(o.end);
+    if (o.conf) {
+      if (dup[o.conf]) o.conf = o.conf + "#" + (++dup[o.conf]);
+      else dup[o.conf] = 1;
+    }
   }
   return list;
 }
@@ -1066,7 +1429,7 @@ function buildIcs(store) {
       desc ? "DESCRIPTION:" + icsEscape(desc) : "",
       "END:VEVENT"].filter(Boolean).join("\r\n");
   }).join("\r\n");
-  return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//RoamRadar//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:RoamRadar\r\n" + ev + "\r\nEND:VCALENDAR\r\n";
+  return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//888RoamTravel//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:888漫步旅遊 · 888RoamTravel\r\n" + ev + "\r\nEND:VCALENDAR\r\n";
 }
 
 async function loadStore(env) {
@@ -1113,6 +1476,6 @@ function cors(res) {
   const h = new Headers(res.headers);
   h.set("Access-Control-Allow-Origin", "*");
   h.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  h.set("Access-Control-Allow-Headers", "Content-Type");
+  h.set("Access-Control-Allow-Headers", "Content-Type, X-Auth");
   return new Response(res.body, { status: res.status, headers: h });
 }
