@@ -27,6 +27,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - 設定視窗在模型輸入框右側新增 **「🔍 取得可用模型清單」** 按鈕與 `<datalist>` 自動完成選單，一鍵連線列出即時可用模型，徹底根絕模型被官方廢棄（Decommissioned）或寫死過期名稱的痛點。
 
 ### Changed / 改善與優化
+- **官網頁尾作者標註與致敬更新 (Author Attribution & Credit)**：
+  - 官網（Landing Page）頁尾正式更新為 **`Created with ❤️ for travel, by david888.com（修改於 Giovanni Brees）`**（英文版：`adapted from Giovanni Brees`），同時保留原作者連結致敬，明確標示 `david888.com` 為目前維護與分支修改者。
+- **免跳轉 GitHub，直連 App 體驗 (Direct App Access CTAs)**：
+  - 首頁底部巨型按鈕、頂部導航列與 Hero 區塊的行動呼籲（CTA）全面改為 **「直接開啟 888漫步旅遊」** / **「立即開啟 888漫步旅遊」**，直接連結進入 `https://travel.david888.com/app`，不再引導前往 GitHub 倉庫，為一般使用者帶來更即時純粹的 Web App 入口體驗。
+- **網站地圖與搜尋引擎標註校正**：
+  - `sitemap.xml` 與 `robots.txt` 域名更新為 `https://travel.david888.com`，結構化資料（JSON-LD）亦加入 `david888.com` 作者標記。
 - **清理提供者選單名稱 (Sanitized Provider Dropdown)**：
   - 徹底移除選單標籤中寫死的具體模型名稱（如不再標註已變動或廢棄的 `(GPT-4o mini)`、`(極速 Llama 3.3)` 等），改採純粹提供者品牌名稱。
   - Worker 端後備預設模型全面升級為主流活躍版本，並增強 API 呼叫失敗時的詳細錯誤日誌，提升除錯透明度。

@@ -14,4 +14,4 @@ Disallow: /backups
 Disallow: /settings
 Disallow: /auth/
 
-Sitemap: https://travel.giovannibrees.com/sitemap.xml
+Sitemap: https://travel.david888.com/sitemap.xml
