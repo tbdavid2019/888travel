@@ -1515,12 +1515,23 @@
         '<option value="custom">'+(isZH()?"自訂 OpenAI 相容服務 (Custom)":"Custom OpenAI-Compatible")+'</option>'+
       '</select></div>'+
       field(isZH()?"API 端點網址 (Base URL)":"API Base URL","s_llm_base","text","","https://generativelanguage.googleapis.com/v1beta/openai",isZH()?"(Anthropic 留空即可)":"(blank for Anthropic)")+
-      '<div class="field"><label>'+(isZH()?"模型名稱 (Model)":"Model Name")+'</label>'+
-        '<div style="display:flex;gap:8px;align-items:stretch">'+
-          '<input id="s_llm_model" list="llm_models_list" type="text" placeholder="'+(isZH()?"輸入模型 ID 或點擊右側抓取":"e.g. gpt-4o, gemini-2.0-flash, or fetch")+'" style="flex:1">'+
-          '<button class="btn" id="llmFetchModels" type="button" style="white-space:nowrap;padding:0 12px;font-size:13px">'+(isZH()?"🔍 取得可用模型清單":"🔍 Fetch Models")+'</button>'+
+      '<div class="field">'+
+        '<label style="display:flex;justify-content:space-between;align-items:center">'+
+          '<span>'+(isZH()?"模型選擇 (Model Selection)":"Model Selection")+'</span>'+
+          '<span id="llm_models_badge" style="font-size:12px;font-weight:normal;color:var(--muted)"></span>'+
+        '</label>'+
+        '<div style="display:flex;gap:8px;align-items:center">'+
+          '<select id="s_llm_model_select" aria-label="'+(isZH()?"選擇模型下拉選單":"Select model dropdown")+'" style="flex:1;cursor:pointer;font-family:var(--mono);font-size:13px">'+
+            '<option value="">'+(isZH()?"-- 請點擊右側取得可用模型 --":"-- Click Fetch Models to load --")+'</option>'+
+          '</select>'+
+          '<button class="btn" id="llmFetchModels" type="button" style="white-space:nowrap;padding:0 14px;font-size:13px;display:flex;align-items:center;gap:6px">'+
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'+
+            '<span>'+(isZH()?"取得可用模型清單":"Fetch Models")+'</span>'+
+          '</button>'+
         '</div>'+
-        '<datalist id="llm_models_list"></datalist>'+
+        '<div style="margin-top:8px;display:flex;align-items:center;gap:8px">'+
+          '<input id="s_llm_model" aria-label="'+(isZH()?"模型 ID 輸入框":"Model ID input")+'" type="text" placeholder="'+(isZH()?"選取上方下拉選單，或在此自訂模型 ID (例如 gpt-4o, llama-3.3-70b-versatile)":"Select from dropdown above or enter custom Model ID")+'" style="flex:1;font-family:var(--mono);font-size:13px">'+
+        '</div>'+
       '</div>'+
       field(isZH()?"API 金鑰 (API Key)":"API Key","s_llm_key","password","",isZH()?"僅儲存於你的 Worker":"stored on your worker only",isZH()?"僅存於 Worker 端":"stored on your worker only")+
       '<div class="hint">'+(isZH()?"支援 Google Gemini、OpenAI、Groq、DeepSeek、Anthropic 及任何相容 OpenAI 的 API 端點。切換提供者將填入預設端點，點擊「🔍 取得可用模型清單」可連線即時取得你的帳號真正支援的有效模型。":"Supports Google Gemini, OpenAI, Groq, DeepSeek, Anthropic, or any OpenAI-compatible API base URL. Switching provider sets base URL; click \"Fetch Models\" to retrieve the live active models from your account.")+'</div>'+
@@ -1566,6 +1577,13 @@
         if(lp && d.llmProvider) lp.value = d.llmProvider;
         if(lb && d.llmBaseUrl !== undefined && !lb.value) lb.value = d.llmBaseUrl;
         if(lm && d.llmModel && !lm.value) lm.value = d.llmModel;
+        var curP = (lp ? lp.value : "") || "openai";
+        var curM = (lm ? lm.value : "") || "";
+        var mSelInit = document.getElementById("s_llm_model_select");
+        if(mSelInit){
+          mSelInit.innerHTML = renderModelOptions(curP, null, curM);
+          if(curM) mSelInit.value = curM;
+        }
         if(ls){
           ls.innerHTML = (d.llmConfigured || d.anthropicKeySet)
             ? ('<span style="color:var(--green)">● '+(isZH()?'已啟用智慧解析':'Smart parsing active')+'</span> <span class="opt">('+(d.llmProvider||"provider")+' · '+(d.llmModel||"model")+(d.llmSource==="secret"?' · secret':'')+')</span>')
@@ -1600,6 +1618,65 @@
       anthropic: { base: "" },
       custom: { base: "" }
     };
+    var LLM_RECOMMENDED_MODELS = {
+      gemini: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"],
+      openai: ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "o3-mini"],
+      groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"],
+      deepseek: ["deepseek-chat", "deepseek-reasoner"],
+      anthropic: ["claude-3-7-sonnet-latest", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
+      custom: []
+    };
+
+    function renderModelOptions(p, modelsList, activeVal){
+      var list = (modelsList && modelsList.length) ? modelsList : (LLM_RECOMMENDED_MODELS[p] || []);
+      var html = '<option value="">' + (isZH() ? ('-- 請由下拉選單選取模型' + (modelsList && modelsList.length ? ('（共 ' + modelsList.length + ' 個可用）') : '') + ' --') : ('-- Select a model' + (modelsList && modelsList.length ? (' (' + modelsList.length + ' available)') : '') + ' --')) + '</option>';
+      var hasActive = false;
+      list.forEach(function(m){
+        if(m === activeVal) hasActive = true;
+        html += '<option value="' + esc(m) + '"' + (m === activeVal ? ' selected' : '') + '>' + esc(m) + '</option>';
+      });
+      if(activeVal && !hasActive && activeVal !== "__custom__"){
+        html += '<option value="' + esc(activeVal) + '" selected>' + esc(activeVal) + (isZH() ? ' (目前設定)' : ' (current)') + '</option>';
+      }
+      html += '<option value="__custom__">' + (isZH() ? '✏️ 手動自訂輸入…' : '✏️ Custom model ID…') + '</option>';
+      return html;
+    }
+
+    var mSel = document.getElementById("s_llm_model_select");
+    var mInput = document.getElementById("s_llm_model");
+    if(mSel){
+      mSel.onchange = function(){
+        if(this.value === "__custom__"){
+          if(mInput){ mInput.focus(); mInput.select(); }
+        } else if(this.value){
+          if(mInput) mInput.value = this.value;
+        }
+      };
+    }
+    if(mInput){
+      mInput.oninput = function(){
+        var v = this.value.trim();
+        if(mSel){
+          var found = false;
+          for(var i = 0; i < mSel.options.length; i++){
+            if(mSel.options[i].value === v){
+              mSel.selectedIndex = i;
+              found = true;
+              break;
+            }
+          }
+          if(!found){
+            for(var i = 0; i < mSel.options.length; i++){
+              if(mSel.options[i].value === "__custom__"){
+                mSel.selectedIndex = i;
+                break;
+              }
+            }
+          }
+        }
+      };
+    }
+
     var provSelect = document.getElementById("s_llm_provider");
     if(provSelect){
       provSelect.onchange = function(){
@@ -1608,6 +1685,12 @@
           var bEl = document.getElementById("s_llm_base");
           if(bEl) bEl.value = LLM_PRESETS[p].base;
         }
+        var rec = LLM_RECOMMENDED_MODELS[p] || [];
+        var defaultM = rec[0] || "";
+        if(mSel) mSel.innerHTML = renderModelOptions(p, null, defaultM);
+        if(mInput) mInput.value = defaultM;
+        var badge = document.getElementById("llm_models_badge");
+        if(badge) badge.innerHTML = "";
       };
     }
 
@@ -1617,7 +1700,7 @@
         var p = val("s_llm_provider") || "openai";
         var b = val("s_llm_base");
         var k = val("s_llm_key");
-        var orig = fetchBtn.textContent;
+        var orig = fetchBtn.innerHTML;
         fetchBtn.disabled = true;
         fetchBtn.textContent = isZH() ? "查詢中…" : "Fetching…";
         try{
@@ -1632,21 +1715,30 @@
             return;
           }
           var models = d.models || [];
-          var dl = document.getElementById("llm_models_list");
-          if(dl){
-            dl.innerHTML = models.map(function(m){ return '<option value="' + esc(m) + '">'; }).join("");
+          if(!models.length){
+            toast(isZH() ? "未搜尋到任何可用模型" : "No models found");
+            return;
           }
-          var mInput = document.getElementById("s_llm_model");
-          if(mInput && (!mInput.value || !models.includes(mInput.value))){
-            var best = models.find(function(m){ return /flash|gpt-4|claude-3|chat/i.test(m); }) || models[0];
-            if(best) mInput.value = best;
+          var curVal = mInput ? mInput.value.trim() : "";
+          var chosen = curVal && models.includes(curVal) ? curVal : "";
+          if(!chosen){
+            chosen = models.find(function(m){ return /llama-3\.3|gpt-4o|flash|chat|claude-3/i.test(m); }) || models[0];
           }
-          toast(isZH() ? ("✅ 成功獲取 " + models.length + " 個可用模型！可在輸入框選取") : ("✅ Loaded " + models.length + " models!"));
+          if(mInput) mInput.value = chosen;
+          if(mSel){
+            mSel.innerHTML = renderModelOptions(p, models, chosen);
+            mSel.value = chosen;
+          }
+          var badge = document.getElementById("llm_models_badge");
+          if(badge){
+            badge.innerHTML = '<span style="color:var(--green)">● ' + (isZH() ? ('已載入 ' + models.length + ' 個可用模型') : (models.length + ' models ready')) + '</span>';
+          }
+          toast(isZH() ? ("✅ 成功獲取 " + models.length + " 個可用模型！請在上方下拉選單選取") : ("✅ Loaded " + models.length + " models! Pick from dropdown."));
         }catch(e){
           toast(isZH() ? "無法連線至 Worker" : "Worker unreachable");
         }finally{
           fetchBtn.disabled = false;
-          fetchBtn.textContent = orig;
+          fetchBtn.innerHTML = orig;
         }
       };
     }

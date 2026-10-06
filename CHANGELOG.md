@@ -22,9 +22,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     - 旅程進行中（Live Travelling）時，提供最直接的當地即時鐘顯示。
   - **日曆訂閱 (ICS) 時區相容**：
     - 匯出之 ICS 訂閱 feed 與個別行程全面注入 `X-WR-TIMEZONE` 與事件時區宣告，防止外部日曆 App 匯入時產生跨日位移。
-- **動態獲取可用模型清單 (Dynamic Live LLM Model Fetching)**：
-  - Worker 新增 `POST /settings/llm/models` 端點，直接連線至 OpenAI、Groq、DeepSeek、Google Gemini、Anthropic 的官方 `/models` API，即時抓取使用者帳號底下最新且真正活著的可用模型清單。
-  - 設定視窗在模型輸入框右側新增 **「🔍 取得可用模型清單」** 按鈕與 `<datalist>` 自動完成選單，一鍵連線列出即時可用模型，徹底根絕模型被官方廢棄（Decommissioned）或寫死過期名稱的痛點。
+- **原生模型下拉選單與雙向同步 (Native LLM Model Select Dropdown & Two-Way Sync)**：
+  - 全面揚棄跨平台相容性不佳的 `<datalist>`，改以標準原生 `<select id="s_llm_model_select">` 下拉選單搭配微調輸入框 `<input id="s_llm_model">`。
+  - 點擊「🔍 取得可用模型清單」後，完整展開所有 API 回傳之有效模型清單（如 Groq 12 個模型全數可見可選），點選任一項目即自動填入模型 ID。
+  - 支援 `✏️ 手動自訂輸入…` 與輸入框雙向即時聯動，並內建主流提供者常用模型推薦預設（Gemini、OpenAI、Groq、DeepSeek、Anthropic）。
+  - 通過 Codex Code Review 嚴格審查，具備無死鎖事件同步、XSS 轉義防護與無障礙 `aria-label` 標籤支援。
 
 ### Changed / 改善與優化
 - **官網頁尾作者標註與致敬更新 (Author Attribution & Credit)**：
