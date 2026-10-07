@@ -690,6 +690,199 @@ export default {
       return cors(json({ ok: true }));
     }
 
+    // In-App AI Travel Assistant (Copilot Chat Gateway)
+    if (url.pathname === "/ai/chat" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      const rawMessages = Array.isArray(body && body.messages) ? body.messages : [];
+      // Enforce client/server sliding window (max 10 recent messages) to preserve prompt tokens & Groq TPM
+      const windowMessages = rawMessages.slice(-10);
+      const messages = windowMessages
+        .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
+        .map((m) => ({ role: m.role, content: m.content.trim() }));
+
+      if (messages.length === 0) {
+        return cors(json({ error: "INVALID_REQUEST", message: "對話訊息不可為空 / Messages cannot be empty" }, 400));
+      }
+
+      const llm = await getLLMConfig(env);
+      if (!llm.apiKey) {
+        return cors(json({
+          error: "NO_LLM_KEY",
+          message: "尚未設定 AI 語言模型金鑰，請前往「設定」配置 API Key。"
+        }, 400));
+      }
+
+      const store = await loadStore(env);
+      const currentTripId = ((body && body.currentTripId) || "").trim();
+      let tripContext = "";
+      let activeTrip = null;
+
+      if (currentTripId && store.trips[currentTripId]) {
+        activeTrip = store.trips[currentTripId];
+        const segSummary = (activeTrip.segments || [])
+          .slice()
+          .sort((a, b) => ((a.start || "") < (b.start || "") ? -1 : 1))
+          .map((s) => {
+            let line = `[${s.start || "未定時間"}] ${s.type || "other"}: ${s.name || "未命名"}`;
+            if (s.address) line += ` [地點: ${s.address}]`;
+            if (s.note) line += ` (${s.note})`;
+            if (s.fallback && s.fallback.name) line += ` [備案: ${s.fallback.name}${s.fallback.address ? " @ " + s.fallback.address : ""}]`;
+            return line;
+          })
+          .join("\n");
+
+        tripContext = `【目前討論中的行程 (Active Trip Context)】
+- 行程 ID: ${activeTrip.id}
+- 行程名稱: ${activeTrip.label || activeTrip.to}
+- 目的地: ${activeTrip.to} (出發地: ${activeTrip.from || "未指定"})
+- 日期區間: ${activeTrip.start} 至 ${activeTrip.end}
+- 時區: ${activeTrip.timezone || "未設定"}
+- 備註: ${activeTrip.notes || "無"}
+- 目前已安排細項 (${(activeTrip.segments || []).length} 項):
+${segSummary || "（目前尚無細項安排）"}`;
+      } else {
+        const upcoming = Object.values(store.trips)
+          .slice()
+          .sort((a, b) => ((a.start || "") < (b.start || "") ? -1 : 1))
+          .slice(0, 8)
+          .map((t) => `- [${t.id}] ${t.label || t.to} (${t.from || ""} ➔ ${t.to}) : ${t.start} ~ ${t.end} [${(t.segments || []).length} 項細項]`)
+          .join("\n");
+        tripContext = `【旅客目前行程清單總覽 (All Trips Overview)】
+${upcoming || "（目前尚未建立任何行程）"}`;
+      }
+
+      const sysPrompt = `你是一位專業、敏銳且細緻的個人旅遊規劃特助 (RoamRadar Travel Copilot)。
+你的任務是協助旅客構思、討論與優化行程規劃（包含餐廳美食、飯店住宿、航班、鐵路、交通接駁、景點活動與雨天/客滿備案）。
+
+${tripContext}
+
+【原則與行為指引】
+1. 回應親切自然、條理分明、具備專業旅遊洞察。建議應考慮當地的地理距離、營業時間、動線流暢度與時差/交通。
+2. 支援 7 種細項規劃類別:
+   - flight (✈️ 航班)
+   - hotel (🏨 飯店住宿)
+   - restaurant (🍽️ 餐廳美食)
+   - rail (🚆 鐵路/新幹線/地鐵)
+   - car (🚗 租車自駕)
+   - ride (🚕 計程車/機場接送)
+   - other (📍 景點活動/展覽/會議)
+3. 當你在對話中建議「具體的行程項目、餐廳預約、景點活動或交通」時，除了親切回應用戶外，請務必在回應結尾附上結構化提案區塊 (proposal block)。格式嚴格遵循：
+:::proposal
+{
+  "action": "add_segments",
+  "tripId": "${activeTrip ? activeTrip.id : ""}",
+  "segments": [
+    {
+      "type": "restaurant",
+      "name": "餐廳或景點名稱",
+      "address": "地址或概略位置",
+      "start": "YYYY-MM-DDTHH:mm:ss 或 YYYY-MM-DD",
+      "end": "YYYY-MM-DDTHH:mm:ss 或 YYYY-MM-DD (選填)",
+      "note": "簡短精闢的推薦理由或用餐/參觀重點",
+      "fallback": {
+        "name": "備案名稱 (例如客滿或雨天替代方案)",
+        "address": "備案地址 (選填)",
+        "note": "備案說明 (選填)"
+      }
+    }
+  ]
+}
+:::
+4. 如果旅客只是閒聊、問一般天氣、問建議、或無具體要排入行程的項目，請正常文字回應，不要輸出 :::proposal 區塊。
+5. 每次 proposal 的 segments 請控制在 1 ~ 4 個精選項目以內，質量重於數量。
+6. 對於熱門餐廳或戶外行程，強烈建議主動規劃可行的 fallback (備案方案)。
+7. proposal 內的 JSON 必須是標準 JSON，請勿包含尾隨逗號或註解。`;
+
+      let replyText = "";
+      try {
+        if (llm.provider === "anthropic" || (!llm.baseUrl && llm.apiKey.startsWith("sk-ant-"))) {
+          const anthropicMsgs = [];
+          for (const m of messages) {
+            if (anthropicMsgs.length === 0 && m.role !== "user") {
+              continue;
+            }
+            if (anthropicMsgs.length > 0 && anthropicMsgs[anthropicMsgs.length - 1].role === m.role) {
+              anthropicMsgs[anthropicMsgs.length - 1].content += "\n\n" + m.content;
+            } else {
+              anthropicMsgs.push({ role: m.role, content: m.content });
+            }
+          }
+          if (anthropicMsgs.length === 0) {
+            anthropicMsgs.push({ role: "user", content: "你好" });
+          }
+
+          const res = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+              "x-api-key": llm.apiKey,
+              "anthropic-version": "2023-06-01",
+              "content-type": "application/json"
+            },
+            body: JSON.stringify({
+              model: llm.model || "claude-3-5-haiku-latest",
+              max_tokens: 2000,
+              system: sysPrompt,
+              messages: anthropicMsgs
+            })
+          });
+
+          if (!res.ok) {
+            const errText = await res.text().catch(() => "");
+            if (res.status === 429) {
+              return cors(json({ error: "RATE_LIMITED", message: "AI 服務暫時超過速率限制，請稍候重試。" }, 429));
+            }
+            return cors(json({ error: "PROVIDER_ERROR", message: `Anthropic API 錯誤 (${res.status}): ${errText.slice(0, 200)}` }, res.status));
+          }
+
+          const data = await res.json();
+          replyText = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
+        } else {
+          // OpenAI-compatible
+          const baseUrl = (llm.baseUrl || "https://api.openai.com/v1").replace(/\/+$/, "");
+          const endpoint = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
+
+          const openAiMsgs = [
+            { role: "system", content: sysPrompt },
+            ...messages
+          ];
+
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${llm.apiKey}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              model: llm.model || "gpt-4o",
+              temperature: 0.4,
+              messages: openAiMsgs
+            })
+          });
+
+          if (!res.ok) {
+            const errText = await res.text().catch(() => "");
+            if (res.status === 429) {
+              return cors(json({ error: "RATE_LIMITED", message: "AI 服務暫時超過速率限制，請稍候重試。" }, 429));
+            }
+            return cors(json({ error: "PROVIDER_ERROR", message: `AI 服務錯誤 (${res.status}): ${errText.slice(0, 200)}` }, res.status));
+          }
+
+          const data = await res.json();
+          replyText = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+        }
+      } catch (err) {
+        console.error("AI chat error:", err);
+        return cors(json({ error: "PROVIDER_ERROR", message: "連線 AI 服務失敗: " + (err && err.message ? err.message : String(err)) }, 500));
+      }
+
+      return cors(json({
+        ok: true,
+        reply: replyText,
+        provider: llm.provider,
+        model: llm.model
+      }));
+    }
+
     // Resend Email Delivery Settings
     if (url.pathname === "/settings/resend" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));

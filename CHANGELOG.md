@@ -7,6 +7,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.6.0] - 2026-10-07
+
+### Added / 新增功能
+- **應用程式內建 AI 行程特助 (In-App AI Copilot Chat Drawer)**：
+  - **響應式對話抽屜與底板**：桌面端右側滑出抽屜（`width: 440px`），手機端原生 `85dvh` 底板，全面支援 `overscroll-behavior: contain` 滾動鎖定與 `env(safe-area-inset-bottom)` 安全邊界。
+  - **頂部導航與旅程卡片雙入口**：頂部導航列提供「✨ AI 助理」，旅程卡片操作區提供「✨ AI 規劃」，點擊自動綁定當前旅程情境。
+  - **情境脈絡精簡注入 (Context Slicing & TPM Protection)**：後端自動擷取當前旅程日期、地點與已排細項，濃縮為一行式結構化標記 (`[{start}] {type}: {name} ({note}) [地點: {address}] [備案: {fallback}]`)，大幅節省 Token 並避免 Groq / 快取模型的速率超限。
+  - **多模型後端閘道 (`POST /ai/chat`)**：支援 Anthropic 原生 System Prompt 與 OpenAI 相容規範（Gemini, Groq, DeepSeek, OpenAI），提供 `NO_LLM_KEY` (400) 與 `RATE_LIMITED` (429) 標準錯誤碼。
+  - **結構化提案卡片與一鍵套用 (Structured Proposal Cards & 1-Click Apply)**：
+    - AI Assistant 在對話中輸出 `:::proposal` 結構化區塊，前端容錯解析程式碼標籤與結尾逗號，渲染為高對比互動卡片。
+    - 支援 7 大行程類別與備案預覽（`fallback`）。
+    - 點擊「✓ 確認套用至行程」自動標記 `source: "manual"`（遵守手動不可侵犯法則），寫入雲端 KV 並立即更新時間軸與列表，提案卡片即時鎖定並防範重複點擊。
+  - **極致嚴格防護**：全對話文字與欄位經 `esc()` 消毒預防 XSS 漏洞；未配置金鑰時提供單鍵直達「設定」面板之指引卡片。
+
+---
+
 ## [2.5.0] - 2026-10-07
 
 ### Added / 新增功能

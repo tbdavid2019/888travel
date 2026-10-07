@@ -430,6 +430,77 @@
     line-height: 1.25;
   }
 
+  /* ===================== AI Copilot Drawer & Proposals ===================== */
+  .copilot-scrim{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(22,19,12,.48);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:1040;opacity:0;pointer-events:none;transition:opacity .26s ease}
+  .copilot-scrim.show{opacity:1;pointer-events:auto}
+  .copilot-drawer{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100vw;height:100vh;background:var(--canvas);box-shadow:-14px 0 45px rgba(22,19,12,.22);display:flex;flex-direction:column;z-index:1050;transform:translateX(100%);transition:transform .28s cubic-bezier(0.16,1,0.3,1);border-left:1px solid var(--line)}
+  .copilot-scrim.show .copilot-drawer{transform:translateX(0)}
+  .copilot-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--card);border-bottom:1px solid var(--line);flex-shrink:0}
+  .copilot-title{font-family:var(--display);font-size:17px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:6px;letter-spacing:-.01em}
+  .copilot-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .copilot-close{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--soft);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s ease}
+  .copilot-close:hover{background:var(--card);color:var(--coral);border-color:rgba(255,90,53,.35)}
+  .copilot-context-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:rgba(30,64,255,.07);border-bottom:1px solid rgba(30,64,255,.15);flex-shrink:0}
+  .copilot-context-info{display:flex;align-items:center;gap:6px;min-width:0}
+  .copilot-context-title{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--cobalt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .copilot-context-clear{border:none;background:transparent;color:var(--cobalt);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px;transition:background .15s ease}
+  .copilot-context-clear:hover{background:rgba(30,64,255,.14)}
+  .copilot-stream{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:16px;display:flex;flex-direction:column;gap:14px}
+  .copilot-stream::-webkit-scrollbar{width:6px}
+  .copilot-stream::-webkit-scrollbar-thumb{background:rgba(22,19,12,.14);border-radius:999px}
+  .copilot-stream::-webkit-scrollbar-thumb:hover{background:rgba(22,19,12,.25)}
+  .copilot-msg{display:flex;flex-direction:column;max-width:90%;animation:riseIn .2s ease both}
+  .copilot-msg.user{align-self:flex-end}
+  .copilot-msg.assistant{align-self:flex-start;max-width:96%}
+  .copilot-bubble{padding:12px 16px;font-size:14px;line-height:1.55;border-radius:16px}
+  .copilot-msg.user .copilot-bubble{background:var(--ink);color:var(--cream);border-bottom-right-radius:4px}
+  .copilot-msg.assistant .copilot-bubble{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:0 2px 10px rgba(22,19,12,.04);border-bottom-left-radius:4px}
+  .copilot-bubble p{margin:0 0 8px}
+  .copilot-bubble p:last-child{margin-bottom:0}
+  .copilot-bubble ul,.copilot-bubble ol{margin:6px 0;padding-left:18px}
+  .copilot-bubble li{margin-bottom:4px}
+  .copilot-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .copilot-chip{font-size:12px;padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);cursor:pointer;transition:all .15s ease;text-align:left;line-height:1.35}
+  .copilot-chip:hover{border-color:var(--coral);color:var(--coral);transform:translateY(-1px);box-shadow:0 2px 6px rgba(255,90,53,.12)}
+  .copilot-proposal-card{margin-top:12px;background:var(--card);border:1.5px solid rgba(255,90,53,.35);border-radius:14px;padding:14px 16px;box-shadow:0 4px 16px rgba(22,19,12,.06);display:flex;flex-direction:column;gap:8px}
+  .copilot-proposal-header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .copilot-prop-type{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;padding:2px 8px;border-radius:999px;text-transform:uppercase}
+  .copilot-prop-type.flight{background:rgba(30,64,255,.12);color:var(--cobalt)}
+  .copilot-prop-type.hotel{background:rgba(27,138,87,.12);color:var(--green)}
+  .copilot-prop-type.restaurant{background:rgba(255,90,53,.14);color:var(--coral)}
+  .copilot-prop-type.rail{background:rgba(255,90,53,.12);color:var(--coral)}
+  .copilot-prop-type.car{background:rgba(232,154,43,.14);color:var(--amber)}
+  .copilot-prop-type.ride{background:rgba(124,77,255,.12);color:var(--purple)}
+  .copilot-prop-type.other{background:rgba(117,109,94,.12);color:var(--muted)}
+  .copilot-prop-badge{font-family:var(--mono);font-size:10px;color:var(--coral);font-weight:700}
+  .copilot-prop-name{font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink)}
+  .copilot-prop-meta{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+  .copilot-prop-meta span{display:flex;align-items:center;gap:4px}
+  .copilot-prop-note{font-size:12px;color:var(--ink);background:var(--soft);padding:6px 10px;border-radius:6px;border:1px solid var(--line)}
+  .copilot-prop-fallback{background:rgba(232,154,43,.08);border:1px dashed rgba(232,154,43,.35);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--ink)}
+  .copilot-prop-fb-title{font-weight:700;color:var(--amber);font-size:11px;margin-bottom:2px;display:flex;align-items:center;gap:4px}
+  .copilot-prop-actions{display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap}
+  .copilot-prop-btn{padding:6px 14px;font-size:12px;font-weight:600;border-radius:999px;cursor:pointer;border:1px solid var(--line);transition:all .15s ease}
+  .copilot-prop-btn.apply{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+  .copilot-prop-btn.apply:hover{background:var(--coral);border-color:var(--coral);transform:translateY(-1px)}
+  .copilot-prop-btn.dismiss{background:transparent;color:var(--muted);border-color:transparent}
+  .copilot-prop-btn.dismiss:hover{color:var(--ink)}
+  .copilot-prop-status{font-family:var(--mono);font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px}
+  .copilot-prop-status.applied{background:rgba(27,138,87,.12);color:var(--green)}
+  .copilot-prop-status.dismissed{background:var(--soft);color:var(--muted)}
+  .copilot-thinking{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink);padding:9px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;align-self:flex-start;animation:riseIn .2s ease both;box-shadow:0 2px 8px rgba(22,19,12,.04)}
+  .copilot-spinner{width:13px;height:13px;border:2px solid rgba(255,90,53,.25);border-top-color:var(--coral);border-radius:50%;animation:copilotSpin .8s linear infinite;flex-shrink:0}
+  @keyframes copilotSpin{to{transform:rotate(360deg)}}
+  .copilot-footer{padding:12px 16px 16px;background:var(--card);border-top:1px solid var(--line);flex-shrink:0}
+  .copilot-input-wrap{display:flex;gap:8px;align-items:flex-end;background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:8px 12px;transition:border-color .15s ease,box-shadow .15s ease}
+  .copilot-input-wrap:focus-within{border-color:var(--ink);box-shadow:0 0 0 2px rgba(22,19,12,.08);background:#FFF}
+  .copilot-input{flex:1;border:none;background:transparent;font-family:var(--body);font-size:14px;line-height:1.45;color:var(--ink);resize:none;max-height:120px;outline:none;padding:2px 0}
+  .copilot-send{border:none;background:var(--ink);color:var(--cream);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .15s ease,background-color .15s ease}
+  .copilot-send:hover{background:var(--coral);transform:scale(1.05)}
+  .copilot-send:disabled{opacity:.4;cursor:not-allowed;transform:none;background:var(--muted)}
+  .card-acts .mini.ai{color:var(--coral);background:rgba(255,90,53,.08);border-color:rgba(255,90,53,.25);font-weight:600}
+  .card-acts .mini.ai:hover{background:rgba(255,90,53,.16);border-color:var(--coral)}
+
   @media(max-width:760px){
     body{padding:22px 16px 56px}
     .topbar{flex-direction:column;align-items:flex-start;gap:18px}
@@ -454,6 +525,8 @@
     .ig-side{width:min(92vw,432px)}
     .modal{padding:24px 20px}
     .two{grid-template-columns:1fr}
+    .copilot-drawer{top:auto;bottom:0;left:0;right:0;width:100%;height:85dvh;max-height:85dvh;border-radius:24px 24px 0 0;border-left:none;border-top:1px solid var(--line);transform:translateY(100%);box-shadow:0 -12px 40px rgba(22,19,12,.25);padding-bottom:env(safe-area-inset-bottom);overscroll-behavior:contain}
+    .copilot-scrim.show .copilot-drawer{transform:translateY(0)}
   }
 </style>
 </head>
@@ -465,6 +538,7 @@
       <p id="brandDesc">Every trip - its flights, stays and rides - on one living timeline.</p>
     </div>
     <div class="ctl">
+      <button class="btn" id="copilotBtn" title="AI 行程特助 / AI Travel Copilot">✨ <span id="copilotBtnText">AI 助理</span></button>
       <button class="btn" id="langBtn" title="切換語言 / Switch language">繁中 / EN</button>
       <button class="btn" id="refreshBtn" style="display:none">Sync now</button>
       <button class="btn" id="shareBtn">Share</button>
@@ -494,6 +568,33 @@
 </div>
 
 <div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+<div class="copilot-scrim" id="copilotScrim">
+  <aside class="copilot-drawer" id="copilotDrawer" role="dialog" aria-label="AI Travel Copilot">
+    <div class="copilot-header">
+      <div class="copilot-title-group">
+        <div class="copilot-title">✨ <span id="copilotTitleText">AI 行程特助</span></div>
+        <div class="copilot-sub" id="copilotSubText">智慧對話規劃 · 推薦備案 · 一鍵套用</div>
+      </div>
+      <button class="copilot-close" id="copilotCloseBtn" title="關閉 / Close">✕</button>
+    </div>
+    <div class="copilot-context-bar" id="copilotContextBar" style="display:none">
+      <div class="copilot-context-info">
+        <span class="copilot-context-pin">📍</span>
+        <span class="copilot-context-title" id="copilotContextTitle">--</span>
+      </div>
+      <button class="copilot-context-clear" id="copilotContextClearBtn" title="切換為全行程 / Switch to all trips">✕</button>
+    </div>
+    <div class="copilot-stream" id="copilotStream"></div>
+    <div class="copilot-footer">
+      <div class="copilot-input-wrap">
+        <textarea class="copilot-input" id="copilotInput" rows="1" placeholder="輸入你想討論或新增的行程..."></textarea>
+        <button class="copilot-send" id="copilotSendBtn" title="發送訊息 / Send">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+</div>
 <div class="share-scrim" id="shareScrim"><div id="shareInner" style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;justify-content:center"></div></div>
 <div class="auth-scrim" id="authScrim"></div>
 <div class="toast" id="toast"></div>
@@ -501,7 +602,7 @@
 <script>
 (function(){
   "use strict";
-  var BUILD="2026-07-10.36";
+  var BUILD="2026-07-10.37";
 
   /* ===================== i18n infrastructure ===================== */
   var LANG = (function(){
@@ -912,6 +1013,14 @@
     if(hb) hb.textContent = isZH() ? "說明" : "Help";
     var stb = document.getElementById("setBtn");
     if(stb) stb.textContent = isZH() ? "設定" : "Settings";
+    var cb = document.getElementById("copilotBtnText");
+    if(cb) cb.textContent = isZH() ? "AI 助理" : "AI Copilot";
+    var ct = document.getElementById("copilotTitleText");
+    if(ct) ct.textContent = isZH() ? "AI 行程特助" : "AI Travel Copilot";
+    var cs = document.getElementById("copilotSubText");
+    if(cs) cs.textContent = isZH() ? "智慧對話規劃 · 推薦備案 · 一鍵套用" : "Conversational planner · Fallback suggestions · 1-click apply";
+    var ci = document.getElementById("copilotInput");
+    if(ci) ci.placeholder = isZH() ? "輸入你想討論或新增的行程..." : "Ask for dining, spots, or plan adjustments...";
 
     var tu = document.getElementById("tabUp");
     if(tu && tu.childNodes[0]) tu.childNodes[0].textContent = isZH() ? "即將出發 " : "Upcoming ";
@@ -986,6 +1095,17 @@
   var SEG_RANK={flight:0,rail:1,car:2,ride:3,hotel:4,restaurant:5};
   function segRank(s){return SEG_RANK[s.type]!==undefined?SEG_RANK[s.type]:6;}
   function segCmp(a,b){var ka=segSortKey(a),kb=segSortKey(b);return ka<kb?-1:ka>kb?1:segRank(a)-segRank(b);}
+  function dedupeSegs(segs){
+    var seen={}, out=[];
+    for(var i=0; i<segs.length; i++){
+      var s=segs[i];
+      var key=s.conf || (s.type + "|" + s.name + "|" + s.start);
+      if(seen[key]) continue;
+      seen[key]=1;
+      out.push(s);
+    }
+    return out.sort(segCmp);
+  }
   function itinerary(t){
     var segs=(t.segments||[]).slice().sort(segCmp);
     var addBtn='<button class="addplan" data-addseg="'+t.id+'">'+(isZH()?"+ 新增細項":"+ Add plan")+'</button>'+
@@ -1030,7 +1150,7 @@
           (t.label?'<h3>'+esc(t.label)+'</h3>':'<h3 class="empty">'+(isZH()?"未命名旅程":"Untitled trip")+'</h3>')+
           '<div class="chips"><span class="c-date">'+fmtRange(t.start,t.end)+'</span><span class="c-dur">'+duration(t.start,t.end)+(isZH()?" 天":" DAYS")+'</span>'+badge+'</div>'+
           '<div class="destinfo" data-dest="'+t.id+'"></div>'+
-        '</div><div class="card-acts"><button class="mini" data-edit="'+t.id+'">'+(isZH()?"編輯":"Edit")+'</button><button class="mini del" data-del="'+t.id+'">'+(isZH()?"刪除":"Delete")+'</button></div></div></div>'+
+        '</div><div class="card-acts"><button class="mini ai" data-ai="'+t.id+'" title="'+(isZH()?"AI 智慧規劃此旅程":"AI Planning")+'">✨ '+(isZH()?"AI 規劃":"AI Plan")+'</button><button class="mini" data-edit="'+t.id+'">'+(isZH()?"編輯":"Edit")+'</button><button class="mini del" data-del="'+t.id+'">'+(isZH()?"刪除":"Delete")+'</button></div></div></div>'+
       '</div>'+
       (t.notes?'<div class="tripnote">'+esc(t.notes)+'</div>':'')+
       '<button class="toggle" data-toggle="'+t.id+'"><span class="lbl"><span class="sq" style="background:var(--cobalt)"></span><span class="sq" style="background:var(--green)"></span><span class="sq" style="background:var(--purple)"></span>'+(isZH()?"行程規劃":"ITINERARY")+'</span>'+
@@ -1767,9 +1887,10 @@
     document.getElementById("p_save").onclick=async function(){t.photo=inp.value.trim();t.updatedAt=Date.now();await persistTrip(t);closeModal();render();toast(t.photo?(isZH()?"相片已更新":"Photo updated"):(isZH()?"已套用預設相片":"Using automatic photo"));};
   }
   document.getElementById("list").addEventListener("click",function(e){
-    var t=e.target.closest("[data-edit],[data-del],[data-editw],[data-delw],[data-toggle],[data-addseg],[data-editseg],[data-delseg],[data-ics],[data-photo],[data-plan],[data-sharetrip]");
+    var t=e.target.closest("[data-edit],[data-del],[data-editw],[data-delw],[data-toggle],[data-addseg],[data-editseg],[data-delseg],[data-ics],[data-photo],[data-plan],[data-sharetrip],[data-ai]");
     if(!t)return;
-    if(t.dataset.del){if(confirm(isZH()?"確定要刪除這趟旅程嗎？":"Delete this trip?")){var did=t.dataset.del;trips=trips.filter(function(x){return x.id!==did;});save("trips",trips);render();toast(isZH()?"旅程已刪除":"Trip deleted");
+    if(t.dataset.ai){openCopilot(t.dataset.ai);}
+    else if(t.dataset.del){if(confirm(isZH()?"確定要刪除這趟旅程嗎？":"Delete this trip?")){var did=t.dataset.del;trips=trips.filter(function(x){return x.id!==did;});save("trips",trips);render();toast(isZH()?"旅程已刪除":"Trip deleted");
       if(settings.workerUrl){fetch(settings.workerUrl+"/trips/delete",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({id:did})}).catch(function(){});}}}
     else if(t.dataset.edit){modal.dataset.editId=t.dataset.edit;openModal(tripForm(trips.find(function(x){return x.id===t.dataset.edit;})));bindModal();}
     else if(t.dataset.delw){if(confirm("Delete this watch?")){wishes=wishes.filter(function(x){return x.id!==t.dataset.delw;});save("wishes",wishes);render();toast("Watch deleted");}}
@@ -2946,6 +3067,470 @@
     toast(bits.length?("Sync done \u2014 "+bits.join(", ")+" \u2713"):"Sync done \u2014 nothing new this time");
   }
   document.getElementById("refreshBtn").onclick=syncNow;
+
+  /* ===================== In-App AI Copilot (Client Module) ===================== */
+  var copilotScrim = document.getElementById("copilotScrim");
+  var copilotDrawer = document.getElementById("copilotDrawer");
+  var copilotStream = document.getElementById("copilotStream");
+  var copilotInput = document.getElementById("copilotInput");
+  var copilotSendBtn = document.getElementById("copilotSendBtn");
+  var copilotContextBar = document.getElementById("copilotContextBar");
+  var copilotContextTitle = document.getElementById("copilotContextTitle");
+  var copilotContextClearBtn = document.getElementById("copilotContextClearBtn");
+  var copilotCloseBtn = document.getElementById("copilotCloseBtn");
+  var copilotBtn = document.getElementById("copilotBtn");
+
+  var copilotTripId = null;
+  var copilotMessages = [];
+  var copilotProposals = {};
+  var copilotInFlight = false;
+
+  function updateCopilotContextUI(){
+    var t = copilotTripId ? trips.find(function(x){ return x.id === copilotTripId; }) : null;
+    if(t && copilotContextBar && copilotContextTitle){
+      copilotContextBar.style.display = "flex";
+      copilotContextTitle.textContent = (t.label || t.to) + " (" + (t.start || "") + " ~ " + (t.end || "") + ")";
+    } else if(copilotContextBar){
+      copilotContextBar.style.display = "none";
+    }
+  }
+
+  function getQuickChips(tripId){
+    var t = tripId ? trips.find(function(x){ return x.id === tripId; }) : null;
+    if(t){
+      var dest = t.to || (isZH() ? "當地" : "destination");
+      return [
+        isZH() ? "🍽️ 推薦 " + dest + " 的特色美食與客滿備案" : "🍽️ Recommend dining in " + dest + " with backup",
+        isZH() ? "🌧️ 如果遇上下雨，有什麼推薦的室內備案景點？" : "🌧️ What indoor activities are recommended if it rains?",
+        isZH() ? "🚆 幫我規劃最後一天前往機場的順暢交通與時間" : "🚆 Plan transport to airport for departure day",
+        isZH() ? "🔍 幫我檢視現有行程是否有太緊湊或不順路的地方" : "🔍 Review current schedule for pacing or conflicts"
+      ];
+    } else {
+      return [
+        isZH() ? "✨ 幫我發想 5 天 4 夜的日本關西賞楓行程規劃" : "✨ Plan a 5-day Kansai autumn leaves itinerary",
+        isZH() ? "🍽️ 巴黎自由行必吃的私房甜點店與預約建議" : "🍽️ Must-visit bakeries & reservations in Paris",
+        isZH() ? "💡 帶長輩出遊，行程排定有哪些需要特別注意的？" : "💡 Key tips for slow-paced travel with senior family"
+      ];
+    }
+  }
+
+  function showWelcomeGreeting(){
+    var t = copilotTripId ? trips.find(function(x){ return x.id === copilotTripId; }) : null;
+    var welcomeText = "";
+    if(t){
+      welcomeText = isZH()
+        ? "您好！我是您的 888漫步旅遊 AI 特助。目前正針對「" + (t.label || t.to) + "」進行規劃討論。\n您可以隨時問我私房美食、交通動線、或要求我規劃易客滿/雨天的備用替代方案！"
+        : "Hello! I am your 888RoamTravel AI Copilot, assisting you with \"" + (t.label || t.to) + "\".\nFeel free to ask for restaurant recommendations, transit connections, or contingency backup plans!";
+    } else {
+      welcomeText = isZH()
+        ? "您好！我是您的 888漫步旅遊 AI 特助。\n我可以為您構思新旅程、推薦在地美食、安排交通動線，並在規劃時提供實用的雨天或客滿替代備案。"
+        : "Hello! I am your 888RoamTravel AI Copilot.\nI can help you brainstorm new trips, find authentic dining, map transport routes, and attach contingency backups.";
+    }
+
+    var chips = getQuickChips(copilotTripId);
+    var chipsHtml = '<div class="copilot-chips">' +
+      chips.map(function(c){
+        return '<button class="copilot-chip" data-chip="' + esc(c) + '">' + esc(c) + '</button>';
+      }).join("") +
+    '</div>';
+
+    copilotStream.innerHTML = '<div class="copilot-msg assistant">' +
+      '<div class="copilot-bubble">' +
+        '<p>' + esc(welcomeText).replace(/\n/g, '<br>') + '</p>' +
+        chipsHtml +
+      '</div>' +
+    '</div>';
+  }
+
+  function openCopilot(tripId){
+    copilotTripId = tripId || null;
+    if(copilotScrim) copilotScrim.classList.add("show");
+    updateCopilotContextUI();
+
+    if(copilotMessages.length === 0){
+      showWelcomeGreeting();
+    }
+    setTimeout(function(){
+      if(copilotInput) copilotInput.focus();
+    }, 120);
+  }
+
+  function closeCopilot(){
+    if(copilotScrim) copilotScrim.classList.remove("show");
+  }
+
+  function scrollCopilotToBottom(){
+    if(copilotStream){
+      copilotStream.scrollTop = copilotStream.scrollHeight;
+    }
+  }
+
+  function formatReplyText(text){
+    if(!text) return "";
+    var escaped = esc(text);
+    // Convert markdown bold **text** to <b>text</b>
+    escaped = escaped.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    var blocks = escaped.split(/\n{2,}/);
+    var html = blocks.map(function(b){
+      b = b.trim();
+      if(!b) return "";
+      if(/^[-*•]\s+/m.test(b)){
+        var lines = b.split(/\n/);
+        var listItems = lines.map(function(line){
+          var cleanLine = line.replace(/^[-*•]\s+/, "").trim();
+          return cleanLine ? "<li>" + cleanLine + "</li>" : "";
+        }).join("");
+        return "<ul>" + listItems + "</ul>";
+      }
+      return "<p>" + b.replace(/\n/g, "<br>") + "</p>";
+    }).join("");
+    return html;
+  }
+
+  function extractProposals(text){
+    var propRegex = /:::proposal\s*([\s\S]*?)\s*:::/g;
+    var proposals = [];
+    var cleanText = text.replace(propRegex, function(match, jsonContent){
+      try {
+        var cleaned = jsonContent.trim();
+        if(cleaned.indexOf("```json") === 0){
+          cleaned = cleaned.replace(/^```json\s*/, "").replace(/```$/, "").trim();
+        } else if(cleaned.indexOf("```") === 0){
+          cleaned = cleaned.replace(/^```\s*/, "").replace(/```$/, "").trim();
+        }
+        cleaned = cleaned.replace(/,\s*([\]}])/g, "$1");
+        var parsed = JSON.parse(cleaned);
+        if(parsed && parsed.action === "add_segments" && Array.isArray(parsed.segments)){
+          var propId = "prop_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6);
+          proposals.push({
+            id: propId,
+            data: parsed
+          });
+          return '\n\n__COPILOT_PROP_' + propId + '__\n\n';
+        }
+      } catch(e){
+        console.warn("Proposal parsing failed:", e, jsonContent);
+      }
+      return "";
+    });
+    return { cleanText: cleanText.trim(), proposals: proposals };
+  }
+
+  function renderProposalCard(prop){
+    var data = prop.data;
+    var segments = data.segments || [];
+    if(!segments.length) return "";
+
+    var itemsHtml = segments.map(function(s, idx){
+      var type = s.type || "other";
+      var typeLabel = {
+        flight: isZH() ? "✈️ 航班" : "✈️ Flight",
+        hotel: isZH() ? "🏨 住宿" : "🏨 Hotel",
+        restaurant: isZH() ? "🍽️ 餐廳" : "🍽️ Dining",
+        rail: isZH() ? "🚆 鐵路" : "🚆 Rail",
+        car: isZH() ? "🚗 租車" : "🚗 Car",
+        ride: isZH() ? "🚕 接送" : "🚕 Ride",
+        other: isZH() ? "📍 景點" : "📍 Spot"
+      }[type] || (isZH() ? "📍 行程" : "📍 Plan");
+
+      var fbHtml = "";
+      if(s.fallback && s.fallback.name){
+        fbHtml = '<div class="copilot-prop-fallback">' +
+          '<div class="copilot-prop-fb-title">💡 ' + (isZH() ? "建議備案 (雨天/客滿替代)" : "Contingency / Backup Plan") + '</div>' +
+          '<b>' + esc(s.fallback.name) + '</b>' +
+          (s.fallback.address ? ' · <span style="color:var(--muted)">' + esc(s.fallback.address) + '</span>' : '') +
+          (s.fallback.note ? '<div style="font-size:11px;margin-top:2px;color:var(--muted)">' + esc(s.fallback.note) + '</div>' : '') +
+        '</div>';
+      }
+
+      return '<div class="copilot-prop-item" style="border-bottom:' + (idx < segments.length - 1 ? '1px dashed var(--line);padding-bottom:10px;margin-bottom:10px' : 'none') + '">' +
+        '<div class="copilot-proposal-header">' +
+          '<span class="copilot-prop-type ' + esc(type) + '">' + typeLabel + '</span>' +
+          '<span class="copilot-prop-badge">💡 ' + (isZH() ? "建議項目 #" + (idx + 1) : "Suggested #" + (idx + 1)) + '</span>' +
+        '</div>' +
+        '<div class="copilot-prop-name" style="margin-top:4px">' + esc(s.name || (isZH() ? "未命名項目" : "Untitled")) + '</div>' +
+        '<div class="copilot-prop-meta">' +
+          (s.start ? '<span>🕒 ' + esc(s.start.replace("T", " ")) + (s.end ? ' ~ ' + esc(s.end.replace("T", " ")) : '') + '</span>' : '') +
+          (s.address ? '<span>📍 ' + esc(s.address) + '</span>' : '') +
+        '</div>' +
+        (s.note ? '<div class="copilot-prop-note">' + esc(s.note) + '</div>' : '') +
+        fbHtml +
+      '</div>';
+    }).join("");
+
+    return '<div class="copilot-proposal-card" id="' + prop.id + '">' +
+      '<div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--coral);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,90,53,.15);padding-bottom:6px;margin-bottom:6px">' +
+        '<span>✨ ' + (isZH() ? "行程建議清單 (" + segments.length + " 項)" : "Itinerary Proposal (" + segments.length + " items)") + '</span>' +
+        '<span style="font-size:10px;color:var(--muted)">' + (isZH() ? "手動確認後寫入" : "Manual review") + '</span>' +
+      '</div>' +
+      itemsHtml +
+      '<div class="copilot-prop-actions" id="acts_' + prop.id + '">' +
+        '<button class="copilot-prop-btn apply" data-applyprop="' + prop.id + '">' + (isZH() ? "✓ 確認套用至行程" : "✓ Apply to Itinerary") + '</button>' +
+        '<button class="copilot-prop-btn dismiss" data-dismissprop="' + prop.id + '">' + (isZH() ? "✕ 忽略" : "✕ Dismiss") + '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderCopilotMessage(msg){
+    var div = document.createElement("div");
+    div.className = "copilot-msg " + msg.role;
+
+    if(msg.role === "user"){
+      div.innerHTML = '<div class="copilot-bubble">' + esc(msg.content).replace(/\n/g, '<br>') + '</div>';
+    } else {
+      var formattedText = formatReplyText(msg.content);
+      if(msg.proposals && msg.proposals.length > 0){
+        msg.proposals.forEach(function(p){
+          var cardHtml = renderProposalCard(p);
+          var marker = '__COPILOT_PROP_' + p.id + '__';
+          var pMarker = '<p>' + marker + '</p>';
+          if(formattedText.indexOf(pMarker) !== -1){
+            formattedText = formattedText.replace(pMarker, cardHtml);
+          } else {
+            formattedText = formattedText.replace(marker, cardHtml);
+          }
+        });
+      }
+      div.innerHTML = '<div class="copilot-bubble">' + formattedText + '</div>';
+    }
+
+    copilotStream.appendChild(div);
+    scrollCopilotToBottom();
+  }
+
+  function renderNoKeyError(){
+    var div = document.createElement("div");
+    div.className = "copilot-msg assistant";
+    div.innerHTML = '<div class="copilot-bubble" style="border-color:rgba(232,154,43,.4);background:rgba(232,154,43,.06)">' +
+      '<div style="font-weight:700;color:var(--amber);margin-bottom:6px">⚠️ ' + (isZH() ? "尚未設定 AI 語言模型金鑰" : "No LLM API Key Configured") + '</div>' +
+      '<p style="font-size:13px;color:var(--ink)">' + (isZH() ? "RoamRadar AI 助理支援 Groq、Gemini、DeepSeek、OpenAI 或 Anthropic 等多種模型。請先前往設定填寫您的 API Key。" : "RoamRadar AI Copilot supports Groq, Gemini, DeepSeek, OpenAI, or Anthropic. Please configure your API key in Settings.") + '</p>' +
+      '<button class="btn solid" id="copilotOpenSettingsBtn" style="margin-top:8px;font-size:12px;padding:6px 14px">⚙️ ' + (isZH() ? "立即前往「設定」配置金鑰" : "Go to Settings") + '</button>' +
+    '</div>';
+    copilotStream.appendChild(div);
+    var btn = document.getElementById("copilotOpenSettingsBtn");
+    if(btn){
+      btn.onclick = function(){
+        closeCopilot();
+        document.getElementById("setBtn").click();
+      };
+    }
+    scrollCopilotToBottom();
+  }
+
+  function renderCopilotError(errMsg){
+    var div = document.createElement("div");
+    div.className = "copilot-msg assistant";
+    div.innerHTML = '<div class="copilot-bubble" style="border-color:rgba(255,90,53,.3);background:rgba(255,90,53,.06);color:var(--coral)">' +
+      '<div>⚠️ ' + esc(errMsg) + '</div>' +
+    '</div>';
+    copilotStream.appendChild(div);
+    scrollCopilotToBottom();
+  }
+
+  async function sendCopilotMessage(userText){
+    var text = (userText !== undefined ? userText : (copilotInput ? copilotInput.value : "")).trim();
+    if(!text || copilotInFlight) return;
+
+    if(copilotInput){
+      copilotInput.value = "";
+      copilotInput.style.height = "auto";
+    }
+    copilotInFlight = true;
+    if(copilotSendBtn) copilotSendBtn.disabled = true;
+
+    copilotMessages.push({ role: "user", content: text });
+    renderCopilotMessage({ role: "user", content: text });
+
+    var thinkingEl = document.createElement("div");
+    thinkingEl.className = "copilot-thinking";
+    thinkingEl.id = "copilotThinking";
+    thinkingEl.innerHTML = '<span class="copilot-spinner"></span><span>' + (isZH() ? "AI 特助正在思考與彙整行程資訊..." : "AI Copilot is reviewing itinerary details...") + '</span>';
+    copilotStream.appendChild(thinkingEl);
+    scrollCopilotToBottom();
+
+    try {
+      var res = await fetch((settings.workerUrl || "") + "/ai/chat", {
+        method: "POST",
+        headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+        body: JSON.stringify({
+          messages: copilotMessages.slice(-10),
+          currentTripId: copilotTripId || undefined
+        })
+      });
+
+      var data = await res.json().catch(function(){ return {}; });
+      var th = document.getElementById("copilotThinking");
+      if(th) th.remove();
+
+      if(!res.ok || !data.ok){
+        if(data.error === "NO_LLM_KEY"){
+          renderNoKeyError();
+        } else {
+          renderCopilotError(data.message || (isZH() ? "連線 AI 服務時發生錯誤，請稍後重試。" : "Error communicating with AI service."));
+        }
+        return;
+      }
+
+      var reply = data.reply || "";
+      var extracted = extractProposals(reply);
+      var asstMsg = {
+        role: "assistant",
+        content: extracted.cleanText,
+        proposals: extracted.proposals
+      };
+      extracted.proposals.forEach(function(p){
+        copilotProposals[p.id] = p;
+      });
+
+      copilotMessages.push(asstMsg);
+      renderCopilotMessage(asstMsg);
+
+    } catch(err){
+      console.error("Copilot request error:", err);
+      var thErr = document.getElementById("copilotThinking");
+      if(thErr) thErr.remove();
+      renderCopilotError(isZH() ? "網路連線異常，請確認網路連線或稍後再試。" : "Network error, please check connection.");
+    } finally {
+      copilotInFlight = false;
+      if(copilotSendBtn) copilotSendBtn.disabled = false;
+      if(copilotInput) copilotInput.focus();
+      scrollCopilotToBottom();
+    }
+  }
+
+  async function applyProposal(propId){
+    var prop = copilotProposals[propId];
+    if(!prop || prop.applied) return;
+    prop.applied = true; // Guard immediately against double-clicks
+
+    var actsEl = document.getElementById("acts_" + propId);
+    if(actsEl){
+      actsEl.innerHTML = '<span class="copilot-prop-status applied">⏳ ' + (isZH() ? "正在儲存至行程..." : "Saving...") + '</span>';
+    }
+
+    var targetTripId = prop.data.tripId || copilotTripId;
+    var targetTrip = trips.find(function(t){ return t.id === targetTripId; });
+
+    if(!targetTrip){
+      var up = trips.filter(isUpcoming);
+      targetTrip = up.length ? up[0] : trips[0];
+    }
+
+    if(!targetTrip){
+      prop.applied = false;
+      if(actsEl){
+        actsEl.innerHTML = '<span style="color:var(--coral);font-size:12px;">' + (isZH() ? "⚠️ 尚未建立任何旅程，請先在主頁點擊「+ 新增旅程」" : "⚠️ No trip found, please add a trip first") + '</span>';
+      }
+      return;
+    }
+
+    if(!targetTrip.segments) targetTrip.segments = [];
+
+    var segments = prop.data.segments || [];
+    segments.forEach(function(s){
+      var newSeg = {
+        sid: uid(),
+        source: "manual",
+        type: s.type || "other",
+        name: s.name || (isZH() ? "未命名細項" : "Untitled item"),
+        address: s.address || "",
+        start: s.start || targetTrip.start || "",
+        end: s.end || "",
+        note: s.note || "",
+        conf: s.conf || ""
+      };
+      if(s.fallback && s.fallback.name){
+        newSeg.fallback = {
+          name: s.fallback.name,
+          address: s.fallback.address || "",
+          note: s.fallback.note || ""
+        };
+      }
+      targetTrip.segments.push(newSeg);
+    });
+
+    targetTrip.segments = dedupeSegs(targetTrip.segments);
+    targetTrip.updatedAt = Date.now();
+
+    try {
+      await persistTrip(targetTrip);
+      render();
+      if(actsEl){
+        actsEl.innerHTML = '<span class="copilot-prop-status applied">✓ ' + (isZH() ? "已成功套用至「" + esc(targetTrip.label || targetTrip.to) + "」" : "Applied to " + esc(targetTrip.label || targetTrip.to)) + '</span>';
+      }
+      toast(isZH() ? "✓ 已成功將 " + segments.length + " 個項目加入行程！" : "✓ " + segments.length + " items added to itinerary!");
+    } catch(err){
+      console.error("Save trip error:", err);
+      prop.applied = false;
+      if(actsEl){
+        actsEl.innerHTML = '<span style="color:var(--coral);font-size:12px;">' + (isZH() ? "儲存失敗，請重試" : "Failed to save") + '</span>';
+      }
+    }
+  }
+
+  function dismissProposal(propId){
+    var prop = copilotProposals[propId];
+    if(!prop) return;
+    prop.dismissed = true;
+    var actsEl = document.getElementById("acts_" + propId);
+    if(actsEl){
+      actsEl.innerHTML = '<span class="copilot-prop-status dismissed">' + (isZH() ? "✕ 已忽略此提案" : "✕ Dismissed") + '</span>';
+    }
+  }
+
+  // Copilot Event Listeners
+  if(copilotBtn){
+    copilotBtn.onclick = function(){ openCopilot(null); };
+  }
+  if(copilotCloseBtn){
+    copilotCloseBtn.onclick = closeCopilot;
+  }
+  if(copilotScrim){
+    copilotScrim.addEventListener("click", function(e){
+      if(e.target === copilotScrim) closeCopilot();
+    });
+  }
+  if(copilotContextClearBtn){
+    copilotContextClearBtn.onclick = function(){
+      copilotTripId = null;
+      updateCopilotContextUI();
+      toast(isZH() ? "已切換為全行程視野" : "Switched to all-trips view");
+    };
+  }
+  if(copilotInput){
+    copilotInput.addEventListener("keydown", function(e){
+      if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendCopilotMessage();
+      }
+    });
+    copilotInput.addEventListener("input", function(){
+      this.style.height = "auto";
+      this.style.height = Math.min(this.scrollHeight, 120) + "px";
+    });
+  }
+  if(copilotSendBtn){
+    copilotSendBtn.onclick = function(){ sendCopilotMessage(); };
+  }
+  if(copilotStream){
+    copilotStream.addEventListener("click", function(e){
+      var chip = e.target.closest("[data-chip]");
+      if(chip){
+        sendCopilotMessage(chip.dataset.chip);
+        return;
+      }
+      var applyBtn = e.target.closest("[data-applyprop]");
+      if(applyBtn){
+        applyProposal(applyBtn.dataset.applyprop);
+        return;
+      }
+      var dismissBtn = e.target.closest("[data-dismissprop]");
+      if(dismissBtn){
+        dismissProposal(dismissBtn.dataset.dismissprop);
+        return;
+      }
+    });
+  }
 
   /* ===================== init (preserved seeding) ===================== */
   // When served from the worker itself, adopt its own origin as the sync URL so
