@@ -1,0 +1,16 @@
+/*
+  Access-Control-Allow-Origin: *
+
+/*.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.md
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.html
+  Content-Type: text/html; charset=utf-8
+
+/*.json
+  Content-Type: application/json; charset=utf-8

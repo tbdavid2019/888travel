@@ -20,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **零依賴 Lucide SVG 圖標系統全面置換 (Zero-Dependency Lucide SVG Icon Registry)**：
   - 提取 50+ 個官方 Lucide Stroke SVG 圖標，全面取代傳統 Emoji 圖形反模式。
   - 頂部工具列、5 大主導航分頁、旅程操作卡、細項行程、設定 5 大分頁、AI 抽屜、頁尾全面換裝統一筆畫與質感的現代向量圖標。
+- **修復獨立規範文件 UTF-8 編碼與 MIME 協商 (Fix UTF-8 Charset & MIME for Discovery Docs)**：
+  - 徹底解決瀏覽器直接打開 `/llms.txt`、`/llms-full.txt` 與 `/skill.md` 時因缺少 `charset=utf-8` 標頭而導致繁體中文被誤判為 Big5 亂碼的物理問題。
+  - 將獨立端點轉交由 Worker 動態處理並嚴格注入 `Content-Type: text/plain; charset=utf-8` 與 `Cache-Control: public, max-age=0, must-revalidate`，同時支援 `HEAD` 探測與動態 Origin 網域名稱代換。
+  - 配置 `public/_headers` 確保所有靜態資源與 MIME 類型均附帶 UTF-8 編碼保護。
 - **全光譜外部 AI Agent RESTful API 完整覆蓋 (Full-Spectrum Agent API 19 Endpoints)**：
   - 全面擴充 `/api/v1/*` 端點，100% 覆蓋 RoamRadar 所有中樞能力：
     1. `GET /api/v1/status`：實例健康狀態、旅程統計、整合服務開通狀態。

@@ -219,17 +219,33 @@ export default {
     }
 
     // --- Machine-readable Discovery (llms.txt, llms-full.txt, SKILL.md) ---
-    if ((url.pathname === "/llms.txt" || url.pathname === "/api/llms.txt") && request.method === "GET") {
+    if ((url.pathname === "/llms.txt" || url.pathname === "/api/llms.txt") && (request.method === "GET" || request.method === "HEAD")) {
       const body = LLMS_TXT.replace(/https:\/\/travel\.david888\.com/g, url.origin);
-      return cors(new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8" } }));
+      return cors(new Response(request.method === "HEAD" ? null : body, {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "public, max-age=0, must-revalidate"
+        }
+      }));
     }
-    if (url.pathname === "/llms-full.txt" && request.method === "GET") {
+    if (url.pathname === "/llms-full.txt" && (request.method === "GET" || request.method === "HEAD")) {
       const body = LLMS_FULL_TXT.replace(/https:\/\/travel\.david888\.com/g, url.origin);
-      return cors(new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8" } }));
+      return cors(new Response(request.method === "HEAD" ? null : body, {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "public, max-age=0, must-revalidate"
+        }
+      }));
     }
-    if (url.pathname === "/skill.md" && request.method === "GET") {
+    if (url.pathname === "/skill.md" && (request.method === "GET" || request.method === "HEAD")) {
       const body = SKILL_MD.replace(/https:\/\/travel\.david888\.com/g, url.origin);
-      return cors(new Response(body, { headers: { "Content-Type": "text/markdown; charset=utf-8" } }));
+      const isMd = (request.headers.get("Accept") || "").includes("text/markdown");
+      return cors(new Response(request.method === "HEAD" ? null : body, {
+        headers: {
+          "Content-Type": (isMd ? "text/markdown" : "text/plain") + "; charset=utf-8",
+          "Cache-Control": "public, max-age=0, must-revalidate"
+        }
+      }));
     }
 
     // --- Agent RESTful API v1 (/api/v1/*) ---
