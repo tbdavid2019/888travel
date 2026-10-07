@@ -119,17 +119,17 @@
   .c-badge.live{background:rgba(27,138,87,.12);color:var(--green)}
   .c-badge.done{background:rgba(22,19,12,.06);color:var(--faint)}
   .card-acts{display:flex;gap:8px;flex-shrink:0}
-  .mini{font-family:var(--body);font-weight:600;font-size:13.5px;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:8px 16px;border-radius:999px;cursor:pointer}
+  .mini{font-family:var(--body);font-weight:600;font-size:14.5px;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:8px 16px;border-radius:999px;cursor:pointer;min-height:38px;display:inline-flex;align-items:center;gap:6px}
   .mini:hover{background:var(--soft)}
   .mini.del{color:var(--coral);border-color:rgba(255,90,53,.3)}
   .mini.del:hover{background:rgba(255,90,53,.08)}
-  .tripnote{margin:14px 26px 0;font-size:13.5px;line-height:1.6;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--line-strong);border-radius:0 10px 10px 0;padding:11px 14px;white-space:pre-wrap}
+  .tripnote{margin:14px 26px 0;font-size:14.5px;line-height:1.6;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--line-strong);border-radius:0 10px 10px 0;padding:11px 14px;white-space:pre-wrap}
 
   /* toggle + timeline */
   .toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 26px;background:#F8F5EE;border:none;border-top:1px solid var(--line);cursor:pointer;margin-top:16px}
   .toggle .lbl{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;color:var(--muted)}
   .toggle .sq{width:8px;height:8px;border-radius:2px;display:inline-block}
-  .toggle .rgt{font-family:var(--body);font-size:13.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px}
+  .toggle .rgt{font-family:var(--body);font-size:14.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px}
   .toggle .caret{font-size:12px}
   .itin{padding:8px 26px 22px;display:none}
   .trip.open .itin{display:block}
@@ -137,42 +137,42 @@
   .plan .dotwrap{position:relative;display:flex;justify-content:center}
   .plan .dot{width:14px;height:14px;border-radius:50%}
   .plan .ttl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .plan .nm{font-family:var(--display);font-weight:700;font-size:16px}
-  .plan .type{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.08em;padding:3px 9px;border-radius:999px;text-transform:uppercase}
+  .plan .nm{font-family:var(--display);font-weight:700;font-size:17px}
+  .plan .type{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.06em;padding:4px 10px;border-radius:999px;text-transform:uppercase;display:inline-flex;align-items:center;gap:5px}
   .plan{cursor:pointer}
   .plan>div{min-width:0}
   .plan .ttl .nm{overflow-wrap:anywhere}
-  .plan .sub{font-size:13.5px;line-height:1.55;color:var(--muted);margin-top:3px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .fb-badge{font-family:var(--mono);font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(232,154,43,.14);color:var(--amber);display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
-  .rating-badge{font-family:var(--mono);font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(255,200,0,.18);color:#9E7300;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
-  .plan .fb-sub{color:var(--amber);font-size:12.5px;margin-top:3px;display:flex;align-items:center;gap:5px}
-  .plan .fb-sub .fb-tag{font-weight:700;font-family:var(--mono);font-size:11.5px;padding:2px 6px;border-radius:4px;background:rgba(232,154,43,.18);color:var(--amber)}
+  .plan .sub{font-size:14.5px;line-height:1.6;color:var(--muted);margin-top:3px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .fb-badge{font-family:var(--mono);font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(232,154,43,.14);color:var(--amber);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .rating-badge{font-family:var(--mono);font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(255,200,0,.18);color:#9E7300;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+  .plan .fb-sub{color:var(--amber);font-size:14px;margin-top:4px;display:flex;align-items:center;gap:6px}
+  .plan .fb-sub .fb-tag{font-weight:700;font-family:var(--mono);font-size:12.5px;padding:3px 8px;border-radius:6px;background:rgba(232,154,43,.18);color:var(--amber);display:inline-flex;align-items:center;gap:4px}
   .pd-fb-card{margin-top:14px;background:rgba(232,154,43,.06);border:1px solid rgba(232,154,43,.25);border-radius:12px;padding:12px 14px}
   .pd-fb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
   .pd-fb-tag{font-size:12.5px;font-weight:700;color:var(--amber);display:flex;align-items:center;gap:5px}
   .pd-fb-tip{font-size:12px;color:var(--muted)}
-  .pd-fb-name{font-family:var(--display);font-weight:700;font-size:15.5px;color:var(--ink);margin-bottom:4px}
-  .pd-fb-addr{font-size:13.5px;color:var(--muted);margin-bottom:4px}
-  .pd-fb-note{font-size:13.5px;color:var(--ink);margin-bottom:8px;padding:6px 10px;background:var(--soft);border-radius:6px;border:1px solid var(--line)}
+  .pd-fb-name{font-family:var(--display);font-weight:700;font-size:16.5px;color:var(--ink);margin-bottom:4px}
+  .pd-fb-addr{font-size:14.5px;color:var(--muted);margin-bottom:4px}
+  .pd-fb-note{font-size:14.5px;color:var(--ink);margin-bottom:8px;padding:6px 10px;background:var(--soft);border-radius:6px;border:1px solid var(--line)}
   .pd-fb-actions{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
-  .pd-fb-actions .btn{padding:7px 14px;font-size:13px}
+  .pd-fb-actions .btn{padding:8px 16px;font-size:14.5px;display:inline-flex;align-items:center;gap:6px}
   .places-box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.08);margin-top:6px}
   .places-item{padding:8px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px;text-align:left}
   .places-item:last-child{border-bottom:none}
   .places-item-header{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-  .places-name{font-weight:700;font-size:14px;color:var(--ink)}
-  .places-rating{font-family:var(--mono);font-size:12px;color:#9E7300;background:rgba(255,200,0,.15);padding:2px 8px;border-radius:999px;white-space:nowrap}
-  .places-addr{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .places-name{font-weight:700;font-size:15px;color:var(--ink)}
+  .places-rating{font-family:var(--mono);font-size:13px;color:#9E7300;background:rgba(255,200,0,.15);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .places-addr{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .places-acts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-  .places-acts button, .places-acts a{font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+  .places-acts button, .places-acts a{font-size:13.5px;padding:6px 12px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
   #g_places_btn:hover{background:rgba(255,90,53,.14)!important;transform:translateY(-1px);box-shadow:0 2px 8px rgba(255,90,53,.15)}
   #g_places_btn:active{transform:translateY(0)}
   .plan .pmeta{display:flex;align-items:center;gap:12px}
-  .plan .when{font-family:var(--mono);font-size:13.5px;color:var(--ink);white-space:nowrap}
+  .plan .when{font-family:var(--mono);font-size:14px;color:var(--ink);white-space:nowrap}
   .plan .x{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;font-size:14px;line-height:1}
   .plan .x:hover{color:var(--coral);border-color:rgba(255,90,53,.35)}
-  .itin .empty{color:var(--faint);font-size:13.5px;padding:6px 0 4px}
-  .addplan{margin-top:16px;font-family:var(--body);font-weight:700;font-size:13.5px;color:var(--cobalt);background:rgba(30,64,255,.08);border:none;padding:10px 20px;border-radius:999px;cursor:pointer}
+  .itin .empty{color:var(--faint);font-size:14.5px;padding:6px 0 4px}
+  .addplan{margin-top:16px;font-family:var(--body);font-weight:700;font-size:14.5px;color:var(--cobalt);background:rgba(30,64,255,.08);border:none;padding:10px 20px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
   .addplan.ical{margin-left:8px;color:var(--ink);background:var(--soft)}
   .destinfo{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px;empty-cells:hide}
   .destinfo:empty{display:none}
@@ -244,16 +244,16 @@
   @keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 
   /* app footer */
-  .app-footer{margin-top:64px;padding:24px 0 36px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:13px}
-  .foot-brand{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
-  .foot-ver{font-family:var(--mono);font-size:12px;color:var(--faint)}
-  .foot-links{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px}
-  .foot-link{color:var(--muted);text-decoration:none;transition:color .15s ease}
+  .app-footer{margin-top:64px;padding:26px 0 38px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:14.5px}
+  .foot-brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink);font-size:15px}
+  .foot-ver{font-family:var(--mono);font-size:13px;color:var(--faint)}
+  .foot-links{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:14px}
+  .foot-link{color:var(--muted);text-decoration:none;transition:color .15s ease;display:inline-flex;align-items:center;gap:6px;font-weight:600}
   .foot-link:hover{color:var(--coral);text-decoration:underline}
   .foot-sep{color:var(--line)}
   .field{margin-bottom:18px}
-  .field label{display:block;font-weight:600;font-size:13.5px;color:var(--muted);margin-bottom:7px}
-  .field label .opt{color:var(--faint);font-weight:400}
+  .field label{display:block;font-weight:600;font-size:15px;color:var(--ink);margin-bottom:8px}
+  .field label .opt{color:var(--muted);font-weight:400;font-size:13.5px}
   .field input,.field select,.field textarea{width:100%;font-family:var(--body);font-size:16px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:13px 15px;outline:none}
   .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cobalt);background:#fff}
   .field textarea{resize:vertical;min-height:60px;font-family:var(--body)}
@@ -261,7 +261,7 @@
   .two{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px}
   .modal-actions{display:flex;gap:12px;margin-top:28px}
   .modal-actions.act-row{justify-content:flex-start;gap:8px;margin-top:0;flex-wrap:wrap}
-  .modal-actions.act-row .btn{flex:0 0 auto;padding:10px 16px;font-size:13.5px;font-weight:600;white-space:nowrap}
+  .modal-actions.act-row .btn{flex:0 0 auto;padding:10px 18px;font-size:14.5px;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
   .hlp{border-bottom:1px solid var(--line)}
   .hlp summary{cursor:pointer;font-family:var(--display);font-weight:700;font-size:16px;padding:14px 0;list-style:none;display:flex;justify-content:space-between;align-items:center}
   .hlp summary::-webkit-details-marker{display:none}
@@ -418,7 +418,8 @@
     text-transform: none !important;
   }
 
-  /* 🛡️ CJK HARD FLOOR: 12px ABSOLUTE MINIMUM FOR ALL TAGS, BADGES, AND META LABELS */
+  /* 🛡️ CJK IMPECCABLE QUALITY FLOOR: Chinese Characters (方塊字) Stroke Density Protection */
+  /* Badges, Pills, Tags & Meta Badges: 13.5px Minimum for CJK ideograms */
   html[lang*="zh"] .plan .type,
   html[lang*="zh"] .fb-badge,
   html[lang*="zh"] .rating-badge,
@@ -429,6 +430,8 @@
   html[lang*="zh"] .c-badge,
   html[lang*="zh"] .pill-next,
   html[lang*="zh"] .status,
+  html[lang*="zh"] .wchip,
+  html[lang*="zh"] .mc,
   html[lang*="zh"] .copilot-prop-type,
   html[lang*="zh"] .copilot-prop-badge,
   html[lang*="zh"] .copilot-prop-status,
@@ -442,51 +445,67 @@
   html[lang*="zh"] .ig-foot .handle,
   html[lang*="zh"] #llm_models_badge,
   html[lang*="zh"] #agent_key_badge {
-    font-size: 12px !important;
-    line-height: 1.35 !important;
+    font-size: 13.5px !important;
+    line-height: 1.45 !important;
+    letter-spacing: 0.02em !important;
   }
 
   html[lang*="zh"] .plan .type {
-    padding: 3px 10px;
-    font-weight: 700;
+    padding: 4px 11px !important;
+    font-weight: 700 !important;
   }
   html[lang*="zh"] .c-dur,
   html[lang*="zh"] .c-badge {
-    padding: 4px 10px;
-    font-weight: 600;
+    padding: 4px 12px !important;
+    font-weight: 700 !important;
   }
   html[lang*="zh"] .pill-next {
-    padding: 5px 13px;
-    font-weight: 600;
+    padding: 6px 14px !important;
+    font-weight: 700 !important;
   }
   html[lang*="zh"] .copilot-prop-type {
-    padding: 3px 10px;
-    font-weight: 700;
+    padding: 4px 12px !important;
+    font-weight: 700 !important;
+  }
+  html[lang*="zh"] .toast {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    padding: 13px 26px !important;
+    letter-spacing: 0.01em !important;
+  }
+  html[lang*="zh"] .cal-d {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+  html[lang*="zh"] .cal-dow {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
   }
 
-  /* Secondary Information & Metadata (13px - 14px) */
+  /* Secondary Information & Metadata (14.5px - 15px) */
   html[lang*="zh"] .copilot-sub {
-    font-size: 13px !important;
-    line-height: 1.5 !important;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
   }
   html[lang*="zh"] .stat .l {
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.02em !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
   }
   html[lang*="zh"] .c-date,
   html[lang*="zh"] .destinfo .di,
   html[lang*="zh"] .toggle .lbl,
   html[lang*="zh"] .toggle .rgt,
   html[lang*="zh"] .plan .when {
-    font-size: 13.5px !important;
-    line-height: 1.5 !important;
+    font-size: 14.5px !important;
+    line-height: 1.55 !important;
   }
   html[lang*="zh"] .plan .sub,
   html[lang*="zh"] .tripnote,
   html[lang*="zh"] .hint,
   html[lang*="zh"] .pd-fb-tip,
   html[lang*="zh"] .pd-fb-addr,
+  html[lang*="zh"] .pd-fb-note,
   html[lang*="zh"] .places-addr,
   html[lang*="zh"] .copilot-prop-meta,
   html[lang*="zh"] .copilot-prop-note,
@@ -498,53 +517,85 @@
   html[lang*="zh"] .yr-trip,
   html[lang*="zh"] .yr-td,
   html[lang*="zh"] .cal-tab,
-  html[lang*="zh"] .cal-d,
   html[lang*="zh"] .cal-leg .dt,
   html[lang*="zh"] .auth-err,
   html[lang*="zh"] .auth-foot,
+  html[lang*="zh"] .auth-tab,
   html[lang*="zh"] .err {
-    font-size: 13.5px !important;
-    line-height: 1.6 !important;
+    font-size: 14.5px !important;
+    line-height: 1.65 !important;
+  }
+  html[lang*="zh"] .plan .sub {
+    font-size: 15px !important;
+    line-height: 1.65 !important;
+  }
+  html[lang*="zh"] .plan .nm {
+    font-size: 17.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em !important;
+  }
+  html[lang*="zh"] .trip h3 {
+    font-size: 21px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em !important;
   }
 
   /* Section Titles & Structural Headings */
   html[lang*="zh"] .listhead h2 {
-    font-size: 15px !important;
+    font-size: 16.5px !important;
     font-weight: 700 !important;
     color: var(--ink) !important;
-    letter-spacing: 0.02em !important;
-  }
-  html[lang*="zh"] .modal h3 {
-    font-size: 18px !important;
-    font-weight: 800 !important;
     letter-spacing: 0.01em !important;
   }
+  html[lang*="zh"] .modal h3 {
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.3 !important;
+  }
   html[lang*="zh"] .modal h4 {
-    font-size: 15px !important;
+    font-size: 17px !important;
     font-weight: 700 !important;
     color: var(--ink) !important;
-    letter-spacing: 0.02em !important;
+    letter-spacing: 0 !important;
+    line-height: 1.4 !important;
+  }
+  html[lang*="zh"] .field label {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: var(--ink) !important;
+  }
+  html[lang*="zh"] .set-tab-btn {
+    font-size: 15.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+  }
+  html[lang*="zh"] .app-footer {
+    font-size: 14.5px !important;
+  }
+  html[lang*="zh"] .foot-links {
+    font-size: 14px !important;
   }
   html[lang*="zh"] .pd-k {
-    font-size: 13px !important;
+    font-size: 13.5px !important;
     font-weight: 600 !important;
     color: var(--muted) !important;
     letter-spacing: 0.02em !important;
   }
   html[lang*="zh"] .pd-v {
-    font-size: 15.5px !important;
+    font-size: 16px !important;
     line-height: 1.6 !important;
   }
   html[lang*="zh"] .hero-count .lab div {
-    font-size: 21px !important;
+    font-size: 22px !important;
     line-height: 1.3 !important;
   }
 
   /* Interactive Elements, Tabs, and Buttons */
   html[lang*="zh"] .tabs .tab {
-    font-size: 14.5px !important;
-    font-weight: 600 !important;
-    padding: 9px 18px !important;
+    font-size: 15.5px !important;
+    font-weight: 700 !important;
+    padding: 10px 18px !important;
     letter-spacing: 0.01em !important;
   }
   html[lang*="zh"] .btn,
@@ -555,13 +606,14 @@
   html[lang*="zh"] .copilot-chip,
   html[lang*="zh"] .places-acts button,
   html[lang*="zh"] .places-acts a {
-    font-size: 14px !important;
-    line-height: 1.4 !important;
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+    font-weight: 600 !important;
   }
 
   /* Body Copy & Chat Bubbles */
   html[lang*="zh"] .copilot-bubble {
-    font-size: 15px !important;
+    font-size: 15.5px !important;
     line-height: 1.65 !important;
     letter-spacing: 0.01em !important;
   }
@@ -608,11 +660,11 @@
   .copilot-bubble ul,.copilot-bubble ol{margin:6px 0;padding-left:18px}
   .copilot-bubble li{margin-bottom:4px}
   .copilot-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-  .copilot-chip{font-size:12.5px;padding:6px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);cursor:pointer;transition:all .15s ease;text-align:left;line-height:1.35}
+  .copilot-chip{font-size:13.5px;padding:7px 15px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);cursor:pointer;transition:all .15s ease;text-align:left;line-height:1.35}
   .copilot-chip:hover{border-color:var(--coral);color:var(--coral);transform:translateY(-1px);box-shadow:0 2px 6px rgba(255,90,53,.12)}
   .copilot-proposal-card{margin-top:12px;background:var(--card);border:1.5px solid rgba(255,90,53,.35);border-radius:14px;padding:14px 16px;box-shadow:0 4px 16px rgba(22,19,12,.06);display:flex;flex-direction:column;gap:8px}
   .copilot-proposal-header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-  .copilot-prop-type{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;padding:3px 9px;border-radius:999px;text-transform:uppercase}
+  .copilot-prop-type{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.06em;padding:4px 10px;border-radius:999px;text-transform:uppercase;display:inline-flex;align-items:center;gap:5px}
   .copilot-prop-type.flight{background:rgba(30,64,255,.12);color:var(--cobalt)}
   .copilot-prop-type.hotel{background:rgba(27,138,87,.12);color:var(--green)}
   .copilot-prop-type.restaurant{background:rgba(255,90,53,.14);color:var(--coral)}
@@ -620,15 +672,15 @@
   .copilot-prop-type.car{background:rgba(232,154,43,.14);color:var(--amber)}
   .copilot-prop-type.ride{background:rgba(124,77,255,.12);color:var(--purple)}
   .copilot-prop-type.other{background:rgba(117,109,94,.12);color:var(--muted)}
-  .copilot-prop-badge{font-family:var(--mono);font-size:11px;color:var(--coral);font-weight:700}
-  .copilot-prop-name{font-family:var(--display);font-size:15.5px;font-weight:700;color:var(--ink)}
-  .copilot-prop-meta{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+  .copilot-prop-badge{font-family:var(--mono);font-size:12.5px;color:var(--coral);font-weight:700;display:inline-flex;align-items:center;gap:4px}
+  .copilot-prop-name{font-family:var(--display);font-size:16.5px;font-weight:700;color:var(--ink)}
+  .copilot-prop-meta{font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
   .copilot-prop-meta span{display:flex;align-items:center;gap:4px}
-  .copilot-prop-note{font-size:13px;line-height:1.5;color:var(--ink);background:var(--soft);padding:6px 10px;border-radius:6px;border:1px solid var(--line)}
-  .copilot-prop-fallback{background:rgba(232,154,43,.08);border:1px dashed rgba(232,154,43,.35);border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.5;color:var(--ink)}
-  .copilot-prop-fb-title{font-weight:700;color:var(--amber);font-size:12px;margin-bottom:2px;display:flex;align-items:center;gap:4px}
+  .copilot-prop-note{font-size:14px;line-height:1.55;color:var(--ink);background:var(--soft);padding:6px 10px;border-radius:6px;border:1px solid var(--line)}
+  .copilot-prop-fallback{background:rgba(232,154,43,.08);border:1px dashed rgba(232,154,43,.35);border-radius:8px;padding:10px 12px;font-size:13.5px;line-height:1.55;color:var(--ink)}
+  .copilot-prop-fb-title{font-weight:700;color:var(--amber);font-size:13px;margin-bottom:4px;display:flex;align-items:center;gap:5px}
   .copilot-prop-actions{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
-  .copilot-prop-btn{padding:7px 16px;font-size:13px;font-weight:600;border-radius:999px;cursor:pointer;border:1px solid var(--line);transition:all .15s ease}
+  .copilot-prop-btn{padding:8px 16px;font-size:14.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;border-radius:999px;cursor:pointer;border:1px solid var(--line);transition:all .15s ease}
   .copilot-prop-btn.apply{background:var(--ink);color:var(--cream);border-color:var(--ink)}
   .copilot-prop-btn.apply:hover{background:var(--coral);border-color:var(--coral);transform:translateY(-1px)}
   .copilot-prop-btn.dismiss{background:transparent;color:var(--muted);border-color:transparent}
@@ -636,7 +688,7 @@
   .copilot-prop-status{font-family:var(--mono);font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px}
   .copilot-prop-status.applied{background:rgba(27,138,87,.12);color:var(--green)}
   .copilot-prop-status.dismissed{background:var(--soft);color:var(--muted)}
-  .copilot-thinking{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink);padding:9px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;align-self:flex-start;animation:riseIn .2s ease both;box-shadow:0 2px 8px rgba(22,19,12,.04)}
+  .copilot-thinking{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink);padding:9px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;align-self:flex-start;animation:riseIn .2s ease both;box-shadow:0 2px 8px rgba(22,19,12,.04)}
   .copilot-spinner{width:13px;height:13px;border:2px solid rgba(255,90,53,.25);border-top-color:var(--coral);border-radius:50%;animation:copilotSpin .8s linear infinite;flex-shrink:0}
   @keyframes copilotSpin{to{transform:rotate(360deg)}}
   .copilot-footer{padding:12px 16px 16px;background:var(--card);border-top:1px solid var(--line);flex-shrink:0}
@@ -658,13 +710,13 @@
     .hero-photo{height:180px;order:-1}
     .hero-fade{background:linear-gradient(0deg,var(--ink) 2%,rgba(22,19,12,.12) 55%,transparent 100%)}
     .stats{grid-template-columns:repeat(2,1fr)}
-    /* Scroll, never clip: keep 14px legible size for mobile tabs without clipping */
-    .tabs{width:100%;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    /* Scroll, never clip: keep generous legible size for mobile tabs without clipping */
+    .tabs{width:100%;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
     .tabs::-webkit-scrollbar{display:none}
-    .tabs .tab{flex:0 0 auto;justify-content:center;padding:9px 15px;font-size:14px;gap:5px}
-    .tab .cnt{margin-left:3px}
-    .card-acts{gap:6px;flex-wrap:wrap}
-    .card-acts .mini{padding:8px 14px;font-size:13.5px;min-height:38px;display:inline-flex;align-items:center}
+    .tabs .tab{flex:0 0 auto;justify-content:center;padding:10px 16px;font-size:15px;gap:6px;min-height:42px}
+    .tab .cnt{margin-left:4px}
+    .card-acts{gap:8px;flex-wrap:wrap}
+    .card-acts .mini{padding:9px 15px;font-size:14.5px;min-height:40px;display:inline-flex;align-items:center;gap:6px}
     .copilot-input{font-size:16px} /* Prevents iOS Safari auto-zoom */
     .trip-head{grid-template-columns:1fr}
     .trip-photo{height:170px;min-height:0}
@@ -674,21 +726,31 @@
     .ig-card{width:min(92vw,432px);height:auto}
     .ig-side{width:min(92vw,432px)}
     .modal{padding:24px 20px}
-    .set-tab-nav{margin:10px -10px 16px;padding:0 10px 4px;gap:4px}
-    .set-tab-btn{padding:8px 10px;font-size:13px;min-height:36px}
+    .set-tab-nav{margin:10px -10px 16px;padding:0 10px 4px;gap:6px}
+    .set-tab-btn{padding:10px 14px;font-size:15px;min-height:42px;display:inline-flex;align-items:center;gap:6px}
     .app-footer{margin-top:40px;flex-direction:column;align-items:flex-start;gap:12px}
     .two{grid-template-columns:1fr}
     .copilot-drawer{top:auto;bottom:0;left:0;right:0;width:100%;height:86dvh;max-height:86dvh;border-radius:24px 24px 0 0;border-left:none;border-top:1px solid var(--line);transform:translateY(100%);box-shadow:0 -12px 40px rgba(22,19,12,.25);padding-bottom:env(safe-area-inset-bottom);overscroll-behavior:contain}
     .copilot-scrim.show .copilot-drawer{transform:translateY(0)}
 
-    /* Mobile Chinese RWD Adjustments */
+    /* Mobile Chinese RWD Adjustments - Impeccable Readability Guarantee */
     html[lang*="zh"] .brand h1{font-size:clamp(30px,8vw,46px)!important;line-height:1.24!important}
-    html[lang*="zh"] .tabs .tab{font-size:14px!important;padding:9px 14px!important}
-    html[lang*="zh"] .card-acts .mini{font-size:13.5px!important;padding:8px 14px!important}
-    html[lang*="zh"] .stat .n{font-size:36px!important}
-    html[lang*="zh"] .stat .l{font-size:12.5px!important}
-    html[lang*="zh"] .trip h3{font-size:18px!important}
-    html[lang*="zh"] .plan .nm{font-size:15.5px!important}
+    html[lang*="zh"] .brand p{font-size:15px!important;line-height:1.6!important}
+    html[lang*="zh"] .tabs .tab{font-size:15px!important;padding:10px 16px!important;font-weight:700!important;min-height:42px!important}
+    html[lang*="zh"] .card-acts .mini{font-size:14.5px!important;padding:9px 15px!important;font-weight:600!important;min-height:40px!important}
+    html[lang*="zh"] .stat .n{font-size:38px!important}
+    html[lang*="zh"] .stat .l{font-size:14px!important;font-weight:700!important}
+    html[lang*="zh"] .trip h3{font-size:20px!important;font-weight:700!important}
+    html[lang*="zh"] .plan .nm{font-size:17px!important;font-weight:700!important}
+    html[lang*="zh"] .plan .sub{font-size:14.5px!important;line-height:1.6!important}
+    html[lang*="zh"] .btn,
+    html[lang*="zh"] .addplan{font-size:14.5px!important;min-height:42px!important}
+    html[lang*="zh"] .set-tab-btn{font-size:15px!important;font-weight:600!important;min-height:42px!important}
+    html[lang*="zh"] .hint{font-size:14.5px!important;line-height:1.65!important}
+    html[lang*="zh"] .plan .type,
+    html[lang*="zh"] .fb-badge,
+    html[lang*="zh"] .rating-badge,
+    html[lang*="zh"] .c-badge{font-size:13px!important;line-height:1.35!important}
     html[lang*="zh"] .copilot-drawer{height:88dvh;max-height:88dvh}
   }
 </style>
@@ -701,7 +763,7 @@
       <p id="brandDesc">Every trip - its flights, stays and rides - on one living timeline.</p>
     </div>
     <div class="ctl">
-      <button class="btn" id="copilotBtn" title="AI 行程特助 / AI Travel Copilot">✨ <span id="copilotBtnText">AI 助理</span></button>
+      <button class="btn" id="copilotBtn" title="AI 行程特助 / AI Travel Copilot"></button>
       <button class="btn" id="langBtn" title="切換語言 / Switch language">繁中 / EN</button>
       <button class="btn" id="refreshBtn" style="display:none">Sync now</button>
       <button class="btn" id="shareBtn">Share</button>
@@ -731,16 +793,16 @@
 
   <footer class="app-footer">
     <div class="foot-brand">
-      <span style="font-size:16px">✈️</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-compass" style="display:inline-block;vertical-align:-0.18em;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span id="footBrandText">888漫步旅遊 · RoamRadar</span>
-      <span class="foot-ver">v2.6.2</span>
+      <span class="foot-ver">v2.6.3</span>
     </div>
     <div class="foot-links">
-      <a href="/llms.txt" target="_blank" rel="noopener" class="foot-link" title="LLM 探索規範索引 (llms.txt)">🤖 llms.txt</a>
+      <a href="/llms.txt" target="_blank" rel="noopener" class="foot-link" title="LLM 探索規範索引 (llms.txt)"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot" style="display:inline-block;vertical-align:-0.18em;flex-shrink:0;"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></svg> llms.txt</a>
       <span class="foot-sep">·</span>
-      <a href="/skill.md" target="_blank" rel="noopener" class="foot-link" title="Autonomous AI Agent 技能定義 (skill.md)">📄 skill.md</a>
+      <a href="/skill.md" target="_blank" rel="noopener" class="foot-link" title="Autonomous AI Agent 技能定義 (skill.md)"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code" style="display:inline-block;vertical-align:-0.18em;flex-shrink:0;"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg> skill.md</a>
       <span class="foot-sep">·</span>
-      <a href="/llms-full.txt" target="_blank" rel="noopener" class="foot-link" title="RESTful Agent API 完整規格文件">📚 Agent API</a>
+      <a href="/llms-full.txt" target="_blank" rel="noopener" class="foot-link" title="RESTful Agent API 完整規格文件"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open" style="display:inline-block;vertical-align:-0.18em;flex-shrink:0;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Agent API</a>
     </div>
   </footer>
 </div>
@@ -750,17 +812,17 @@
   <aside class="copilot-drawer" id="copilotDrawer" role="dialog" aria-label="AI Travel Copilot">
     <div class="copilot-header">
       <div class="copilot-title-group">
-        <div class="copilot-title">✨ <span id="copilotTitleText">AI 行程特助</span></div>
+        <div class="copilot-title"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles" style="display:inline-block;vertical-align:-0.18em;flex-shrink:0;"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4"/><circle cx="4" cy="20" r="2"/></svg> <span id="copilotTitleText">AI 行程特助</span></div>
         <div class="copilot-sub" id="copilotSubText">智慧對話規劃 · 推薦備案 · 一鍵套用</div>
       </div>
-      <button class="copilot-close" id="copilotCloseBtn" title="關閉 / Close">✕</button>
+      <button class="copilot-close" id="copilotCloseBtn" title="關閉 / Close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" style="display:inline-block;vertical-align:-0.18em;flex-shrink:0;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     </div>
     <div class="copilot-context-bar" id="copilotContextBar" style="display:none">
       <div class="copilot-context-info">
-        <span class="copilot-context-pin">📍</span>
+        <span class="copilot-context-pin"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin" style="display:inline-block;vertical-align:-0.18em;flex-shrink:0;"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span>
         <span class="copilot-context-title" id="copilotContextTitle">--</span>
       </div>
-      <button class="copilot-context-clear" id="copilotContextClearBtn" title="切換為全行程 / Switch to all trips">✕</button>
+      <button class="copilot-context-clear" id="copilotContextClearBtn" title="切換為全行程 / Switch to all trips"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" style="display:inline-block;vertical-align:-0.18em;flex-shrink:0;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     </div>
     <div class="copilot-stream" id="copilotStream"></div>
     <div class="copilot-footer">
@@ -780,7 +842,71 @@
 <script>
 (function(){
   "use strict";
-  var BUILD="2026-07-10.39";
+  var BUILD="2026-07-10.40";
+  /* ===================== Lucide Icons (Zero-dependency SVG) ===================== */
+  var LUCIDE_ICONS = {
+  "bot": "<path d=\"M12 8V4H8\"/><rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\"/><path d=\"M2 14h2m16 0h2m-7-1v2m-6-2v2\"/>",
+  "sparkles": "<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4\"/><circle cx=\"4\" cy=\"20\" r=\"2\"/>",
+  "zap": "<path d=\"M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z\"/>",
+  "user": "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/>",
+  "settings": "<path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0a2.34 2.34 0 0 0 3.319 1.915a2.34 2.34 0 0 1 2.33 4.033a2.34 2.34 0 0 0 0 3.831a2.34 2.34 0 0 1-2.33 4.033a2.34 2.34 0 0 0-3.319 1.915a2.34 2.34 0 0 1-4.659 0a2.34 2.34 0 0 0-3.32-1.915a2.34 2.34 0 0 1-2.33-4.033a2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>",
+  "refresh-cw": "<path d=\"M3 12a9 9 0 0 1 9-9a9.75 9.75 0 0 1 6.74 2.74L21 8\"/><path d=\"M21 3v5h-5m5 4a9 9 0 0 1-9 9a9.75 9.75 0 0 1-6.74-2.74L3 16\"/><path d=\"M8 16H3v5\"/>",
+  "database": "<ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\"/><path d=\"M3 5v14a9 3 0 0 0 18 0V5\"/><path d=\"M3 12a9 3 0 0 0 18 0\"/>",
+  "shield-alert": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1zm-8-5v4m0 4h.01\"/>",
+  "shield-check": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12l2 2l4-4\"/>",
+  "key": "<path d=\"m2 21l9.6-9.6m-4.1 4.1l2.3 2.3a1 1 0 0 1 0 1.4l-2.1 2.1a1 1 0 0 1-1.4 0L4 19\"/><circle cx=\"15.5\" cy=\"7.5\" r=\"5.5\"/>",
+  "copy": "<rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/><path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/>",
+  "check": "<path d=\"M20 6L9 17l-5-5\"/>",
+  "trash-2": "<path d=\"M10 11v6m4-6v6m5-11v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/>",
+  "file-code": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5m-10 4.5L8 15l2 2.5m4-5l2 2.5l-2 2.5\"/>",
+  "file-text": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5M10 9H8m8 4H8m8 4H8\"/>",
+  "book-open": "<path d=\"M12 5v16m8.001-2A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2a5 5 0 0 1 4-2z\"/>",
+  "external-link": "<path d=\"M15 3h6v6m-11 5L21 3m-3 10v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\"/>",
+  "globe": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 2a14.5 14.5 0 0 0 0 20a14.5 14.5 0 0 0 0-20M2 12h20\"/>",
+  "share-2": "<circle cx=\"18\" cy=\"5\" r=\"3\"/><circle cx=\"6\" cy=\"12\" r=\"3\"/><circle cx=\"18\" cy=\"19\" r=\"3\"/><path d=\"m8.59 13.51l6.83 3.98m-.01-10.98l-6.82 3.98\"/>",
+  "help-circle": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m.08 4h.01\"/>",
+  "plane": "<path d=\"M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8L4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1l3 2l2 3l1-1v-3l3-2l3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2\"/>",
+  "bed": "<path d=\"M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9\"/>",
+  "utensils": "<path d=\"M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20m14-7V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2zm0 0v7\"/>",
+  "train": "<rect width=\"16\" height=\"16\" x=\"4\" y=\"3\" rx=\"2\"/><path d=\"M4 11h16m-8-8v8m-4 8l-2 3m12 0l-2-3m-8-4h.01M16 15h.01\"/>",
+  "car": "<path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2\"/><circle cx=\"7\" cy=\"17\" r=\"2\"/><path d=\"M9 17h6\"/><circle cx=\"17\" cy=\"17\" r=\"2\"/>",
+  "compass": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m16.24 7.76l-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z\"/>",
+  "search": "<path d=\"m21 21l-4.34-4.34\"/><circle cx=\"11\" cy=\"11\" r=\"8\"/>",
+  "plus": "<path d=\"M5 12h14m-7-7v14\"/>",
+  "x": "<path d=\"M18 6L6 18M6 6l12 12\"/>",
+  "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497zM15 5l4 4\"/>",
+  "mail": "<path d=\"m22 7l-8.991 5.727a2 2 0 0 1-2.009 0L2 7\"/><rect width=\"20\" height=\"16\" x=\"2\" y=\"4\" rx=\"2\"/>",
+  "download": "<path d=\"M12 15V3m9 12v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10l5 5l5-5\"/>",
+  "calendar": "<path d=\"M8 2v3m8-3v3\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/><path d=\"M3 9h18\"/>",
+  "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/>",
+  "map-pin": "<path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\"/><circle cx=\"12\" cy=\"10\" r=\"3\"/>",
+  "alert-triangle": "<path d=\"m21.73 18l-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4m0 4h.01\"/>",
+  "arrow-right": "<path d=\"M5 12h14m-7-7l7 7l-7 7\"/>",
+  "layers": "<path d=\"M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z\"/><path d=\"M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12\"/><path d=\"M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17\"/>",
+  "history": "<path d=\"M3 12a9 9 0 1 0 9-9a9.75 9.75 0 0 0-6.74 2.74L3 8\"/><path d=\"M3 3v5h5m4-1v5l4 2\"/>",
+  "eye": "<path d=\"M2.062 12.348a1 1 0 0 1 0-.696a10.75 10.75 0 0 1 19.876 0a1 1 0 0 1 0 .696a10.75 10.75 0 0 1-19.876 0\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>",
+  "log-out": "<path d=\"m16 17l5-5l-5-5m5 5H9m0 9H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"/>",
+  "chevron-down": "<path d=\"m6 9l6 6l6-6\"/>",
+  "chevron-right": "<path d=\"m9 18l6-6l-6-6\"/>",
+  "chevron-left": "<path d=\"m15 18l-6-6l6-6\"/>",
+  "navigation": "<path d=\"m3 11l19-9l-9 19l-2-8z\"/>",
+  "plane-takeoff": "<path d=\"M2 22h20M6.36 17.4L4 17l-2-4l1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12L5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.4 2.4 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.58 17.2a2 2 0 0 1-1.22.18Z\"/>",
+  "info": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 16v-4m0-4h.01\"/>",
+  "filter": "<path d=\"M22 3H2l8 9.46V19l4 2v-8.54z\"/>",
+  "eye-off": "<path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575a1 1 0 0 1 0 .696a10.8 10.8 0 0 1-1.444 2.49m-6.41-.679a3 3 0 0 1-4.242-4.242\"/><path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151a1 1 0 0 1 0-.696a10.75 10.75 0 0 1 4.446-5.143M2 2l20 20\"/>",
+  "heart": "<path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676a.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\"/>",
+  "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z\"/>"
+};
+
+  function lucideIcon(name, size, strokeWidth, className, style) {
+    var sz = size || 16;
+    var sw = strokeWidth || 2;
+    var cls = className ? ' class="lucide lucide-' + name + ' ' + className + '"' : ' class="lucide lucide-' + name + '"';
+    var st = 'display:inline-block;vertical-align:-0.18em;flex-shrink:0;' + (style || '');
+    var path = LUCIDE_ICONS[name] || LUCIDE_ICONS["sparkles"] || "";
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round"' + cls + ' style="' + st + '">' + path + '</svg>';
+  }
+
 
   /* ===================== i18n infrastructure ===================== */
   var LANG = (function(){
@@ -1168,10 +1294,21 @@
 
   var CAT={flight:{c:"var(--flight)",t:"rgba(30,64,255,.1)"},hotel:{c:"var(--hotel)",t:"rgba(27,138,87,.12)"},restaurant:{c:"var(--restaurant)",t:"rgba(255,90,53,.14)"},car:{c:"var(--car)",t:"rgba(232,154,43,.14)"},ride:{c:"var(--ride)",t:"rgba(124,77,255,.12)"},rail:{c:"var(--rail)",t:"rgba(255,90,53,.12)"},other:{c:"var(--other)",t:"rgba(117,109,94,.12)"}};
   function cat(type){return CAT[type]||CAT.other;}
+  function segTypeIcon(type, size){
+    var m = {flight:"plane",hotel:"bed",restaurant:"utensils",car:"car",ride:"navigation",rail:"train",other:"map-pin"};
+    return lucideIcon(m[type]||"map-pin", size||14);
+  }
+  function segTypeLabel(type){
+    var zhMap={flight:"航班",hotel:"住宿",restaurant:"餐廳",car:"租車",ride:"接駁",rail:"鐵路",other:"景點/其他"};
+    var enMap={flight:"Flight",hotel:"Hotel",restaurant:"Dining",car:"Car rental",ride:"Transfer",rail:"Rail",other:"Plan"};
+    return isZH() ? (zhMap[type]||type) : (enMap[type]||type);
+  }
   function segTypeName(type){
-    var zhMap={flight:"✈️ 航班",hotel:"🏨 住宿",restaurant:"🍽️ 餐廳",car:"🚗 租車",ride:"🚕 接駁",rail:"🚆 鐵路",other:"📌 景點/其他"};
-    var enMap={flight:"✈️ Flight",hotel:"🏨 Hotel",restaurant:"🍽️ Dining",car:"🚗 Car rental",ride:"🚕 Transfer",rail:"🚆 Rail",other:"📌 Plan"};
-    return isZH() ? (zhMap[type]||("📌 "+type)) : (enMap[type]||("📌 "+type));
+    return segTypeLabel(type);
+  }
+  function segTypeBadge(type){
+    var cc = cat(type);
+    return '<span class="type" style="color:'+cc.c+';background:'+cc.t+';display:inline-flex;align-items:center;gap:5px">'+segTypeIcon(type, 13)+'<span>'+esc(segTypeLabel(type))+'</span></span>';
   }
 
   
@@ -1182,17 +1319,17 @@
     var bd = document.getElementById("brandDesc");
     if(bd) bd.textContent = isZH() ? "將所有航班、住宿與交通接駁，整合於動態旅程時間軸。" : "Every trip - its flights, stays and rides - on one living timeline.";
     var lb = document.getElementById("langBtn");
-    if(lb) lb.textContent = isZH() ? "English" : "繁體中文";
+    if(lb) lb.innerHTML = lucideIcon('globe', 16) + ' <span>' + (isZH() ? "English" : "繁體中文") + '</span>';
     var rb = document.getElementById("refreshBtn");
-    if(rb) rb.textContent = isZH() ? "立即同步" : "Sync now";
+    if(rb) rb.innerHTML = lucideIcon('refresh-cw', 16) + ' <span>' + (isZH() ? "立即同步" : "Sync now") + '</span>';
     var sb = document.getElementById("shareBtn");
-    if(sb) sb.textContent = isZH() ? "分享" : "Share";
+    if(sb) sb.innerHTML = lucideIcon('share-2', 16) + ' <span>' + (isZH() ? "分享" : "Share") + '</span>';
     var hb = document.getElementById("helpBtn");
-    if(hb) hb.textContent = isZH() ? "說明" : "Help";
+    if(hb) hb.innerHTML = lucideIcon('help-circle', 16) + ' <span>' + (isZH() ? "說明" : "Help") + '</span>';
     var stb = document.getElementById("setBtn");
-    if(stb) stb.textContent = isZH() ? "設定" : "Settings";
-    var cb = document.getElementById("copilotBtnText");
-    if(cb) cb.textContent = isZH() ? "AI 助理" : "AI Copilot";
+    if(stb) stb.innerHTML = lucideIcon('settings', 16) + ' <span>' + (isZH() ? "設定" : "Settings") + '</span>';
+    var cbtn = document.getElementById("copilotBtn");
+    if(cbtn) cbtn.innerHTML = lucideIcon('sparkles', 16) + ' <span id="copilotBtnText">' + (isZH() ? "AI 助理" : "AI Copilot") + '</span>';
     var ct = document.getElementById("copilotTitleText");
     if(ct) ct.textContent = isZH() ? "AI 行程特助" : "AI Travel Copilot";
     var cs = document.getElementById("copilotSubText");
@@ -1201,17 +1338,31 @@
     if(ci) ci.placeholder = isZH() ? "輸入你想討論或新增的行程..." : "Ask for dining, spots, or plan adjustments...";
 
     var tu = document.getElementById("tabUp");
-    if(tu && tu.childNodes[0]) tu.childNodes[0].textContent = isZH() ? "即將出發 " : "Upcoming ";
+    if(tu) tu.innerHTML = lucideIcon('plane-takeoff', 16) + ' <span>' + (isZH() ? "即將出發" : "Upcoming") + '</span> <span class="cnt" id="c-up"></span>';
     var tt = document.getElementById("tabTl");
-    if(tt) tt.textContent = isZH() ? "時間軸" : "Timeline";
+    if(tt) tt.innerHTML = lucideIcon('clock', 16) + ' <span>' + (isZH() ? "時間軸" : "Timeline") + '</span>';
     var tp = document.getElementById("tabPast");
-    if(tp && tp.childNodes[0]) tp.childNodes[0].textContent = isZH() ? "歷史回憶 " : "Past ";
+    if(tp) tp.innerHTML = lucideIcon('history', 16) + ' <span>' + (isZH() ? "歷史回憶" : "Past") + '</span> <span class="cnt" id="c-past"></span>';
     var tc = document.getElementById("tabCal");
-    if(tc) tc.textContent = isZH() ? "行事曆" : "Calendar";
+    if(tc) tc.innerHTML = lucideIcon('calendar', 16) + ' <span>' + (isZH() ? "行事曆" : "Calendar") + '</span>';
     var tm = document.getElementById("tabMap");
-    if(tm) tm.textContent = isZH() ? "足跡地圖" : "Map";
-    var fb = document.getElementById("footBrandText");
-    if(fb) fb.textContent = isZH() ? "888漫步旅遊 · RoamRadar" : "888RoamTravel · RoamRadar";
+    if(tm) tm.innerHTML = lucideIcon('map-pin', 16) + ' <span>' + (isZH() ? "足跡地圖" : "Map") + '</span>';
+    var addB = document.getElementById("addBtn");
+    if(addB) addB.innerHTML = lucideIcon('plus', 16) + ' <span>' + (isZH() ? "新增旅程" : "Add trip") + '</span>';
+
+    var fbBrand = document.querySelector(".foot-brand");
+    if(fbBrand) {
+      fbBrand.innerHTML = lucideIcon('compass', 18) + ' <span id="footBrandText">' + (isZH() ? "888漫步旅遊 · RoamRadar" : "888RoamTravel · RoamRadar") + '</span> <span class="foot-ver">v2.6.3</span>';
+    }
+    var footLinks = document.querySelector(".foot-links");
+    if(footLinks) {
+      footLinks.innerHTML = 
+        '<a href="/llms.txt" target="_blank" rel="noopener" class="foot-link" title="LLM 探索規範索引 (llms.txt)">' + lucideIcon('bot', 15) + ' llms.txt</a>' +
+        '<span class="foot-sep">·</span>' +
+        '<a href="/skill.md" target="_blank" rel="noopener" class="foot-link" title="Autonomous AI Agent 技能定義 (skill.md)">' + lucideIcon('file-code', 15) + ' skill.md</a>' +
+        '<span class="foot-sep">·</span>' +
+        '<a href="/llms-full.txt" target="_blank" rel="noopener" class="foot-link" title="RESTful Agent API 完整規格文件">' + lucideIcon('book-open', 15) + ' Agent API</a>';
+    }
   }
 
   /* ===================== hero (new) ===================== */
@@ -1297,16 +1448,16 @@
       var when=s.start?(fmtSeg(s.start)+(s.end&&s.end!==s.start?" - "+fmtSeg(s.end):"")):"";
       var dispAddr=(s.address||"").replace(/https?:\/\/\S+/g,"").replace(/[-\u2013\u00b7|,\s]+$/,"").trim();
       var hasFb = s.fallback && s.fallback.name;
-      var fbBadge = hasFb ? '<span class="fb-badge" title="'+esc(s.fallback.name)+'">💡 '+(isZH()?"備案已就緒":"Backup ready")+'</span>' : '';
-      var ratingBadge = s.rating ? '<span class="rating-badge">⭐ '+s.rating+(s.userRatingsTotal?' ('+s.userRatingsTotal+')':'')+'</span>' : '';
+      var fbBadge = hasFb ? '<span class="fb-badge" title="'+esc(s.fallback.name)+'">'+lucideIcon('shield-check',13)+' <span>'+(isZH()?"備案已就緒":"Backup ready")+'</span></span>' : '';
+      var ratingBadge = s.rating ? '<span class="rating-badge">'+lucideIcon('star',13)+' <span>'+s.rating+(s.userRatingsTotal?' ('+s.userRatingsTotal+')':'')+'</span></span>' : '';
       return '<div class="plan" data-plan="'+t.id+'|'+s.sid+'">'+
         '<div class="dotwrap"><span class="dot" style="background:'+cc.c+';box-shadow:0 0 0 4px var(--card),0 0 0 5px '+cc.c+'"></span></div>'+
         '<div><div class="ttl"><span class="nm">'+esc(s.name||(isZH()?"預訂規劃":"Booking"))+'</span>'+
-          '<span class="type" style="color:'+cc.c+';background:'+cc.t+'">'+esc(segTypeName(s.type))+'</span>'+
+          segTypeBadge(s.type)+
           ratingBadge+fbBadge+'</div>'+
           (s.note?'<div class="sub">'+esc(s.note)+'</div>':'')+
           (dispAddr?'<div class="sub">'+esc(dispAddr)+'</div>':'')+
-          (hasFb?'<div class="sub fb-sub"><span class="fb-tag">'+(isZH()?"備案":"Backup")+'</span> '+esc(s.fallback.name)+(s.fallback.address?' · '+esc(s.fallback.address):'')+'</div>':'')+
+          (hasFb?'<div class="sub fb-sub"><span class="fb-tag">'+lucideIcon('shield-check',12)+' '+(isZH()?"備案":"Backup")+'</span> '+esc(s.fallback.name)+(s.fallback.address?' · '+esc(s.fallback.address):'')+'</div>':'')+
         '</div>'+
         '<div class="pmeta">'+(when?'<span class="when">'+when+'</span>':'')+
           '<button class="mini" data-editseg="'+t.id+'|'+s.sid+'">'+(isZH()?"編輯":"Edit")+'</button>'+
@@ -1650,8 +1801,8 @@
     var placesSearchHtml = "";
     if(isPlacesReady){
       placesSearchHtml = '<div style="display:flex;justify-content:flex-end;margin-top:-6px;margin-bottom:10px">'+
-        '<button type="button" class="btn" id="g_places_btn" style="font-size:13px;padding:6px 14px;display:inline-flex;align-items:center;gap:6px;border-color:var(--coral);color:var(--coral);border-radius:20px;background:rgba(255,90,53,0.06);cursor:pointer;transition:all 0.15s ease">'+
-          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>'+
+        '<button type="button" class="btn" id="g_places_btn" style="font-size:14.5px;padding:8px 16px;display:inline-flex;align-items:center;gap:6px;border-color:var(--coral);color:var(--coral);border-radius:20px;background:rgba(255,90,53,0.06);cursor:pointer;transition:all 0.15s ease">'+
+          lucideIcon('map-pin', 14) +
           '<span id="g_places_btn_text">'+esc(p.placesBtn)+'</span>'+
         '</button>'+
       '</div>'+
@@ -1701,7 +1852,7 @@
     var showConf=s.conf&&!/^(man:|seed|gcal:)/.test(String(s.conf))?s.conf:"";
     var rSuffix = isZH() ? " 則" : "";
     var openLabel = s.openNow === true ? (isZH() ? " · 🟢 營業中" : " · 🟢 Open") : (s.openNow === false ? (isZH() ? " · 🔴 休息中" : " · 🔴 Closed") : "");
-    var ratingHtml = s.rating ? ('<span class="rating-badge">⭐ '+s.rating+(s.userRatingsTotal?' ('+s.userRatingsTotal+rSuffix+')':'')+openLabel+'</span>') : '';
+    var ratingHtml = s.rating ? ('<span class="rating-badge">'+lucideIcon('star',13)+' '+s.rating+(s.userRatingsTotal?' ('+s.userRatingsTotal+rSuffix+')':'')+openLabel+'</span>') : '';
 
     var fbHtml = "";
     if(s.fallback && s.fallback.name){
@@ -1710,26 +1861,26 @@
       var fbAddrText = fbRaw.replace(/https?:\/\/\S+/g,"").replace(/[-\u2013\u00b7|,\s]+$/,"").trim();
       var fbMapsUrl = s.fallback.mapsUrl || (fbUrlM ? fbUrlM[0] : (fbAddrText ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(fbAddrText) : ""));
       fbHtml = '<div class="pd-fb-card">' +
-        '<div class="pd-fb-header"><span class="pd-fb-tag">💡 '+(isZH()?"替代備案方案 (Fallback Plan)":"Fallback Plan")+'</span><span class="pd-fb-tip">'+(isZH()?"如遇客滿、休業或延誤可立即啟用":"Quick switch if closed or delayed")+'</span></div>' +
+        '<div class="pd-fb-header"><span class="pd-fb-tag">'+lucideIcon('shield-check',15)+' <span>'+(isZH()?"替代備案方案 (Fallback Plan)":"Fallback Plan")+'</span></span><span class="pd-fb-tip">'+(isZH()?"如遇客滿、休業或延誤可立即啟用":"Quick switch if closed or delayed")+'</span></div>' +
         '<div class="pd-fb-name">'+esc(s.fallback.name)+'</div>' +
-        (fbAddrText ? '<div class="pd-fb-addr">📍 '+esc(fbAddrText)+'</div>' : '') +
+        (fbAddrText ? '<div class="pd-fb-addr">'+lucideIcon('map-pin',14)+' '+esc(fbAddrText)+'</div>' : '') +
         (s.fallback.note ? '<div class="pd-fb-note">'+esc(s.fallback.note)+'</div>' : '') +
         '<div class="pd-fb-actions">' +
-          (fbMapsUrl ? '<a class="btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-size:13.5px;padding:8px 16px" href="'+esc(fbMapsUrl)+'" target="_blank" rel="noopener">🗺️ '+(isZH()?"導航至備案":"Maps")+'</a>' : '') +
-          '<button class="btn solid" id="pd_swap_fb" style="font-size:13.5px;padding:8px 16px;background:var(--amber);border-color:var(--amber)">🔄 '+(isZH()?"切換為主要行程":"Switch to Primary")+'</button>' +
+          (fbMapsUrl ? '<a class="btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-size:14.5px;padding:8px 16px" href="'+esc(fbMapsUrl)+'" target="_blank" rel="noopener">'+lucideIcon('map-pin',14)+' <span>'+(isZH()?"導航至備案":"Maps")+'</span></a>' : '') +
+          '<button class="btn solid" id="pd_swap_fb" style="font-size:14.5px;padding:8px 16px;background:var(--amber);border-color:var(--amber);display:inline-flex;align-items:center;gap:6px">'+lucideIcon('refresh-cw',14)+' <span>'+(isZH()?"切換為主要行程":"Switch to Primary")+'</span></button>' +
         '</div>' +
       '</div>';
     }
 
     openModal('<h3 style="margin-bottom:6px">'+esc(s.name||(isZH()?"規劃項目":"Plan"))+'</h3>'+
-      '<div class="chips" style="margin-bottom:10px"><span class="type" style="color:'+cc.c+';background:'+cc.t+'">'+esc(segTypeName(s.type))+'</span>'+(when?'<span class="c-date">'+when+'</span>':'')+ratingHtml+'</div>'+
+      '<div class="chips" style="margin-bottom:10px">'+segTypeBadge(s.type)+(when?'<span class="c-date">'+when+'</span>':'')+ratingHtml+'</div>'+
       (s.note?'<div class="pd-row"><div class="pd-k">'+(isZH()?"詳細內容":"Details")+'</div><div class="pd-v">'+esc(s.note)+'</div></div>':'')+
       (addrText?'<div class="pd-row"><div class="pd-k">'+(isZH()?"地址地點":"Address")+'</div><div class="pd-v">'+esc(addrText)+'</div></div>':'')+
       (showConf?'<div class="pd-row"><div class="pd-k">'+(isZH()?"確認代碼":"Confirmation")+'</div><div class="pd-v mono">'+esc(showConf)+'</div></div>':'')+
       fbHtml+
       '<div class="modal-actions">'+
-        (mapsUrl?'<a class="btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center" href="'+esc(mapsUrl)+'" target="_blank" rel="noopener">🗺️ '+(isZH()?"地圖導航":"Maps")+'</a>':'')+
-        '<button class="btn" id="pd_edit">'+(isZH()?"編輯":"Edit")+'</button><button class="btn solid" id="pd_close">'+(isZH()?"關閉":"Close")+'</button></div>');
+        (mapsUrl?'<a class="btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px" href="'+esc(mapsUrl)+'" target="_blank" rel="noopener">'+lucideIcon('map-pin',14)+' <span>'+(isZH()?"地圖導航":"Maps")+'</span></a>':'')+
+        '<button class="btn" id="pd_edit" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('pencil',14)+' <span>'+(isZH()?"編輯":"Edit")+'</span></button><button class="btn solid" id="pd_close" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check',14)+' <span>'+(isZH()?"關閉":"Close")+'</span></button></div>');
     document.getElementById("pd_close").onclick=closeModal;
     document.getElementById("pd_edit").onclick=function(){openSeg(tripId,sid);};
     var swapBtn = document.getElementById("pd_swap_fb");
@@ -2242,11 +2393,11 @@
       :('One-time setup at <b>console.cloud.google.com</b>: create a project, enable the <b>Google Calendar API</b> and <b>Gmail API</b>, then under Credentials create an <b>OAuth client ID (Web application)</b> with:<br>· Authorised JavaScript origin: <b>'+gOrigin+'</b><br>· Authorised redirect URI: <b>'+gRedirect+'</b><br>Then in <b>Audience</b> (OAuth consent screen) hit <b>Publish app</b> — in Testing mode Google cuts the connection after 7 days.<br>Paste the client ID and secret here, Save, then hit Connect Google and approve access.<br><b>Tip:</b> forward any confirmation email to yourself with <b>+trip</b> added before the @ (e.g. you<b>+trip</b>@yourdomain.com) and the next sync files it — whatever the sender.');
     openModal('<h3>'+(isZH()?"系統設定":"Settings")+'</h3>'+
       '<div class="set-tab-nav" id="setTabNav">'+
-        '<button class="set-tab-btn active" type="button" data-pane="general">👤 '+(isZH()?"一般偏好":"General")+'</button>'+
-        '<button class="set-tab-btn" type="button" data-pane="llm">🤖 '+(isZH()?"AI 模型":"AI Model")+'</button>'+
-        '<button class="set-tab-btn" type="button" data-pane="agent">⚡ '+(isZH()?"Agent API":"Agent API")+'</button>'+
-        '<button class="set-tab-btn" type="button" data-pane="sync">🔄 '+(isZH()?"同步服務":"Sync &amp; Services")+'</button>'+
-        '<button class="set-tab-btn" type="button" data-pane="backup">💾 '+(isZH()?"備份與資料":"Backup &amp; Data")+'</button>'+
+        '<button class="set-tab-btn active" type="button" data-pane="general">'+lucideIcon('user', 17)+' <span>'+(isZH()?"一般偏好":"General")+'</span></button>'+
+        '<button class="set-tab-btn" type="button" data-pane="llm">'+lucideIcon('bot', 17)+' <span>'+(isZH()?"AI 模型":"AI Model")+'</span></button>'+
+        '<button class="set-tab-btn" type="button" data-pane="agent">'+lucideIcon('zap', 17)+' <span>'+(isZH()?"Agent API":"Agent API")+'</span></button>'+
+        '<button class="set-tab-btn" type="button" data-pane="sync">'+lucideIcon('refresh-cw', 17)+' <span>'+(isZH()?"同步服務":"Sync &amp; Services")+'</span></button>'+
+        '<button class="set-tab-btn" type="button" data-pane="backup">'+lucideIcon('database', 17)+' <span>'+(isZH()?"備份與資料":"Backup &amp; Data")+'</span></button>'+
       '</div>'+
 
       '<!-- Pane 1: General -->'+
@@ -2287,8 +2438,8 @@
             '<select id="s_llm_model_select" aria-label="'+(isZH()?"選擇模型下拉選單":"Select model dropdown")+'" style="flex:1;cursor:pointer;font-family:var(--mono);font-size:14px">'+
               '<option value="">'+(isZH()?"-- 請點擊右側取得可用模型 --":"-- Click Fetch Models to load --")+'</option>'+
             '</select>'+
-            '<button class="btn" id="llmFetchModels" type="button" style="white-space:nowrap;padding:0 14px;font-size:13.5px;display:flex;align-items:center;gap:6px">'+
-              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'+
+            '<button class="btn" id="llmFetchModels" type="button" style="white-space:nowrap;padding:0 16px;font-size:14.5px;min-height:42px;display:flex;align-items:center;gap:6px">'+
+              lucideIcon('search', 15)+
               '<span>'+(isZH()?"取得可用模型清單":"Fetch Models")+'</span>'+
             '</button>'+
           '</div>'+
@@ -2310,7 +2461,7 @@
         '<div id="keyOneTimeBox" style="display:none;background:rgba(255,90,53,.07);border:1.5px solid rgba(255,90,53,.35);border-radius:14px;padding:16px;margin-bottom:18px">'+
           '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'+
             '<div style="font-weight:700;font-size:14.5px;color:var(--coral);display:flex;align-items:center;gap:6px">'+
-              '<span>🔐</span> <span>'+(isZH()?"請立即複製並保存您的 API 金鑰":"Save Your Agent API Key Now")+'</span>'+
+              lucideIcon('shield-alert', 18, 2.2, '', 'color:var(--coral)') + ' <span>'+(isZH()?"請立即複製並保存您的 API 金鑰":"Save Your Agent API Key Now")+'</span>'+
             '</div>'+
             '<span style="font-family:var(--mono);font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(255,90,53,.15);color:var(--coral)">'+(isZH()?"僅顯示一次":"Shown Once")+'</span>'+
           '</div>'+
@@ -2319,10 +2470,10 @@
           '</p>'+
           '<div style="display:flex;gap:8px;align-items:center">'+
             '<input type="text" readonly id="keyOneTimeInput" class="mono" style="flex:1;background:var(--card);font-size:14px;font-weight:700;color:var(--coral);letter-spacing:.5px;padding:9px 12px;border:1px solid rgba(255,90,53,.4);border-radius:10px">'+
-            '<button class="btn solid" id="keyOneTimeCopy" type="button" style="white-space:nowrap;padding:0 14px;font-size:13.5px">📋 '+(isZH()?"複製金鑰":"Copy Key")+'</button>'+
+            '<button class="btn solid" id="keyOneTimeCopy" type="button" style="white-space:nowrap;padding:0 16px;font-size:14.5px;min-height:40px;display:inline-flex;align-items:center;gap:6px">'+lucideIcon('copy', 15)+' <span>'+(isZH()?"複製金鑰":"Copy Key")+'</span></button>'+
           '</div>'+
           '<div style="margin-top:10px;text-align:right">'+
-            '<button class="btn" id="keyOneTimeDone" type="button" style="font-size:13px;padding:6px 14px">✓ '+(isZH()?"我已妥善保存，關閉此提示":"I have saved it, close")+'</button>'+
+            '<button class="btn" id="keyOneTimeDone" type="button" style="font-size:14px;padding:8px 16px;display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"我已妥善保存，關閉此提示":"I have saved it, close")+'</span></button>'+
           '</div>'+
         '</div>'+
 
@@ -2337,52 +2488,52 @@
           '</div>'+
         '</div>'+
         '<div class="modal-actions act-row" style="margin-top:8px">'+
-          '<button class="btn solid" id="agentKeyGen" type="button">🔑 '+(isZH()?"產生 / 重新產生金鑰":"Generate / Regenerate Key")+'</button>'+
-          '<button class="btn" id="agentKeyRevoke" type="button" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"撤銷金鑰":"Revoke")+'</button>'+
+          '<button class="btn solid" id="agentKeyGen" type="button" style="font-size:14.5px;padding:10px 18px;display:inline-flex;align-items:center;gap:6px">'+lucideIcon('key', 15)+' <span>'+(isZH()?"產生 / 重新產生金鑰":"Generate / Regenerate Key")+'</span></button>'+
+          '<button class="btn" id="agentKeyRevoke" type="button" style="border-color:rgba(255,90,53,.4);color:var(--coral);font-size:14.5px;padding:10px 18px;display:inline-flex;align-items:center;gap:6px">'+lucideIcon('trash-2', 15)+' <span>'+(isZH()?"撤銷金鑰":"Revoke")+'</span></button>'+
         '</div>'+
         '<div id="agentKeyStatus" class="hint" style="margin-top:8px"></div>'+
 
         '<!-- Independent Canonical URLs -->'+
-        '<div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:16px">'+
-          '<div style="font-weight:700;font-size:14px;color:var(--ink);margin-bottom:4px">🌐 '+(isZH()?"獨立規範與 API 文件網址 (Canonical URLs)":"Independent Specification &amp; API URLs")+'</div>'+
-          '<div style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:10px">'+
+        '<div style="background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:18px">'+
+          '<div style="font-weight:700;font-size:15.5px;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:7px">'+lucideIcon('globe', 17)+' <span>'+(isZH()?"獨立規範與 API 文件網址 (Canonical URLs)":"Independent Specification &amp; API URLs")+'</span></div>'+
+          '<div style="font-size:14.5px;color:var(--muted);line-height:1.6;margin-bottom:12px">'+
             (isZH()?"隨著功能持續演進與新增 API，外部 Agent 可直接訪問以下獨立端點取得最新規範：":"As features and API methods evolve, external agents can directly query these live standalone URLs:")+
           '</div>'+
-          '<div style="display:flex;flex-direction:column;gap:8px">'+
-            '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:9px 12px;border-radius:8px;border:1px solid var(--line);gap:8px">'+
+          '<div style="display:flex;flex-direction:column;gap:10px">'+
+            '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:10px 14px;border-radius:10px;border:1px solid var(--line);gap:10px">'+
               '<div style="min-width:0;flex:1">'+
-                '<div style="font-weight:600;font-size:13px;color:var(--ink)">🤖 llms.txt <span style="font-size:12px;color:var(--muted);font-weight:normal">('+(isZH()?"機器可讀規格索引":"Machine-readable index")+')</span></div>'+
-                '<div class="mono" style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+gOrigin+'/llms.txt</div>'+
+                '<div style="font-weight:600;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px">'+lucideIcon('bot', 16)+' <span>llms.txt</span> <span style="font-size:13.5px;color:var(--muted);font-weight:normal">('+(isZH()?"機器可讀規格索引":"Machine-readable index")+')</span></div>'+
+                '<div class="mono" style="font-size:13.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px">'+gOrigin+'/llms.txt</div>'+
               '</div>'+
               '<div style="display:flex;gap:6px;flex-shrink:0">'+
-                '<a class="btn" href="'+gOrigin+'/llms.txt" target="_blank" rel="noopener" style="font-size:12.5px;padding:4px 10px;text-decoration:none">'+(isZH()?"開啟":"Open")+'</a>'+
-                '<button class="btn" type="button" id="copyUrlLlms" style="font-size:12.5px;padding:4px 10px">'+(isZH()?"複製網址":"Copy URL")+'</button>'+
+                '<a class="btn" href="'+gOrigin+'/llms.txt" target="_blank" rel="noopener" style="font-size:14px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;gap:5px">'+lucideIcon('external-link', 14)+' <span>'+(isZH()?"開啟":"Open")+'</span></a>'+
+                '<button class="btn" type="button" id="copyUrlLlms" style="font-size:14px;padding:6px 12px;display:inline-flex;align-items:center;gap:5px">'+lucideIcon('copy', 14)+' <span>'+(isZH()?"複製網址":"Copy URL")+'</span></button>'+
               '</div>'+
             '</div>'+
-            '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:9px 12px;border-radius:8px;border:1px solid var(--line);gap:8px">'+
+            '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:10px 14px;border-radius:10px;border:1px solid var(--line);gap:10px">'+
               '<div style="min-width:0;flex:1">'+
-                '<div style="font-weight:600;font-size:13px;color:var(--ink)">📄 skill.md <span style="font-size:12px;color:var(--muted);font-weight:normal">('+(isZH()?"標準 Agent Skill 規範":"Agent Skill spec")+')</span></div>'+
-                '<div class="mono" style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+gOrigin+'/skill.md</div>'+
+                '<div style="font-weight:600;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px">'+lucideIcon('file-code', 16)+' <span>skill.md</span> <span style="font-size:13.5px;color:var(--muted);font-weight:normal">('+(isZH()?"標準 Agent Skill 規範":"Agent Skill spec")+')</span></div>'+
+                '<div class="mono" style="font-size:13.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px">'+gOrigin+'/skill.md</div>'+
               '</div>'+
               '<div style="display:flex;gap:6px;flex-shrink:0">'+
-                '<a class="btn" href="'+gOrigin+'/skill.md" target="_blank" rel="noopener" style="font-size:12.5px;padding:4px 10px;text-decoration:none">'+(isZH()?"開啟":"Open")+'</a>'+
-                '<button class="btn" type="button" id="copyUrlSkill" style="font-size:12.5px;padding:4px 10px">'+(isZH()?"複製網址":"Copy URL")+'</button>'+
+                '<a class="btn" href="'+gOrigin+'/skill.md" target="_blank" rel="noopener" style="font-size:14px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;gap:5px">'+lucideIcon('external-link', 14)+' <span>'+(isZH()?"開啟":"Open")+'</span></a>'+
+                '<button class="btn" type="button" id="copyUrlSkill" style="font-size:14px;padding:6px 12px;display:inline-flex;align-items:center;gap:5px">'+lucideIcon('copy', 14)+' <span>'+(isZH()?"複製網址":"Copy URL")+'</span></button>'+
               '</div>'+
             '</div>'+
-            '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:9px 12px;border-radius:8px;border:1px solid var(--line);gap:8px">'+
+            '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:10px 14px;border-radius:10px;border:1px solid var(--line);gap:10px">'+
               '<div style="min-width:0;flex:1">'+
-                '<div style="font-weight:600;font-size:13px;color:var(--ink)">📚 llms-full.txt <span style="font-size:12px;color:var(--muted);font-weight:normal">('+(isZH()?"完整 API 規格手冊與 Schema":"Full API Docs &amp; Schemas")+')</span></div>'+
-                '<div class="mono" style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+gOrigin+'/llms-full.txt</div>'+
+                '<div style="font-weight:600;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px">'+lucideIcon('book-open', 16)+' <span>llms-full.txt</span> <span style="font-size:13.5px;color:var(--muted);font-weight:normal">('+(isZH()?"完整 API 規格手冊與 Schema":"Full API Docs &amp; Schemas")+')</span></div>'+
+                '<div class="mono" style="font-size:13.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px">'+gOrigin+'/llms-full.txt</div>'+
               '</div>'+
               '<div style="display:flex;gap:6px;flex-shrink:0">'+
-                '<a class="btn" href="'+gOrigin+'/llms-full.txt" target="_blank" rel="noopener" style="font-size:12.5px;padding:4px 10px;text-decoration:none">'+(isZH()?"開啟":"Open")+'</a>'+
-                '<button class="btn" type="button" id="copyUrlFull" style="font-size:12.5px;padding:4px 10px">'+(isZH()?"複製網址":"Copy URL")+'</button>'+
+                '<a class="btn" href="'+gOrigin+'/llms-full.txt" target="_blank" rel="noopener" style="font-size:14px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;gap:5px">'+lucideIcon('external-link', 14)+' <span>'+(isZH()?"開啟":"Open")+'</span></a>'+
+                '<button class="btn" type="button" id="copyUrlFull" style="font-size:14px;padding:6px 12px;display:inline-flex;align-items:center;gap:5px">'+lucideIcon('copy', 14)+' <span>'+(isZH()?"複製網址":"Copy URL")+'</span></button>'+
               '</div>'+
             '</div>'+
           '</div>'+
-          '<div style="margin-top:14px">'+
-            '<button class="btn" id="copyAgentPrompt" type="button" style="width:100%;justify-content:center;font-size:13.5px;padding:9px 16px;display:flex;align-items:center;gap:6px">'+
-              '📋 '+(isZH()?"一鍵複製動態 Agent 系統提示詞 (System Prompt)":"Copy Dynamic Agent System Prompt")+
+          '<div style="margin-top:16px">'+
+            '<button class="btn" id="copyAgentPrompt" type="button" style="width:100%;justify-content:center;font-size:15px;padding:12px 18px;display:inline-flex;align-items:center;gap:8px;font-weight:600">'+
+              lucideIcon('sparkles', 16)+' <span>'+(isZH()?"一鍵複製動態 Agent 系統提示詞 (System Prompt)":"Copy Dynamic Agent System Prompt")+'</span>'+
             '</button>'+
           '</div>'+
         '</div>'+
@@ -2394,20 +2545,20 @@
         field(isZH()?"Google 用戶端編號 (Client ID)":"Google client ID","s_gid","text","","1234….apps.googleusercontent.com")+
         field(isZH()?"Google 用戶端密鑰 (Client Secret)":"Google client secret","s_gsecret","password","",isZH()?"僅加密儲存於你的 Worker":"GOCSPX-…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
         '<div class="hint">'+gHint+'</div>'+
-        '<div class="modal-actions act-row"><button class="btn" id="gSave">'+(isZH()?"儲存":"Save")+'</button><button class="btn solid" id="gConnect">'+(isZH()?"連結 Google":"Connect Google")+'</button><button class="btn" id="gTest">'+(isZH()?"測試連線":"Test connection")+'</button><button class="btn" id="gRescan">'+(isZH()?"重新掃描信箱":"Re-scan inbox")+'</button><button class="btn" id="gReset">'+(isZH()?"全新重新匯入":"Clean re-import")+'</button><button class="btn" id="gTrace">'+(isZH()?"郵件診斷":"Trace email")+'</button><button class="btn" id="gClear" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"解除綁定":"Disconnect")+'</button></div>'+
+        '<div class="modal-actions act-row"><button class="btn" id="gSave" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存":"Save")+'</span></button><button class="btn solid" id="gConnect" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('refresh-cw', 14)+' <span>'+(isZH()?"連結 Google":"Connect Google")+'</span></button><button class="btn" id="gTest">'+(isZH()?"測試連線":"Test connection")+'</button><button class="btn" id="gRescan">'+(isZH()?"重新掃描信箱":"Re-scan inbox")+'</button><button class="btn" id="gReset">'+(isZH()?"全新重新匯入":"Clean re-import")+'</button><button class="btn" id="gTrace">'+(isZH()?"郵件診斷":"Trace email")+'</button><button class="btn" id="gClear" style="border-color:rgba(255,90,53,.4);color:var(--coral);display:inline-flex;align-items:center;gap:6px">'+lucideIcon('trash-2', 14)+' <span>'+(isZH()?"解除綁定":"Disconnect")+'</span></button></div>'+
         '<div id="gStatus" class="hint" style="font-size:14px;line-height:1.55;margin-top:10px">'+(isZH()?"檢查連線狀態中…":"Checking connection…")+'</div>'+
 
         '<h4 style="margin-top:24px">'+(isZH()?"Google Places API（景點與餐廳評價/營業時間）":"Google Places API (Ratings &amp; Hours)")+'</h4>'+
         field(isZH()?"Google Places API 金鑰 (API Key)":"Google Places API Key","s_places_key","password","",isZH()?"AIzaSy…（留空清除）":"AIzaSy… (blank to clear)",isZH()?"可填於此或設於 Cloudflare":"stored in Worker KV or Cloudflare secret")+
-        '<div class="hint">'+(isZH()?"啟用後，在規劃細項（如餐廳、景點）時將解鎖「📍 Google 查詢評價與營業時間」。<b>若未設定，相關按鈕將完全自動隱藏</b>。支援在 Cloudflare 填入 <code>GOOGLE_PLACES_API_KEY</code> 或直接在上方儲存於 KV。":"When configured, unlocks \"Search Google Places\" in plan forms. <b>If unconfigured, the search feature remains completely hidden</b>.")+'</div>'+
-        '<div class="modal-actions act-row"><button class="btn" id="placesSave">'+(isZH()?"儲存 Places 設定":"Save Places Key")+'</button><button class="btn" id="placesTest">'+(isZH()?"測試 Places 查詢":"Test Places API")+'</button></div>'+
+        '<div class="hint">'+(isZH()?"啟用後，在規劃細項（如餐廳、景點）時將解鎖「Google 查詢評價與營業時間」。<b>若未設定，相關按鈕將完全自動隱藏</b>。支援在 Cloudflare 填入 <code>GOOGLE_PLACES_API_KEY</code> 或直接在上方儲存於 KV。":"When configured, unlocks \"Search Google Places\" in plan forms. <b>If unconfigured, the search feature remains completely hidden</b>.")+'</div>'+
+        '<div class="modal-actions act-row"><button class="btn" id="placesSave" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存 Places 設定":"Save Places Key")+'</span></button><button class="btn" id="placesTest" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('search', 14)+' <span>'+(isZH()?"測試 Places 查詢":"Test Places API")+'</span></button></div>'+
         '<div id="placesStatus" class="hint" style="margin-top:8px"></div>'+
 
         '<h4 style="margin-top:24px">'+(isZH()?"Resend 郵件寄送服務（OTP 登入與通知）":"Resend Email Delivery (OTP &amp; Alerts)")+'</h4>'+
         field(isZH()?"Resend API 金鑰 (API Key)":"Resend API Key","s_resend_key","password","","re_123456…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
         field(isZH()?"寄件者地址 (From Address)":"From Address","s_resend_from","text","","888RoamTravel <onboarding@resend.dev>",isZH()?"(需符合 Resend 驗證網域或使用預設)":"(verified domain or onboarding@resend.dev)")+
         '<div class="hint">'+(isZH()?"用於發送 6 位數 OTP 登入驗證碼及重要行程提醒。前往 <b>resend.com/api-keys</b> 取得金鑰。若未綁定自有網域，可直接使用預設寄件地址。":"Used to send 6-digit OTP login verification codes and trip updates. Get a free key at <b>resend.com/api-keys</b>. You can use the default onboarding address if you haven't verified a custom domain.")+'</div>'+
-        '<div class="modal-actions act-row"><button class="btn" id="resendSave">'+(isZH()?"儲存 Resend 設定":"Save Resend Config")+'</button><button class="btn" id="resendTest">'+(isZH()?"發送測試郵件":"Send Test Email")+'</button></div>'+
+        '<div class="modal-actions act-row"><button class="btn" id="resendSave" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存 Resend 設定":"Save Resend Config")+'</span></button><button class="btn" id="resendTest" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('mail', 14)+' <span>'+(isZH()?"發送測試郵件":"Send Test Email")+'</span></button></div>'+
         '<div id="resendStatus" class="hint" style="margin-top:8px"></div>'+
       '</div>'+
 
@@ -2415,7 +2566,7 @@
       '<div class="set-tab-pane" id="pane_backup">'+
         '<h4>'+(isZH()?"匯出 JSON 旅程資料":"Export Trips JSON")+'</h4>'+
         '<div class="field"><textarea id="exp" readonly class="mono" style="min-height:90px">'+esc(snap)+'</textarea></div>'+
-        '<div class="modal-actions act-row" style="margin-top:0"><button class="btn" id="copyJson">'+(isZH()?"複製 JSON 資料":"Copy data")+'</button><button class="btn" id="dlJson">'+(isZH()?"下載檔案":"Download")+'</button><button class="btn" id="icsFeed">'+(isZH()?"複製日曆訂閱網址 (ICS)":"Copy calendar feed link")+'</button></div>'+
+        '<div class="modal-actions act-row" style="margin-top:0"><button class="btn" id="copyJson" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('copy', 14)+' <span>'+(isZH()?"複製 JSON 資料":"Copy data")+'</span></button><button class="btn" id="dlJson" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('download', 14)+' <span>'+(isZH()?"下載檔案":"Download")+'</span></button><button class="btn" id="icsFeed" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('calendar', 14)+' <span>'+(isZH()?"複製日曆訂閱網址 (ICS)":"Copy calendar feed link")+'</span></button></div>'+
         '<div class="hint">'+(isZH()?"日曆訂閱網址可用於 Apple 行事曆、Google 日曆或 Outlook 貼入「透過 URL 訂閱」，旅程即自動保持同步。":"The feed link works in ANY calendar app — paste it under “Subscribe by URL” in Apple, Google or Outlook and your trips stay updated.")+'</div>'+
 
         '<h4 style="margin-top:24px">'+(isZH()?"雲端自動快照 (Weekly Snapshots)":"Cloud Snapshots (Weekly)")+'</h4>'+
@@ -2425,13 +2576,13 @@
         '<div class="field"><textarea id="imp" class="mono" placeholder=\'[{"from":"TPE","to":"NRT","start":"2026-10-02","end":"2026-10-12","label":"Tokyo"}]\' style="min-height:80px"></textarea><div class="err" id="imperr"></div></div>'+
 
         '<h4 style="margin-top:24px;color:var(--coral)">'+(isZH()?"危險區域 (Danger Zone)":"Danger Zone")+'</h4>'+
-        '<div style="margin-top:8px"><button class="btn" id="clearBtn" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"清除此裝置所有資料":"Clear all data on this device")+'</button></div>'+
+        '<div style="margin-top:8px"><button class="btn" id="clearBtn" style="border-color:rgba(255,90,53,.4);color:var(--coral);display:inline-flex;align-items:center;gap:6px">'+lucideIcon('trash-2', 14)+' <span>'+(isZH()?"清除此裝置所有資料":"Clear all data on this device")+'</span></button></div>'+
       '</div>'+
 
       '<!-- Modal Bottom Actions -->'+
       '<div class="modal-actions" style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">'+
-        '<button class="btn" id="cancelBtn">'+(isZH()?"關閉":"Close")+'</button>'+
-        '<button class="btn solid" id="saveSet">'+(isZH()?"儲存偏好":"Save")+'</button>'+
+        '<button class="btn" id="cancelBtn" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('x', 14)+' <span>'+(isZH()?"關閉":"Close")+'</span></button>'+
+        '<button class="btn solid" id="saveSet" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存偏好":"Save")+'</span></button>'+
       '</div>'+
       '<div class="hint" style="margin-top:12px;text-align:right">build '+BUILD+'</div>');
     var tabNav = document.getElementById("setTabNav");
@@ -2770,9 +2921,9 @@
         var inp = document.getElementById("keyOneTimeInput");
         if (!inp || !inp.value) return;
         copyText(inp.value, isZH() ? "已複製 Agent API Key 至剪貼簿 ✓" : "Agent API Key copied to clipboard ✓");
-        copyOneTimeBtn.textContent = isZH() ? "✓ 已複製！" : "✓ Copied!";
+        copyOneTimeBtn.innerHTML = lucideIcon('check', 15) + ' <span>' + (isZH() ? "已複製！" : "Copied!") + '</span>';
         setTimeout(function() {
-          if (copyOneTimeBtn) copyOneTimeBtn.textContent = isZH() ? "📋 複製金鑰" : "📋 Copy Key";
+          if (copyOneTimeBtn) copyOneTimeBtn.innerHTML = lucideIcon('copy', 15) + ' <span>' + (isZH() ? "複製金鑰" : "Copy Key") + '</span>';
         }, 2000);
       };
     }
@@ -3505,7 +3656,7 @@
       var fbHtml = "";
       if(s.fallback && s.fallback.name){
         fbHtml = '<div class="copilot-prop-fallback">' +
-          '<div class="copilot-prop-fb-title">💡 ' + (isZH() ? "建議備案 (雨天/客滿替代)" : "Contingency / Backup Plan") + '</div>' +
+          '<div class="copilot-prop-fb-title">'+lucideIcon('shield-check', 13)+' <span>' + (isZH() ? "建議備案 (雨天/客滿替代)" : "Contingency / Backup Plan") + '</span></div>' +
           '<b>' + esc(s.fallback.name) + '</b>' +
           (s.fallback.address ? ' · <span style="color:var(--muted)">' + esc(s.fallback.address) + '</span>' : '') +
           (s.fallback.note ? '<div style="font-size:12.5px;margin-top:2px;color:var(--muted)">' + esc(s.fallback.note) + '</div>' : '') +
@@ -3515,12 +3666,12 @@
       return '<div class="copilot-prop-item" style="border-bottom:' + (idx < segments.length - 1 ? '1px dashed var(--line);padding-bottom:10px;margin-bottom:10px' : 'none') + '">' +
         '<div class="copilot-proposal-header">' +
           '<span class="copilot-prop-type ' + esc(type) + '">' + typeLabel + '</span>' +
-          '<span class="copilot-prop-badge">💡 ' + (isZH() ? "建議項目 #" + (idx + 1) : "Suggested #" + (idx + 1)) + '</span>' +
+          '<span class="copilot-prop-badge">'+lucideIcon('sparkles', 12)+' <span>'+(isZH() ? "建議項目 #" + (idx + 1) : "Suggested #" + (idx + 1))+'</span></span>' +
         '</div>' +
         '<div class="copilot-prop-name" style="margin-top:4px">' + esc(s.name || (isZH() ? "未命名項目" : "Untitled")) + '</div>' +
         '<div class="copilot-prop-meta">' +
-          (s.start ? '<span>🕒 ' + esc(s.start.replace("T", " ")) + (s.end ? ' ~ ' + esc(s.end.replace("T", " ")) : '') + '</span>' : '') +
-          (s.address ? '<span>📍 ' + esc(s.address) + '</span>' : '') +
+          (s.start ? '<span>' + lucideIcon('clock', 12) + ' ' + esc(s.start.replace("T", " ")) + (s.end ? ' ~ ' + esc(s.end.replace("T", " ")) : '') + '</span>' : '') +
+          (s.address ? '<span>' + lucideIcon('map-pin', 12) + ' ' + esc(s.address) + '</span>' : '') +
         '</div>' +
         (s.note ? '<div class="copilot-prop-note">' + esc(s.note) + '</div>' : '') +
         fbHtml +
@@ -3534,8 +3685,8 @@
       '</div>' +
       itemsHtml +
       '<div class="copilot-prop-actions" id="acts_' + prop.id + '">' +
-        '<button class="copilot-prop-btn apply" data-applyprop="' + prop.id + '">' + (isZH() ? "✓ 確認套用至行程" : "✓ Apply to Itinerary") + '</button>' +
-        '<button class="copilot-prop-btn dismiss" data-dismissprop="' + prop.id + '">' + (isZH() ? "✕ 忽略" : "✕ Dismiss") + '</button>' +
+        '<button class="copilot-prop-btn apply" data-applyprop="' + prop.id + '">'+lucideIcon('check', 14)+' <span>' + (isZH() ? "確認套用至行程" : "Apply to Itinerary") + '</span></button>' +
+        '<button class="copilot-prop-btn dismiss" data-dismissprop="' + prop.id + '">'+lucideIcon('x', 13)+' <span>' + (isZH() ? "忽略" : "Dismiss") + '</span></button>' +
       '</div>' +
     '</div>';
   }
@@ -3571,9 +3722,9 @@
     var div = document.createElement("div");
     div.className = "copilot-msg assistant";
     div.innerHTML = '<div class="copilot-bubble" style="border-color:rgba(232,154,43,.4);background:rgba(232,154,43,.06)">' +
-      '<div style="font-weight:700;color:var(--amber);margin-bottom:6px">⚠️ ' + (isZH() ? "尚未設定 AI 語言模型金鑰" : "No LLM API Key Configured") + '</div>' +
+      '<div style="font-weight:700;color:var(--amber);margin-bottom:6px;display:flex;align-items:center;gap:6px">'+lucideIcon('alert-triangle', 16, 2, '', 'color:var(--amber)')+' <span>' + (isZH() ? "尚未設定 AI 語言模型金鑰" : "No LLM API Key Configured") + '</span></div>' +
       '<p style="font-size:14px;line-height:1.55;color:var(--ink)">' + (isZH() ? "RoamRadar AI 助理支援 Groq、Gemini、DeepSeek、OpenAI 或 Anthropic 等多種模型。請先前往設定填寫您的 API Key。" : "RoamRadar AI Copilot supports Groq, Gemini, DeepSeek, OpenAI, or Anthropic. Please configure your API key in Settings.") + '</p>' +
-      '<button class="btn solid" id="copilotOpenSettingsBtn" style="margin-top:8px;font-size:13.5px;padding:8px 16px">⚙️ ' + (isZH() ? "立即前往「設定」配置金鑰" : "Go to Settings") + '</button>' +
+      '<button class="btn solid" id="copilotOpenSettingsBtn" style="margin-top:8px;font-size:14.5px;padding:10px 18px;display:inline-flex;align-items:center;gap:6px">'+lucideIcon('settings', 15)+' <span>' + (isZH() ? "立即前往「設定」配置金鑰" : "Go to Settings") + '</span></button>' +
     '</div>';
     copilotStream.appendChild(div);
     var btn = document.getElementById("copilotOpenSettingsBtn");

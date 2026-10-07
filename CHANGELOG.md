@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.6.3] - 2026-10-07
+
+### Enhanced / 介面排版、圖標工藝與全光譜 Agent API 跨世代升級
+- **中英文雙軌字階排版工藝與嚴格漢字底線 (Impeccable Bilingual Typography & CJK Quality Floor)**：
+  - **根本區分中英文字形尺度 (Separated Chinese vs English Font Scales)**：中英文字體特性本質迥異。英文採大字懷與單純筆形，12px–13px 仍具備高度可辨識性；而繁體中文方塊字結構繁複、平均 15–30 道交叉筆畫，在螢幕次像素抗鋸齒下極易產生筆畫黏連成墨團。
+  - **全域漢字嚴格底線 (CJK Hard Floor 13.5px–15px)**：
+    - 徽章 / 標籤 / 類別膠囊 / 統計副標 / 日曆星期：全面提升至 `13.5px`–`14px`（字重 `700`，字距 `0.02em`），徹底拔除中文 12px 模糊反模式。
+    - 次要資訊 / 旅程細項備註 / 地址 / 提示：提升至 `14.5px`–`15px`（行高 `1.65`）。
+    - 按鈕 / 表單標籤 / 分頁切換：規範為 `15px`–`15.5px`（字重 `600`–`700`，最低高度 `42px`）。
+    - 表單輸入框：鎖定 `16px`（徹底根除 iOS Safari 點擊聚焦縮放）。
+    - 區塊標題與彈窗標題：`16.5px`–`22px`。
+  - **行動端 RWD 閱讀保證 (Mobile CJK Immunity)**：在手機小螢幕下嚴格保護中文文字不低於 14.5px，按鈕點擊熱區維持 42px，徹底解決「切換中文太小、手機排版失衡」的痛點。
+- **零依賴 Lucide SVG 圖標系統全面置換 (Zero-Dependency Lucide SVG Icon Registry)**：
+  - 提取 50+ 個官方 Lucide Stroke SVG 圖標，全面取代傳統 Emoji 圖形反模式。
+  - 頂部工具列、5 大主導航分頁、旅程操作卡、細項行程、設定 5 大分頁、AI 抽屜、頁尾全面換裝統一筆畫與質感的現代向量圖標。
+- **全光譜外部 AI Agent RESTful API 完整覆蓋 (Full-Spectrum Agent API 19 Endpoints)**：
+  - 全面擴充 `/api/v1/*` 端點，100% 覆蓋 RoamRadar 所有中樞能力：
+    1. `GET /api/v1/status`：實例健康狀態、旅程統計、整合服務開通狀態。
+    2. `GET`, `POST`, `PUT`, `DELETE /api/v1/trips`：多日旅程完整 CRUD。
+    3. `POST`, `PUT`, `DELETE /api/v1/trips/:id/segments`：7 大類別細項行程單項與高效批次操作。
+    4. `POST /api/v1/trips/:id/segments/:sid/swap-fallback`：一鍵備案切換 API，隨時將主方案與備案互換。
+    5. `POST /api/v1/places/search` & `POST /api/v1/places/details`：真實 Google Places 餐廳與景點探勘、營業時間與地圖直連。
+    6. `GET`, `POST`, `DELETE /api/v1/wishes`：願望清單與機票雷達追蹤。
+    7. `POST /api/v1/sync`：即時觸發 Google Calendar 與 Gmail 雲端背景同步。
+    8. `GET /api/v1/backups` & `GET /api/v1/export`：雲端每週快照清單與全量 JSON 匯出備份。
+    9. `POST /api/v1/copilot/chat`：供外部 Agent 直接調用內建旅行特助與情境脈絡對話。
+  - 同步全面升級動態與靜態規範文件：`/llms.txt`、`/llms-full.txt`、`/skill.md`。
+
+---
+
 ## [2.6.2] - 2026-10-07
 
 ### Enhanced / 介面與架構重大升級

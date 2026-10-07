@@ -481,6 +481,184 @@ export default {
         }
       }
 
+      // GET /api/v1/status - Instance health, versions, and integrations
+      if (url.pathname === "/api/v1/status" && request.method === "GET") {
+        const store = await loadStore(env);
+        const llm = await getLLMConfig(env);
+        const places = await getGooglePlacesConfig(env);
+        const gClient = await googleClient(env);
+        const gRefresh = env.GOOGLE_REFRESH_TOKEN || (await env.TRIPS.get("g_refresh")) || "";
+        const resend = await getResendConfig(env);
+        const trips = Object.values(store.trips);
+        const now = new Date().toISOString().slice(0, 10);
+        const upcoming = trips.filter(t => (t.end || t.start) >= now).length;
+        return cors(json({
+          ok: true,
+          version: "2.6.3",
+          instance: url.origin,
+          serverTime: new Date().toISOString(),
+          totalTrips: trips.length,
+          upcomingTrips: upcoming,
+          totalWishes: (store.wishes || []).length,
+          integrations: {
+            llm: { configured: !!llm.apiKey, provider: llm.provider, model: llm.model },
+            googlePlaces: { configured: places.configured },
+            googleCalendar: { configured: !!(gClient && gRefresh) },
+            resend: { configured: !!resend.apiKey }
+          }
+        }));
+      }
+
+      // POST /api/v1/trips/:id/segments/:sid/swap-fallback - 1-Click Contingency Swap
+      const swapMatch = url.pathname.match(/^\/api\/v1\/trips\/([a-zA-Z0-9_-]+)\/segments\/([a-zA-Z0-9_-]+)\/swap-fallback\/?$/);
+      if (swapMatch && request.method === "POST") {
+        const tripId = swapMatch[1], sid = swapMatch[2];
+        const store = await loadStore(env);
+        const t = store.trips[tripId];
+        if (!t) return cors(json({ error: "Trip not found" }, 404));
+        const s = (t.segments || []).find(x => x.sid === sid);
+        if (!s) return cors(json({ error: "Segment not found" }, 404));
+        if (!s.fallback || !s.fallback.name) {
+          return cors(json({ error: "No contingency fallback plan configured for this segment" }, 400));
+        }
+        const oldPrimary = {
+          name: s.name,
+          address: s.address || "",
+          note: s.note || "",
+          mapsUrl: s.mapsUrl || "",
+          rating: s.rating !== undefined ? s.rating : null,
+          userRatingsTotal: s.userRatingsTotal !== undefined ? s.userRatingsTotal : null,
+          openNow: s.openNow !== undefined ? s.openNow : null,
+          placeId: s.placeId || ""
+        };
+        s.name = s.fallback.name;
+        s.address = s.fallback.address || "";
+        s.note = s.fallback.note || "";
+        s.mapsUrl = s.fallback.mapsUrl || "";
+        s.rating = s.fallback.rating !== undefined ? s.fallback.rating : null;
+        s.userRatingsTotal = s.fallback.userRatingsTotal !== undefined ? s.fallback.userRatingsTotal : null;
+        s.openNow = s.fallback.openNow !== undefined ? s.fallback.openNow : null;
+        s.placeId = s.fallback.placeId || "";
+        s.fallback = oldPrimary;
+        s.source = "manual";
+        t.updatedAt = Date.now();
+        await saveStore(env, store);
+        return cors(json({ ok: true, swapped: true, segment: s }));
+      }
+
+      // POST /api/v1/places/search - Google Places Text Search
+      if (url.pathname === "/api/v1/places/search" && request.method === "POST") {
+        const body = await request.json().catch(() => ({}));
+        const query = ((body && body.query) || "").trim();
+        const lang = ((body && body.language) || "zh-TW").trim();
+        const result = await searchGooglePlaces(env, query, lang);
+        if (!result.ok) return cors(json(result, result.status || 400));
+        return cors(json(result));
+      }
+
+      // POST /api/v1/places/details - Google Places Details
+      if (url.pathname === "/api/v1/places/details" && request.method === "POST") {
+        const body = await request.json().catch(() => ({}));
+        const placeId = ((body && body.placeId) || "").trim();
+        const lang = ((body && body.language) || "zh-TW").trim();
+        const result = await getGooglePlaceDetails(env, placeId, lang);
+        if (!result.ok) return cors(json(result, result.status || 400));
+        return cors(json(result));
+      }
+
+      // GET /api/v1/wishes - List Wishlist Radar items
+      if (url.pathname === "/api/v1/wishes" && request.method === "GET") {
+        const store = await loadStore(env);
+        const wishes = store.wishes || [];
+        return cors(json({ ok: true, count: wishes.length, wishes }));
+      }
+
+      // POST /api/v1/wishes - Add or update Wishlist Radar item
+      if (url.pathname === "/api/v1/wishes" && request.method === "POST") {
+        const body = await request.json().catch(() => null);
+        if (!body || typeof body !== "object") return cors(json({ error: "Invalid JSON body" }, 400));
+        const store = await loadStore(env);
+        store.wishes = store.wishes || [];
+        const id = body.id || uid();
+        const wishItem = {
+          id,
+          from: (body.from || "").toUpperCase(),
+          dest: String(body.dest || body.to || "").trim(),
+          days: String(body.days || "").trim(),
+          month: String(body.month || "").trim(),
+          budget: String(body.budget || "").trim(),
+          note: String(body.note || "").trim(),
+          updatedAt: Date.now()
+        };
+        const idx = store.wishes.findIndex(w => w.id === id);
+        if (idx >= 0) store.wishes[idx] = wishItem;
+        else store.wishes.push(wishItem);
+        await saveStore(env, store);
+        return cors(json({ ok: true, wish: wishItem }, 201));
+      }
+
+      // DELETE /api/v1/wishes/:id - Delete Wishlist Radar item
+      const wishDelMatch = url.pathname.match(/^\/api\/v1\/wishes\/([a-zA-Z0-9_-]+)\/?$/);
+      if (wishDelMatch && request.method === "DELETE") {
+        const wishId = wishDelMatch[1];
+        const store = await loadStore(env);
+        store.wishes = store.wishes || [];
+        const before = store.wishes.length;
+        store.wishes = store.wishes.filter(w => w.id !== wishId);
+        if (store.wishes.length !== before) {
+          await saveStore(env, store);
+        }
+        return cors(json({ ok: true, deleted: true, id: wishId }));
+      }
+
+      // POST /api/v1/sync - Trigger on-demand sync of Google Calendar & Gmail
+      if (url.pathname === "/api/v1/sync" && request.method === "POST") {
+        const only = url.searchParams.get("only") || "";
+        const stats = await runSync(env, only);
+        return cors(json({ ok: true, syncStats: stats }));
+      }
+
+      // GET /api/v1/backups - List cloud snapshot backups
+      if (url.pathname === "/api/v1/backups" && request.method === "GET") {
+        const out = [];
+        for (const slot of ["0", "1", "2", "3", "pre"]) {
+          const raw = await env.TRIPS.get("backup:" + slot);
+          if (!raw) continue;
+          try {
+            const b = JSON.parse(raw);
+            const s = JSON.parse(b.raw);
+            out.push({ slot, at: b.at, trips: Object.keys(s.trips || {}).length });
+          } catch (e) {}
+        }
+        out.sort((a, b) => b.at - a.at);
+        return cors(json({ ok: true, backups: out }));
+      }
+
+      // GET /api/v1/export - Full JSON export
+      if (url.pathname === "/api/v1/export" && request.method === "GET") {
+        const store = await loadStore(env);
+        const home = (await env.TRIPS.get("home")) || "TPE";
+        const homeTz = (await env.TRIPS.get("home_tz")) || "Asia/Taipei";
+        return cors(json({
+          version: 2,
+          exportedAt: new Date().toISOString(),
+          home,
+          homeTz,
+          trips: Object.values(store.trips).sort((a, b) => ((a.start || "") < (b.start || "") ? -1 : 1)),
+          wishes: store.wishes || []
+        }));
+      }
+
+      // POST /api/v1/copilot/chat - AI Travel Copilot Chat with active trip context
+      if (url.pathname === "/api/v1/copilot/chat" && request.method === "POST") {
+        const body = await request.json().catch(() => ({}));
+        const rawMessages = Array.isArray(body && body.messages) ? body.messages : [];
+        const currentTripId = ((body && body.currentTripId) || "").trim();
+        const result = await dispatchAiChat(env, rawMessages, currentTripId);
+        if (!result.ok) return cors(json(result, result.status || 400));
+        return cors(json(result));
+      }
+
       return cors(json({ error: "Not found" }, 404));
     }
 
@@ -698,193 +876,10 @@ export default {
     if (url.pathname === "/ai/chat" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
       const rawMessages = Array.isArray(body && body.messages) ? body.messages : [];
-      // Enforce client/server sliding window (max 10 recent messages) to preserve prompt tokens & Groq TPM
-      const windowMessages = rawMessages.slice(-10);
-      const messages = windowMessages
-        .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
-        .map((m) => ({ role: m.role, content: m.content.trim() }));
-
-      if (messages.length === 0) {
-        return cors(json({ error: "INVALID_REQUEST", message: "對話訊息不可為空 / Messages cannot be empty" }, 400));
-      }
-
-      const llm = await getLLMConfig(env);
-      if (!llm.apiKey) {
-        return cors(json({
-          error: "NO_LLM_KEY",
-          message: "尚未設定 AI 語言模型金鑰，請前往「設定」配置 API Key。"
-        }, 400));
-      }
-
-      const store = await loadStore(env);
       const currentTripId = ((body && body.currentTripId) || "").trim();
-      let tripContext = "";
-      let activeTrip = null;
-
-      if (currentTripId && store.trips[currentTripId]) {
-        activeTrip = store.trips[currentTripId];
-        const segSummary = (activeTrip.segments || [])
-          .slice()
-          .sort((a, b) => ((a.start || "") < (b.start || "") ? -1 : 1))
-          .map((s) => {
-            let line = `[${s.start || "未定時間"}] ${s.type || "other"}: ${s.name || "未命名"}`;
-            if (s.address) line += ` [地點: ${s.address}]`;
-            if (s.note) line += ` (${s.note})`;
-            if (s.fallback && s.fallback.name) line += ` [備案: ${s.fallback.name}${s.fallback.address ? " @ " + s.fallback.address : ""}]`;
-            return line;
-          })
-          .join("\n");
-
-        tripContext = `【目前討論中的行程 (Active Trip Context)】
-- 行程 ID: ${activeTrip.id}
-- 行程名稱: ${activeTrip.label || activeTrip.to}
-- 目的地: ${activeTrip.to} (出發地: ${activeTrip.from || "未指定"})
-- 日期區間: ${activeTrip.start} 至 ${activeTrip.end}
-- 時區: ${activeTrip.timezone || "未設定"}
-- 備註: ${activeTrip.notes || "無"}
-- 目前已安排細項 (${(activeTrip.segments || []).length} 項):
-${segSummary || "（目前尚無細項安排）"}`;
-      } else {
-        const upcoming = Object.values(store.trips)
-          .slice()
-          .sort((a, b) => ((a.start || "") < (b.start || "") ? -1 : 1))
-          .slice(0, 8)
-          .map((t) => `- [${t.id}] ${t.label || t.to} (${t.from || ""} ➔ ${t.to}) : ${t.start} ~ ${t.end} [${(t.segments || []).length} 項細項]`)
-          .join("\n");
-        tripContext = `【旅客目前行程清單總覽 (All Trips Overview)】
-${upcoming || "（目前尚未建立任何行程）"}`;
-      }
-
-      const sysPrompt = `你是一位專業、敏銳且細緻的個人旅遊規劃特助 (RoamRadar Travel Copilot)。
-你的任務是協助旅客構思、討論與優化行程規劃（包含餐廳美食、飯店住宿、航班、鐵路、交通接駁、景點活動與雨天/客滿備案）。
-
-${tripContext}
-
-【原則與行為指引】
-1. 回應親切自然、條理分明、具備專業旅遊洞察。建議應考慮當地的地理距離、營業時間、動線流暢度與時差/交通。
-2. 支援 7 種細項規劃類別:
-   - flight (✈️ 航班)
-   - hotel (🏨 飯店住宿)
-   - restaurant (🍽️ 餐廳美食)
-   - rail (🚆 鐵路/新幹線/地鐵)
-   - car (🚗 租車自駕)
-   - ride (🚕 計程車/機場接送)
-   - other (📍 景點活動/展覽/會議)
-3. 當你在對話中建議「具體的行程項目、餐廳預約、景點活動或交通」時，除了親切回應用戶外，請務必在回應結尾附上結構化提案區塊 (proposal block)。格式嚴格遵循：
-:::proposal
-{
-  "action": "add_segments",
-  "tripId": "${activeTrip ? activeTrip.id : ""}",
-  "segments": [
-    {
-      "type": "restaurant",
-      "name": "餐廳或景點名稱",
-      "address": "地址或概略位置",
-      "start": "YYYY-MM-DDTHH:mm:ss 或 YYYY-MM-DD",
-      "end": "YYYY-MM-DDTHH:mm:ss 或 YYYY-MM-DD (選填)",
-      "note": "簡短精闢的推薦理由或用餐/參觀重點",
-      "fallback": {
-        "name": "備案名稱 (例如客滿或雨天替代方案)",
-        "address": "備案地址 (選填)",
-        "note": "備案說明 (選填)"
-      }
-    }
-  ]
-}
-:::
-4. 如果旅客只是閒聊、問一般天氣、問建議、或無具體要排入行程的項目，請正常文字回應，不要輸出 :::proposal 區塊。
-5. 每次 proposal 的 segments 請控制在 1 ~ 4 個精選項目以內，質量重於數量。
-6. 對於熱門餐廳或戶外行程，強烈建議主動規劃可行的 fallback (備案方案)。
-7. proposal 內的 JSON 必須是標準 JSON，請勿包含尾隨逗號或註解。`;
-
-      let replyText = "";
-      try {
-        if (llm.provider === "anthropic" || (!llm.baseUrl && llm.apiKey.startsWith("sk-ant-"))) {
-          const anthropicMsgs = [];
-          for (const m of messages) {
-            if (anthropicMsgs.length === 0 && m.role !== "user") {
-              continue;
-            }
-            if (anthropicMsgs.length > 0 && anthropicMsgs[anthropicMsgs.length - 1].role === m.role) {
-              anthropicMsgs[anthropicMsgs.length - 1].content += "\n\n" + m.content;
-            } else {
-              anthropicMsgs.push({ role: m.role, content: m.content });
-            }
-          }
-          if (anthropicMsgs.length === 0) {
-            anthropicMsgs.push({ role: "user", content: "你好" });
-          }
-
-          const res = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-              "x-api-key": llm.apiKey,
-              "anthropic-version": "2023-06-01",
-              "content-type": "application/json"
-            },
-            body: JSON.stringify({
-              model: llm.model || "claude-3-5-haiku-latest",
-              max_tokens: 2000,
-              system: sysPrompt,
-              messages: anthropicMsgs
-            })
-          });
-
-          if (!res.ok) {
-            const errText = await res.text().catch(() => "");
-            if (res.status === 429) {
-              return cors(json({ error: "RATE_LIMITED", message: "AI 服務暫時超過速率限制，請稍候重試。" }, 429));
-            }
-            return cors(json({ error: "PROVIDER_ERROR", message: `Anthropic API 錯誤 (${res.status}): ${errText.slice(0, 200)}` }, res.status));
-          }
-
-          const data = await res.json();
-          replyText = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
-        } else {
-          // OpenAI-compatible
-          const baseUrl = (llm.baseUrl || "https://api.openai.com/v1").replace(/\/+$/, "");
-          const endpoint = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
-
-          const openAiMsgs = [
-            { role: "system", content: sysPrompt },
-            ...messages
-          ];
-
-          const res = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${llm.apiKey}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              model: llm.model || "gpt-4o",
-              temperature: 0.4,
-              messages: openAiMsgs
-            })
-          });
-
-          if (!res.ok) {
-            const errText = await res.text().catch(() => "");
-            if (res.status === 429) {
-              return cors(json({ error: "RATE_LIMITED", message: "AI 服務暫時超過速率限制，請稍候重試。" }, 429));
-            }
-            return cors(json({ error: "PROVIDER_ERROR", message: `AI 服務錯誤 (${res.status}): ${errText.slice(0, 200)}` }, res.status));
-          }
-
-          const data = await res.json();
-          replyText = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
-        }
-      } catch (err) {
-        console.error("AI chat error:", err);
-        return cors(json({ error: "PROVIDER_ERROR", message: "連線 AI 服務失敗: " + (err && err.message ? err.message : String(err)) }, 500));
-      }
-
-      return cors(json({
-        ok: true,
-        reply: replyText,
-        provider: llm.provider,
-        model: llm.model
-      }));
+      const result = await dispatchAiChat(env, rawMessages, currentTripId);
+      if (!result.ok) return cors(json(result, result.status || 400));
+      return cors(json(result));
     }
 
     // Resend Email Delivery Settings
@@ -980,83 +975,22 @@ ${tripContext}
 
     // Google Places Search (Find restaurants, attractions, addresses, ratings, and open status)
     if (url.pathname === "/places/search" && request.method === "POST") {
-      const places = await getGooglePlacesConfig(env);
-      if (!places.apiKey) {
-        return cors(json({ error: "Google Places API 尚未設定 / Google Places API not configured" }, 400));
-      }
       const body = await request.json().catch(() => ({}));
       const query = ((body && body.query) || "").trim();
       const lang = ((body && body.language) || "zh-TW").trim();
-      if (!query) return cors(json({ error: "搜尋關鍵字為必填 / Search query required" }, 400));
-
-      try {
-        const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${places.apiKey}&language=${encodeURIComponent(lang)}`;
-        const res = await fetch(searchUrl);
-        if (!res.ok) {
-          return cors(json({ error: `Google Places API 查詢失敗 (${res.status})` }, res.status));
-        }
-        const data = await res.json();
-        if (data.status === "REQUEST_DENIED") {
-          return cors(json({ error: `Google Places API 授權失敗: ${data.error_message || "API Key 無效或未開通 Places API"}` }, 403));
-        }
-        if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-          return cors(json({ error: `Google Places API 異常: ${data.status} - ${data.error_message || ""}` }, 400));
-        }
-
-        const results = (data.results || []).slice(0, 5).map(p => ({
-          placeId: p.place_id,
-          name: p.name,
-          address: p.formatted_address,
-          rating: p.rating || null,
-          userRatingsTotal: p.user_ratings_total || null,
-          priceLevel: p.price_level !== undefined ? p.price_level : null,
-          openNow: p.opening_hours ? p.opening_hours.open_now : null,
-          types: p.types || [],
-          mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name)}&query_place_id=${p.place_id}`
-        }));
-
-        return cors(json({ ok: true, results }));
-      } catch (err) {
-        return cors(json({ error: "連線至 Google Places 失敗: " + (err.message || String(err)) }, 500));
-      }
+      const result = await searchGooglePlaces(env, query, lang);
+      if (!result.ok) return cors(json(result, result.status || 400));
+      return cors(json(result));
     }
 
     // Google Places Details
     if (url.pathname === "/places/details" && request.method === "POST") {
-      const places = await getGooglePlacesConfig(env);
-      if (!places.apiKey) return cors(json({ error: "Google Places API not configured" }, 400));
       const body = await request.json().catch(() => ({}));
       const placeId = ((body && body.placeId) || "").trim();
       const lang = ((body && body.language) || "zh-TW").trim();
-      if (!placeId) return cors(json({ error: "placeId required" }, 400));
-
-      try {
-        const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(placeId)}&fields=name,formatted_address,rating,user_ratings_total,opening_hours,formatted_phone_number,website,url,price_level&key=${places.apiKey}&language=${encodeURIComponent(lang)}`;
-        const res = await fetch(detailUrl);
-        const data = await res.json();
-        if (data.status !== "OK") {
-          return cors(json({ error: data.error_message || data.status }, 400));
-        }
-        const r = data.result || {};
-        return cors(json({
-          ok: true,
-          place: {
-            placeId,
-            name: r.name,
-            address: r.formatted_address,
-            rating: r.rating || null,
-            userRatingsTotal: r.user_ratings_total || null,
-            priceLevel: r.price_level,
-            openNow: r.opening_hours ? r.opening_hours.open_now : null,
-            weekdayText: r.opening_hours ? r.opening_hours.weekday_text : null,
-            phone: r.formatted_phone_number || null,
-            website: r.website || null,
-            mapsUrl: r.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.name)}&query_place_id=${placeId}`
-          }
-        }));
-      } catch (err) {
-        return cors(json({ error: "Details fetch failed: " + (err.message || String(err)) }, 500));
-      }
+      const result = await getGooglePlaceDetails(env, placeId, lang);
+      if (!result.ok) return cors(json(result, result.status || 400));
+      return cors(json(result));
     }
     // What can the Google connection actually see? Split by stage, so "no travel
     // info appeared" points at the exact culprit.
@@ -1737,6 +1671,254 @@ async function getGooglePlacesConfig(env) {
   return (env._placesConfig = { apiKey, source, configured: Boolean(apiKey) });
 }
 
+async function searchGooglePlaces(env, query, lang = "zh-TW") {
+  const places = await getGooglePlacesConfig(env);
+  if (!places.apiKey) {
+    return { ok: false, status: 400, error: "Google Places API 尚未設定 / Google Places API not configured" };
+  }
+  const q = (query || "").trim();
+  if (!q) return { ok: false, status: 400, error: "搜尋關鍵字為必填 / Search query required" };
+
+  try {
+    const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(q)}&key=${places.apiKey}&language=${encodeURIComponent(lang)}`;
+    const res = await fetch(searchUrl);
+    if (!res.ok) {
+      return { ok: false, status: res.status, error: `Google Places API 查詢失敗 (${res.status})` };
+    }
+    const data = await res.json();
+    if (data.status === "REQUEST_DENIED") {
+      return { ok: false, status: 403, error: `Google Places API 授權失敗: ${data.error_message || "API Key 無效或未開通 Places API"}` };
+    }
+    if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
+      return { ok: false, status: 400, error: `Google Places API 異常: ${data.status} - ${data.error_message || ""}` };
+    }
+
+    const results = (data.results || []).slice(0, 5).map(p => ({
+      placeId: p.place_id,
+      name: p.name,
+      address: p.formatted_address,
+      rating: p.rating || null,
+      userRatingsTotal: p.user_ratings_total || null,
+      priceLevel: p.price_level !== undefined ? p.price_level : null,
+      openNow: p.opening_hours ? p.opening_hours.open_now : null,
+      types: p.types || [],
+      mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name)}&query_place_id=${p.place_id}`
+    }));
+
+    return { ok: true, results };
+  } catch (err) {
+    return { ok: false, status: 500, error: "連線至 Google Places 失敗: " + (err.message || String(err)) };
+  }
+}
+
+async function getGooglePlaceDetails(env, placeId, lang = "zh-TW") {
+  const places = await getGooglePlacesConfig(env);
+  if (!places.apiKey) return { ok: false, status: 400, error: "Google Places API not configured" };
+  const pid = (placeId || "").trim();
+  if (!pid) return { ok: false, status: 400, error: "placeId required" };
+
+  try {
+    const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(pid)}&fields=name,formatted_address,rating,user_ratings_total,opening_hours,formatted_phone_number,website,url,price_level&key=${places.apiKey}&language=${encodeURIComponent(lang)}`;
+    const res = await fetch(detailUrl);
+    const data = await res.json();
+    if (data.status !== "OK") {
+      return { ok: false, status: 400, error: data.error_message || data.status };
+    }
+    const r = data.result || {};
+    return {
+      ok: true,
+      place: {
+        placeId: pid,
+        name: r.name,
+        address: r.formatted_address,
+        rating: r.rating || null,
+        userRatingsTotal: r.user_ratings_total || null,
+        priceLevel: r.price_level,
+        openNow: r.opening_hours ? r.opening_hours.open_now : null,
+        weekdayText: r.opening_hours ? r.opening_hours.weekday_text : null,
+        phone: r.formatted_phone_number || null,
+        website: r.website || null,
+        mapsUrl: r.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.name)}&query_place_id=${pid}`
+      }
+    };
+  } catch (err) {
+    return { ok: false, status: 500, error: "Details fetch failed: " + (err.message || String(err)) };
+  }
+}
+
+async function dispatchAiChat(env, rawMessages, currentTripId = "") {
+  const windowMessages = (Array.isArray(rawMessages) ? rawMessages : []).slice(-10);
+  const messages = windowMessages
+    .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
+    .map((m) => ({ role: m.role, content: m.content.trim() }));
+
+  if (messages.length === 0) {
+    return { ok: false, status: 400, error: "INVALID_REQUEST", message: "對話訊息不可為空 / Messages cannot be empty" };
+  }
+
+  const llm = await getLLMConfig(env);
+  if (!llm.apiKey) {
+    return { ok: false, status: 400, error: "NO_LLM_KEY", message: "尚未設定 AI 語言模型金鑰，請前往「設定」配置 API Key。" };
+  }
+
+  const store = await loadStore(env);
+  const tripId = (currentTripId || "").trim();
+  let tripContext = "";
+  let activeTrip = null;
+
+  if (tripId && store.trips[tripId]) {
+    activeTrip = store.trips[tripId];
+    const segSummary = (activeTrip.segments || [])
+      .slice()
+      .sort((a, b) => ((a.start || "") < (b.start || "") ? -1 : 1))
+      .map((s) => {
+        let line = `[${s.start || "未定時間"}] ${s.type || "other"}: ${s.name || "未命名"}`;
+        if (s.address) line += ` [地點: ${s.address}]`;
+        if (s.note) line += ` (${s.note})`;
+        if (s.fallback && s.fallback.name) line += ` [備案: ${s.fallback.name}${s.fallback.address ? " @ " + s.fallback.address : ""}]`;
+        return line;
+      })
+      .join("\n");
+
+    tripContext = `【目前討論中的行程 (Active Trip Context)】
+- 行程 ID: ${activeTrip.id}
+- 行程名稱: ${activeTrip.label || activeTrip.to}
+- 目的地: ${activeTrip.to} (出發地: ${activeTrip.from || "未指定"})
+- 日期區間: ${activeTrip.start} 至 ${activeTrip.end}
+- 時區: ${activeTrip.timezone || "未設定"}
+- 備註: ${activeTrip.notes || "無"}
+- 目前已安排細項 (${(activeTrip.segments || []).length} 項):
+${segSummary || "（目前尚無細項安排）"}`;
+  } else {
+    const upcoming = Object.values(store.trips)
+      .slice()
+      .sort((a, b) => ((a.start || "") < (b.start || "") ? -1 : 1))
+      .slice(0, 8)
+      .map((t) => `- [${t.id}] ${t.label || t.to} (${t.from || ""} ➔ ${t.to}) : ${t.start} ~ ${t.end} [${(t.segments || []).length} 項細項]`)
+      .join("\n");
+    tripContext = `【旅客目前行程清單總覽 (All Trips Overview)】
+${upcoming || "（目前尚未建立任何行程）"}`;
+  }
+
+  const sysPrompt = `你是一位專業、敏銳且細緻的個人旅遊規劃特助 (RoamRadar Travel Copilot)。
+你的任務是協助旅客構思、討論與優化行程規劃（包含餐廳美食、飯店住宿、航班、鐵路、交通接駁、景點活動與雨天/客滿備案）。
+
+${tripContext}
+
+【原則與行為指引】
+1. 回應親切自然、條理分明、具備專業旅遊洞察。建議應考慮當地的地理距離、營業時間、動線流暢度與時差/交通。
+2. 支援 7 種細項規劃類別:
+   - flight (✈️ 航班)
+   - hotel (🏨 飯店住宿)
+   - restaurant (🍽️ 餐廳美食)
+   - rail (🚆 鐵路/新幹線/地鐵)
+   - car (🚗 租車自駕)
+   - ride (🚕 計程車/機場接送)
+   - other (📍 景點活動/展覽/會議)
+3. 當你在對話中建議「具體的行程項目、餐廳預約、景點活動或交通」時，除了親切回應用戶外，請務必在回應結尾附上結構化提案區塊 (proposal block)。格式嚴格遵循：
+:::proposal
+{
+  "action": "add_segments",
+  "tripId": "${activeTrip ? activeTrip.id : ""}",
+  "segments": [
+    {
+      "type": "restaurant",
+      "name": "餐廳或景點名稱",
+      "address": "地址或概略位置",
+      "start": "YYYY-MM-DDTHH:mm:ss 或 YYYY-MM-DD",
+      "end": "YYYY-MM-DDTHH:mm:ss 或 YYYY-MM-DD (選填)",
+      "note": "簡短精闢的推薦理由或用餐/參觀重點",
+      "fallback": {
+        "name": "備案名稱 (例如客滿或雨天替代方案)",
+        "address": "備案地址 (選填)",
+        "note": "備案說明 (選填)"
+      }
+    }
+  ]
+}
+:::
+4. 如果旅客只是閒聊、問一般天氣、問建議、或無具體要排入行程的項目，請正常文字回應，不要輸出 :::proposal 區塊。
+5. 每次 proposal 的 segments 請控制在 1 ~ 4 個精選項目以內，質量重於數量。
+6. 對於熱門餐廳或戶外行程，強烈建議主動規劃可行的 fallback (備案方案)。
+7. proposal 內的 JSON 必須是標準 JSON，請勿包含尾隨逗號或註解。`;
+
+  let replyText = "";
+  try {
+    if (llm.provider === "anthropic" || (!llm.baseUrl && llm.apiKey.startsWith("sk-ant-"))) {
+      const anthropicMsgs = [];
+      for (const m of messages) {
+        if (anthropicMsgs.length === 0 && m.role !== "user") continue;
+        if (anthropicMsgs.length > 0 && anthropicMsgs[anthropicMsgs.length - 1].role === m.role) {
+          anthropicMsgs[anthropicMsgs.length - 1].content += "\n\n" + m.content;
+        } else {
+          anthropicMsgs.push({ role: m.role, content: m.content });
+        }
+      }
+      if (anthropicMsgs.length === 0) anthropicMsgs.push({ role: "user", content: "你好" });
+
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": llm.apiKey,
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          model: llm.model || "claude-3-5-haiku-latest",
+          max_tokens: 2000,
+          system: sysPrompt,
+          messages: anthropicMsgs
+        })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        if (res.status === 429) return { ok: false, status: 429, error: "RATE_LIMITED", message: "AI 服務暫時超過速率限制，請稍候重試。" };
+        return { ok: false, status: res.status, error: "PROVIDER_ERROR", message: `Anthropic API 錯誤 (${res.status}): ${errText.slice(0, 200)}` };
+      }
+
+      const data = await res.json();
+      replyText = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
+    } else {
+      const baseUrl = (llm.baseUrl || "https://api.openai.com/v1").replace(/\/+$/, "");
+      const endpoint = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
+      const openAiMsgs = [{ role: "system", content: sysPrompt }, ...messages];
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${llm.apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: llm.model || "gpt-4o",
+          temperature: 0.4,
+          messages: openAiMsgs
+        })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        if (res.status === 429) return { ok: false, status: 429, error: "RATE_LIMITED", message: "AI 服務暫時超過速率限制，請稍候重試。" };
+        return { ok: false, status: res.status, error: "PROVIDER_ERROR", message: `AI 服務錯誤 (${res.status}): ${errText.slice(0, 200)}` };
+      }
+
+      const data = await res.json();
+      replyText = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+    }
+  } catch (err) {
+    console.error("AI chat error:", err);
+    return { ok: false, status: 500, error: "PROVIDER_ERROR", message: "連線 AI 服務失敗: " + (err && err.message ? err.message : String(err)) };
+  }
+
+  return {
+    ok: true,
+    reply: replyText,
+    provider: llm.provider,
+    model: llm.model
+  };
+}
+
 // Returns an ARRAY of segment objects (a return ticket = one per flight, so
 // nothing in the email is lost; empty = "this email is not a booking"), or
 // undefined ("could not ask" - no key / API down; caller retries later).
@@ -2218,6 +2400,373 @@ function cors(res) {
 
 
 
-const LLMS_TXT = "# 888漫步旅遊 · 888RoamTravel (RoamRadar)\n\n> Single-tenant, privacy-first personal travel hub with multi-language itinerary planning, live calendar subscriptions, and a dedicated RESTful Agent API.\n\n## Overview\nRoamRadar is a personal travel command center designed to run serverlessly on Cloudflare Workers and Cloudflare KV. It aggregates bookings from Google Calendar, Gmail, and manual user inputs into a unified, chronological timeline.\n\nThis instance provides a RESTful API (`/api/v1`) designed specifically for external AI agents, LLM assistants, and automation workflows to plan, query, update, and manage trips and granular itinerary items.\n\n## Machine-Readable Documents\n- [/skill.md](https://travel.david888.com/skill.md): Canonical Agent Skill specification with tool definitions and instructions.\n- [/llms-full.txt](https://travel.david888.com/llms-full.txt): Comprehensive API documentation, full JSON schemas, and usage examples.\n\n## Key Capabilities & Rules\n1. **Full Trips CRUD**: Create, read, update, and delete multi-day travel itineraries.\n2. **Granular Segment Planning**: Append, edit, or remove itinerary segments individually or in batch.\n3. **Supported Categories**:\n   - `flight` ✈️: Airline flights and connections.\n   - `hotel` 🏨: Accommodations, hotels, ryokans, and Airbnbs.\n   - `restaurant` 🍽️: Dining reservations, food spots, and cafes.\n   - `rail` 🚆: Trains, Shinkansen, metro, and rail passes.\n   - `car` 🚗: Rental cars and car hires.\n   - `ride` 🚕: Taxis, airport transfers, and ride-hailing.\n   - `other` 📍: Attractions, activities, museums, and meetings.\n4. **Smart Contingency & Fallback Plans**: Attach alternative plans (e.g. backup restaurant or bad-weather indoor plan) to any itinerary item with 1-click in-app promotion.\n5. **Manual Invariant Protection**: All items created via the Agent API are stamped with `source: \"manual\"`. They will NEVER be overwritten or deleted by automated background calendar or email synchronization.\n6. **Subscribed ICS Feed**: Private calendar feed exportable to Apple Calendar, Google Calendar, and Outlook.\n\n## Quick API Reference\n\n### Base URL & Authentication\n- Base URL: `https://<your-instance-domain>/api/v1`\n- Header: `Authorization: Bearer rr_agent_<your-token>`\n- Content-Type: `application/json`\n\n### Endpoints\n- `GET /api/v1/trips`: List all trips with summary metrics and segments.\n- `POST /api/v1/trips`: Create a new trip with destination, dates, notes, and optional initial segments.\n- `GET /api/v1/trips/:id`: Retrieve single trip details by ID.\n- `PUT /api/v1/trips/:id`: Update trip destination, dates, timezone, photo, or notes.\n- `DELETE /api/v1/trips/:id`: Delete a trip and its itinerary.\n- `POST /api/v1/trips/:id/segments`: Append single segment or batch array of segments (with optional fallback plans).\n- `PUT /api/v1/trips/:id/segments/:sid`: Update an existing segment.\n- `DELETE /api/v1/trips/:id/segments/:sid`: Delete an itinerary segment with automatic tombstoning.\n\n## Getting Started for Agents\n1. Have the user generate an Agent API Key in the web app under Settings -> AI Agent Integration.\n2. Verify connectivity with `GET /api/v1/trips`.\n3. Read [/skill.md](https://travel.david888.com/skill.md) or [/llms-full.txt](https://travel.david888.com/llms-full.txt) for detailed schemas and prompt engineering guidelines.\n";
-const LLMS_FULL_TXT = "# 888漫步旅遊 · 888RoamTravel (RoamRadar) - Full LLM & API Reference\n\n> Machine-readable specification and guide for AI Agents, autonomous planners, and automation systems integrating with RoamRadar.\n\n---\n\n## 1. System Architecture & Invariants\n\nRoamRadar is a privacy-first, single-tenant personal travel hub. All data is persisted in Cloudflare KV as a unified store.\n\n### The Invariant Rules\n1. **Manual Invariant**: Any segment created or updated via the Agent API is assigned `source: \"manual\"`. The background sync engine (which periodically scans Google Calendar and Gmail) will **NEVER** overwrite, modify, or delete manual plans.\n2. **Category Fidelity**: Categories must strictly match one of the 7 supported values:\n   - `flight` ✈️: Flight bookings, airport codes, flight numbers.\n   - `hotel` 🏨: Accommodations, hotels, ryokans, villas, Airbnbs.\n   - `restaurant` 🍽️: Dining, restaurants, cafes, food stalls, ramen shops, izakayas.\n   - `rail` 🚆: Trains, high-speed rail (Shinkansen, TGV, ICE), subways, scenic railways.\n   - `car` 🚗: Rental cars, car hire pick-up and drop-off.\n   - `ride` 🚕: Taxi, airport pick-up, Uber, private chauffeur.\n   - `other` 📍: Sightseeing attractions, theme parks, museum entries, appointments.\n3. **Contingency / Fallback Plans**: Any segment can hold an embedded `fallback` object representing a backup alternative. If the primary plan is full, closed, or delayed, the user can switch to the fallback plan in 1 click in the UI.\n\n---\n\n## 2. Authentication\n\nExternal agents authenticate using an HTTP Bearer token in the `Authorization` header:\n\n```http\nAuthorization: Bearer rr_agent_<token>\nContent-Type: application/json\n```\n\nAgent keys are generated in the RoamRadar Web App (Settings -> AI Agent Integration). Tokens are prefixed with `rr_agent_` and can be regenerated or revoked at any time.\n\n---\n\n## 3. Data Schemas\n\n### Trip Schema\n```json\n{\n  \"id\": \"t_202610_tokyo\",             // string (unique ID; auto-assigned if omitted)\n  \"from\": \"TPE\",                      // string (origin airport IATA or city name)\n  \"to\": \"NRT\",                        // string (destination airport IATA or city name)\n  \"start\": \"2026-10-15\",              // string (YYYY-MM-DD)\n  \"end\": \"2026-10-20\",                // string (YYYY-MM-DD)\n  \"label\": \"Tokyo Autumn Voyage\",     // string (human-friendly trip title)\n  \"notes\": \"Flight booked via BR198\", // string (free-text trip notes)\n  \"timezone\": \"Asia/Tokyo\",           // string (IANA timezone, e.g. \"Asia/Tokyo\")\n  \"photo\": \"https://example.com/p.jpg\", // string (optional custom banner photo URL)\n  \"segments\": [],                     // Segment[] (itinerary plans)\n  \"updatedAt\": 1729000000000          // number (epoch timestamp ms)\n}\n```\n\n### Segment Schema\n```json\n{\n  \"sid\": \"s_123456\",                  // string (unique segment ID; auto-assigned if omitted)\n  \"type\": \"restaurant\",               // string (\"flight\"|\"hotel\"|\"restaurant\"|\"car\"|\"ride\"|\"rail\"|\"other\")\n  \"name\": \"Ichiran Ramen Shibuya\",    // string (plan title / business name)\n  \"address\": \"1-22-7 Jinnan, Shibuya\",// string (optional formatted address or location)\n  \"note\": \"18:00 Dinner reservation\", // string (optional notes, times, seat info)\n  \"start\": \"2026-10-15T18:00\",        // string (YYYY-MM-DD or YYYY-MM-DDTHH:mm)\n  \"end\": \"2026-10-15T19:30\",          // string (optional YYYY-MM-DD or YYYY-MM-DDTHH:mm)\n  \"conf\": \"RES-889900\",               // string (optional confirmation / booking reference)\n  \"source\": \"manual\",                 // string (always \"manual\" for agent items)\n  \"rating\": 4.5,                      // number (optional Google rating, 1.0 - 5.0)\n  \"userRatingsTotal\": 2450,           // number (optional total review count)\n  \"openNow\": true,                    // boolean (optional current open status)\n  \"mapsUrl\": \"https://maps.google.com/?cid=123\", // string (optional Google Maps link)\n  \"placeId\": \"ChIJN1t_tDeuEmsRUsoyG83frY4\",      // string (optional Google Place ID)\n  \"fallback\": {                       // object (optional contingency alternative)\n    \"name\": \"Afuri Ramen Harajuku\",\n    \"address\": \"1-1-7 Jingumae, Shibuya\",\n    \"note\": \"Backup option if Ichiran line exceeds 30 mins\",\n    \"mapsUrl\": \"https://maps.google.com/?cid=456\",\n    \"rating\": 4.3,\n    \"userRatingsTotal\": 1820\n  }\n}\n```\n\n---\n\n## 4. API Endpoints Specification\n\n### 4.1 Trips Endpoints\n\n#### `GET /api/v1/trips`\nRetrieves all trips sorted chronologically by start date.\n- **Request**: No body required.\n- **Response**: `200 OK`\n```json\n{\n  \"ok\": true,\n  \"count\": 1,\n  \"trips\": [\n    {\n      \"id\": \"t_202610_tokyo\",\n      \"from\": \"TPE\",\n      \"to\": \"NRT\",\n      \"start\": \"2026-10-15\",\n      \"end\": \"2026-10-20\",\n      \"label\": \"Tokyo Autumn Voyage\",\n      \"timezone\": \"Asia/Tokyo\",\n      \"segmentCount\": 5,\n      \"segments\": [...]\n    }\n  ]\n}\n```\n\n#### `GET /api/v1/trips/:id`\nRetrieves details of a single trip by ID.\n- **Response**: `200 OK`\n```json\n{\n  \"ok\": true,\n  \"trip\": { ... }\n}\n```\n\n#### `POST /api/v1/trips`\nCreates a new trip.\n- **Request Body**:\n```json\n{\n  \"from\": \"TPE\",\n  \"to\": \"NRT\",\n  \"start\": \"2026-10-15\",\n  \"end\": \"2026-10-20\",\n  \"label\": \"Tokyo Autumn Voyage\",\n  \"notes\": \"Trip planned by AI assistant\",\n  \"timezone\": \"Asia/Tokyo\",\n  \"segments\": [ ... ]\n}\n```\n- **Response**: `201 Created` with created trip object.\n\n#### `PUT /api/v1/trips/:id`\nUpdates an existing trip's properties (dates, destination, label, notes, timezone).\n- **Response**: `200 OK` with updated trip object.\n\n#### `DELETE /api/v1/trips/:id`\nDeletes a trip and all its segments.\n- **Response**: `200 OK`\n```json\n{\n  \"ok\": true,\n  \"deleted\": true,\n  \"id\": \"t_202610_tokyo\"\n}\n```\n\n---\n\n### 4.2 Segments Endpoints\n\n#### `POST /api/v1/trips/:id/segments`\nAppends one or more itinerary segments to an existing trip.\n- **Batch Support**: Accepts either a single segment object `{ ... }` or an array of segment objects `[ { ... }, { ... } ]`.\n- **Request Body (Batch Example)**:\n```json\n[\n  {\n    \"type\": \"flight\",\n    \"name\": \"BR198 TPE to NRT\",\n    \"start\": \"2026-10-15T08:50\",\n    \"end\": \"2026-10-15T13:15\",\n    \"conf\": \"BR-78910\",\n    \"note\": \"Terminal 2, Seat 12A\"\n  },\n  {\n    \"type\": \"hotel\",\n    \"name\": \"Hotel Gracery Shinjuku\",\n    \"address\": \"1-19-1 Kabukicho, Shinjuku, Tokyo\",\n    \"start\": \"2026-10-15\",\n    \"end\": \"2026-10-20\",\n    \"conf\": \"HG-9921\",\n    \"note\": \"Check-in from 14:00\"\n  },\n  {\n    \"type\": \"restaurant\",\n    \"name\": \"Ramen Nagi Shinjuku Golden Gai\",\n    \"address\": \"1-1-10 Kabukicho, Shinjuku\",\n    \"start\": \"2026-10-15T19:00\",\n    \"note\": \"Top rated niboshi ramen\",\n    \"fallback\": {\n      \"name\": \"Ichiran Shinjuku Chuo-Higashiguchi\",\n      \"address\": \"3-34-11 Shinjuku\",\n      \"note\": \"Backup if Nagi wait exceeds 40 mins\"\n    }\n  }\n]\n```\n- **Response**: `201 Created`\n```json\n{\n  \"ok\": true,\n  \"count\": 3,\n  \"segments\": [ ... ]\n}\n```\n\n#### `PUT /api/v1/trips/:id/segments/:sid`\nUpdates an existing segment.\n- **Request Body**: Any editable fields (`name`, `address`, `note`, `start`, `end`, `conf`, `fallback`, `rating`, `openNow`, `mapsUrl`, etc.).\n- **Response**: `200 OK` with updated segment object.\n\n#### `DELETE /api/v1/trips/:id/segments/:sid`\nRemoves a segment from the trip and records its confirmation reference into `deletedSegs` tombstone store.\n- **Response**: `200 OK`\n```json\n{\n  \"ok\": true,\n  \"deleted\": true,\n  \"sid\": \"s_123456\"\n}\n```\n\n---\n\n## 5. Agent Planning Best Practices\n\n1. **Chronological Consistency**: Ensure segment start times fall within the trip's `start` and `end` bounds.\n2. **Time Formatting in Notes**: RoamRadar's timeline parser automatically extracts clock times (e.g. `09:00-11:30` or `19:00`) from the `note` field to order same-day events. Include explicit times in either `start` or `note`.\n3. **Proactive Fallbacks**: When recommending popular dining or outdoor attractions, automatically attach a fallback alternative in the `fallback` field to provide the user with peace of mind.\n";
-const SKILL_MD = "---\nname: roamradar-travel-planner\ndescription: Autonomous travel planning agent skill for RoamRadar (888RoamTravel). Plans multi-day trips, manages itinerary segments across all 7 categories (flight, hotel, restaurant, rail, car, ride, other), and configures contingency fallback plans via RESTful API.\n---\n\n# RoamRadar Travel Planner Skill\n\nUse this skill when tasked with researching, structuring, or managing travel itineraries in RoamRadar (888RoamTravel). This skill gives you direct RESTful API access to create and modify trips and detailed itinerary segments.\n\n## Configuration & Headers\n- **Base URL**: `https://<your-instance-domain>/api/v1`\n- **Headers**:\n  ```http\n  Authorization: Bearer <AGENT_API_KEY>\n  Content-Type: application/json\n  ```\n\n## 7 Standard Categories\nEvery itinerary segment must use one of the following 7 categories:\n1. `flight` ✈️: Flights, connections, airport departure/arrival.\n2. `hotel` 🏨: Accommodations, hotels, ryokans, resorts, Airbnbs.\n3. `restaurant` 🍽️: Dining, restaurants, food stalls, cafes, bars.\n4. `rail` 🚆: Trains, Shinkansen, high-speed rail, subways.\n5. `car` 🚗: Rental cars, car hire pick-up and drop-off.\n6. `ride` 🚕: Taxis, airport transfers, ride-hailing services.\n7. `other` 📍: Sightseeing attractions, museums, activities, meetings.\n\n## Contingency & Fallback Plans\nTravelers encounter unexpected queues, closures, and weather changes. Whenever proposing restaurants or outdoor activities, attach a viable alternative in the `fallback` object:\n```json\n{\n  \"type\": \"restaurant\",\n  \"name\": \"Primary Target Restaurant\",\n  \"address\": \"Primary Address\",\n  \"start\": \"2026-10-16T18:30\",\n  \"note\": \"18:30 dinner\",\n  \"fallback\": {\n    \"name\": \"Alternative Backup Restaurant\",\n    \"address\": \"Backup Address nearby\",\n    \"note\": \"Backup in case line exceeds 30m or booked out\"\n  }\n}\n```\n\n## Available Tool Actions & Endpoints\n\n### 1. `list_trips`\nRetrieve all existing trips to check dates or find a trip ID.\n- **Method**: `GET /api/v1/trips`\n- **Example Response**:\n  ```json\n  {\n    \"ok\": true,\n    \"count\": 2,\n    \"trips\": [\n      {\n        \"id\": \"t_tokyo_2026\",\n        \"to\": \"NRT\",\n        \"from\": \"TPE\",\n        \"start\": \"2026-10-15\",\n        \"end\": \"2026-10-20\",\n        \"label\": \"Tokyo Autumn\",\n        \"segmentCount\": 6\n      }\n    ]\n  }\n  ```\n\n### 2. `create_trip`\nCreate a new multi-day trip container.\n- **Method**: `POST /api/v1/trips`\n- **Payload**:\n  ```json\n  {\n    \"from\": \"TPE\",\n    \"to\": \"NRT\",\n    \"start\": \"2026-10-15\",\n    \"end\": \"2026-10-20\",\n    \"label\": \"Tokyo Autumn Voyage\",\n    \"timezone\": \"Asia/Tokyo\",\n    \"notes\": \"Autumn trip to Tokyo and Hakone\"\n  }\n  ```\n\n### 3. `get_trip`\nFetch complete trip details including all segments and notes.\n- **Method**: `GET /api/v1/trips/:id`\n\n### 4. `update_trip`\nModify trip dates, notes, or destination.\n- **Method**: `PUT /api/v1/trips/:id`\n- **Payload**: `{ \"label\": \"Tokyo & Hakone Autumn\", \"notes\": \"Updated itinerary\" }`\n\n### 5. `delete_trip`\nDelete a trip and its itinerary.\n- **Method**: `DELETE /api/v1/trips/:id`\n\n### 6. `add_segments` (Batch or Single)\nAdd itinerary items to a trip. Pass an array of items for high-performance batch creation.\n- **Method**: `POST /api/v1/trips/:id/segments`\n- **Payload**:\n  ```json\n  [\n    {\n      \"type\": \"flight\",\n      \"name\": \"BR198 TPE to NRT\",\n      \"start\": \"2026-10-15T08:50\",\n      \"end\": \"2026-10-15T13:15\",\n      \"note\": \"Terminal 2, Seat 12A\",\n      \"conf\": \"BR-78910\"\n    },\n    {\n      \"type\": \"restaurant\",\n      \"name\": \"Ginza Kagari Ramen\",\n      \"address\": \"6-4-12 Ginza, Chuo-ku, Tokyo\",\n      \"start\": \"2026-10-15T18:00\",\n      \"note\": \"Famous Tori Paitan ramen\",\n      \"fallback\": {\n        \"name\": \"Kyushu Jangara Ginza\",\n        \"address\": \"6-12-1 Ginza, Chuo-ku, Tokyo\",\n        \"note\": \"Quick tonkotsu backup\"\n      }\n    }\n  ]\n  ```\n\n### 7. `update_segment`\nUpdate an individual itinerary item.\n- **Method**: `PUT /api/v1/trips/:id/segments/:sid`\n- **Payload**: `{ \"note\": \"Updated table time to 19:00\" }`\n\n### 8. `delete_segment`\nDelete a segment. Deletion is automatically tombstoned to prevent calendar/email sync resurrection.\n- **Method**: `DELETE /api/v1/trips/:id/segments/:sid`\n\n## Operational Guidelines for Agents\n- When planning an entire itinerary, first call `GET /api/v1/trips` to find if a trip already exists for the dates, or create one using `POST /api/v1/trips`.\n- Use the batch `POST /api/v1/trips/:id/segments` endpoint to insert the entire itinerary in a single HTTP request to optimize token efficiency and speed.\n- In `note`, include key operational details such as flight times (`09:00-11:30`), confirmation codes, or booking deadlines.\n";
+const LLMS_TXT = `# 888漫步旅遊 · 888RoamTravel (RoamRadar)
+
+> Single-tenant, privacy-first personal travel hub with multi-language itinerary planning, live calendar subscriptions, Google Places verification, contingency fallback management, and a dedicated RESTful Agent API.
+
+## Overview
+RoamRadar is a personal travel command center designed to run serverlessly on Cloudflare Workers and Cloudflare KV. It aggregates bookings from Google Calendar, Gmail, and manual user inputs into a unified, chronological timeline.
+
+This instance provides a comprehensive RESTful API (\`/api/v1\`) designed specifically for external AI agents (Claude Code, Antigravity, Cursor, OpenAI Agents, LangChain) to plan, query, update, and manage trips, granular itinerary items, verified places, fallback plans, wishlist radar, backups, and live synchronization.
+
+## Machine-Readable Documents
+- [/skill.md](https://travel.david888.com/skill.md): Canonical Agent Skill specification with tool definitions and instructions.
+- [/llms-full.txt](https://travel.david888.com/llms-full.txt): Comprehensive API documentation, full JSON schemas, and usage examples.
+
+## Key Capabilities & Rules
+1. **Full Trips CRUD**: Create, read, update, and delete multi-day travel itineraries (\`GET\`, \`POST\`, \`PUT\`, \`DELETE /api/v1/trips\`).
+2. **Granular Segment Planning**: Append, edit, or remove itinerary segments individually or in high-performance batches (\`POST\`, \`PUT\`, \`DELETE /api/v1/trips/:id/segments\`).
+3. **7 Standard Categories**:
+   - \`flight\` ✈️: Airline flights, layovers, and airport terminals.
+   - \`hotel\` 🏨: Accommodations, hotels, ryokans, resorts, and Airbnbs.
+   - \`restaurant\` 🍽️: Dining reservations, culinary spots, and cafes.
+   - \`rail\` 🚆: Trains, Shinkansen, high-speed rail, metro, and scenic rail.
+   - \`car\` 🚗: Rental cars and vehicle hire pick-up and drop-off.
+   - \`ride\` 🚕: Taxis, airport transfers, and private chauffeurs.
+   - \`other\` 📍: Attractions, museums, activities, and meetings.
+4. **Smart Contingency & Fallback Plans**: Attach alternative backup plans to any item. Support 1-click in-app promotion and programmatic 1-click swap (\`POST /api/v1/trips/:id/segments/:sid/swap-fallback\`).
+5. **Google Places Discovery**: Search verified real-world places, opening hours, Google ratings, review counts, and Maps links (\`POST /api/v1/places/search\`, \`POST /api/v1/places/details\`).
+6. **Wishlist Radar & Airfare Tracking**: Maintain future destinations, target budgets, and travel months (\`GET\`, \`POST\`, \`DELETE /api/v1/wishes\`).
+7. **On-Demand Sync Trigger**: Programmatically trigger Google Calendar & Gmail synchronization passes (\`POST /api/v1/sync\`).
+8. **Cloud Snapshots & Export**: Inspect automatic KV backup snapshots and download full data exports (\`GET /api/v1/backups\`, \`GET /api/v1/export\`).
+9. **In-App AI Copilot Chat**: Query RoamRadar's internal AI travel assistant with active trip context to generate structured proposal cards (\`POST /api/v1/copilot/chat\`).
+10. **Manual Invariant Protection**: All items created via the Agent API are stamped with \`source: "manual"\`. They will NEVER be overwritten or deleted by automated background calendar or email synchronization.
+11. **Instance Health & Status**: Inspect instance health, version, trip counts, and active integration flags (\`GET /api/v1/status\`).
+
+## Quick API Reference
+
+### Base URL & Authentication
+- Base URL: \`https://<your-instance-domain>/api/v1\`
+- Header: \`Authorization: Bearer rr_agent_<your-token>\`
+- Content-Type: \`application/json\`
+
+### Endpoints Index
+- \`GET /api/v1/status\`: Instance health, metrics, and integrations status.
+- \`GET /api/v1/trips\`: List all trips with summary metrics and segments.
+- \`POST /api/v1/trips\`: Create a new trip with destination, dates, notes, and optional initial segments.
+- \`GET /api/v1/trips/:id\`: Retrieve single trip details by ID.
+- \`PUT /api/v1/trips/:id\`: Update trip destination, dates, timezone, photo, or notes.
+- \`DELETE /api/v1/trips/:id\`: Delete a trip and its itinerary.
+- \`POST /api/v1/trips/:id/segments\`: Append single segment or batch array of segments (with optional fallback plans).
+- \`PUT /api/v1/trips/:id/segments/:sid\`: Update an existing segment.
+- \`DELETE /api/v1/trips/:id/segments/:sid\`: Delete an itinerary segment with automatic tombstoning.
+- \`POST /api/v1/trips/:id/segments/:sid/swap-fallback\`: 1-Click swap primary plan with its backup fallback plan.
+- \`POST /api/v1/places/search\`: Search Google Places for verified venues, ratings, reviews, open status.
+- \`POST /api/v1/places/details\`: Fetch details for a specific Google Place ID.
+- \`GET /api/v1/wishes\`: List all wishlist travel radar items.
+- \`POST /api/v1/wishes\`: Add or update a wishlist radar item.
+- \`DELETE /api/v1/wishes/:id\`: Delete a wishlist radar item.
+- \`POST /api/v1/sync\`: Trigger on-demand sync of Google Calendar and Gmail.
+- \`GET /api/v1/backups\`: List automated weekly and pre-restore cloud snapshot backups.
+- \`GET /api/v1/export\`: Export complete instance JSON data backup.
+- \`POST /api/v1/copilot/chat\`: Chat with the in-app AI travel copilot with active trip context.
+
+## Getting Started for Agents
+1. Have the user generate an Agent API Key in the web app under Settings -> AI Agent Integration.
+2. Verify connectivity with \`GET /api/v1/status\` or \`GET /api/v1/trips\`.
+3. Read [/skill.md](https://travel.david888.com/skill.md) or [/llms-full.txt](https://travel.david888.com/llms-full.txt) for detailed schemas and prompt engineering guidelines.
+`;
+
+const LLMS_FULL_TXT = `# 888漫步旅遊 · 888RoamTravel (RoamRadar) - Full LLM & API Reference
+
+> Machine-readable specification and guide for AI Agents, autonomous planners, and automation systems integrating with RoamRadar.
+
+---
+
+## 1. System Architecture & Invariants
+
+RoamRadar is a privacy-first, single-tenant personal travel hub. All data is persisted in Cloudflare KV as a unified store.
+
+### The Invariant Rules
+1. **Manual Invariant**: Any segment created or updated via the Agent API is assigned \`source: "manual"\`. The background sync engine (which periodically scans Google Calendar and Gmail) will **NEVER** overwrite, modify, or delete manual plans.
+2. **Category Fidelity**: Categories must strictly match one of the 7 supported values:
+   - \`flight\` ✈️: Flight bookings, airport codes, flight numbers, terminals.
+   - \`hotel\` 🏨: Accommodations, hotels, ryokans, villas, Airbnbs.
+   - \`restaurant\` 🍽️: Dining, restaurants, cafes, food stalls, ramen shops, izakayas.
+   - \`rail\` 🚆: Trains, high-speed rail (Shinkansen, TGV, ICE), subways, scenic railways.
+   - \`car\` 🚗: Rental cars, car hire pick-up and drop-off.
+   - \`ride\` 🚕: Taxi, airport pick-up, Uber, private chauffeur.
+   - \`other\` 📍: Sightseeing attractions, theme parks, museum entries, appointments.
+3. **Contingency / Fallback Plans**: Any segment can hold an embedded \`fallback\` object representing a backup alternative. If the primary plan is full, closed, or delayed, the user can switch to the fallback plan in 1 click in the UI, or agents can invoke \`/swap-fallback\`.
+4. **Data Layer Purity**: Never localize data literals (e.g. store \`"flight"\`, not \`"航班"\`). UI and markdown formatters handle display localization.
+
+---
+
+## 2. Authentication
+
+External agents authenticate using an HTTP Bearer token in the \`Authorization\` header:
+
+\`\`\`http
+Authorization: Bearer rr_agent_<token>
+Content-Type: application/json
+\`\`\`
+
+Agent keys are generated in the RoamRadar Web App (Settings -> AI Agent Integration). Tokens are prefixed with \`rr_agent_\` and can be regenerated or revoked at any time.
+
+---
+
+## 3. Data Schemas
+
+### Trip Schema
+\`\`\`json
+{
+  "id": "t_202610_tokyo",
+  "from": "TPE",
+  "to": "NRT",
+  "start": "2026-10-15",
+  "end": "2026-10-20",
+  "label": "Tokyo Autumn Voyage",
+  "notes": "Flight booked via BR198",
+  "timezone": "Asia/Tokyo",
+  "photo": "https://example.com/p.jpg",
+  "segments": [],
+  "updatedAt": 1729000000000
+}
+\`\`\`
+
+### Segment Schema
+\`\`\`json
+{
+  "sid": "s_123456",
+  "type": "restaurant",
+  "name": "Ichiran Ramen Shibuya",
+  "address": "1-22-7 Jinnan, Shibuya",
+  "note": "18:00 Dinner reservation",
+  "start": "2026-10-15T18:00",
+  "end": "2026-10-15T19:30",
+  "conf": "RES-889900",
+  "source": "manual",
+  "rating": 4.5,
+  "userRatingsTotal": 2450,
+  "openNow": true,
+  "mapsUrl": "https://maps.google.com/?cid=123",
+  "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+  "fallback": {
+    "name": "Afuri Ramen Harajuku",
+    "address": "1-1-7 Jingumae, Shibuya",
+    "note": "Backup option if Ichiran line exceeds 30 mins",
+    "mapsUrl": "https://maps.google.com/?cid=456",
+    "rating": 4.3,
+    "userRatingsTotal": 1820
+  }
+}
+\`\`\`
+
+### Wishlist Item Schema
+\`\`\`json
+{
+  "id": "w_98765",
+  "from": "TPE",
+  "dest": "KIX",
+  "days": "6",
+  "month": "November",
+  "budget": "NT$35,000",
+  "note": "Autumn maple season flight deals",
+  "updatedAt": 1729000000000
+}
+\`\`\`
+
+---
+
+## 4. Comprehensive API Endpoints Specification
+
+### 4.1 System & Diagnostics
+
+#### \`GET /api/v1/status\`
+Returns instance health, version, metric counts, and configured integrations.
+- **Request**: No body required.
+- **Response**: \`200 OK\`
+
+### 4.2 Trips Management
+
+#### \`GET /api/v1/trips\`
+Retrieves all trips sorted chronologically by start date.
+
+#### \`GET /api/v1/trips/:id\`
+Retrieves single trip details by ID.
+
+#### \`POST /api/v1/trips\`
+Creates a new trip.
+
+#### \`PUT /api/v1/trips/:id\`
+Updates an existing trip's properties (\`from\`, \`to\`, \`start\`, \`end\`, \`label\`, \`notes\`, \`timezone\`, \`photo\`).
+
+#### \`DELETE /api/v1/trips/:id\`
+Deletes a trip and its itinerary.
+
+### 4.3 Segments & Fallback Orchestration
+
+#### \`POST /api/v1/trips/:id/segments\`
+Appends one or more itinerary segments to an existing trip (single object or array of objects).
+
+#### \`PUT /api/v1/trips/:id/segments/:sid\`
+Updates an existing segment.
+
+#### \`DELETE /api/v1/trips/:id/segments/:sid\`
+Removes a segment from the trip and tombstones its confirmation reference.
+
+#### \`POST /api/v1/trips/:id/segments/:sid/swap-fallback\`
+1-Click Contingency Swap: Swaps the active primary plan with its configured fallback alternative.
+
+### 4.4 Google Places Discovery
+
+#### \`POST /api/v1/places/search\`
+Queries Google Places API for verified venues, ratings, review counts, and open status.
+- **Request Body**: \`{ "query": "Ginza Kagari", "language": "zh-TW" }\`
+
+#### \`POST /api/v1/places/details\`
+Retrieves detailed information for a specific Google Place ID.
+- **Request Body**: \`{ "placeId": "ChIJ..." }\`
+
+### 4.5 Wishlist & Airfare Radar
+
+#### \`GET /api/v1/wishes\`
+Retrieves all tracked wishlist radar items.
+
+#### \`POST /api/v1/wishes\`
+Creates or updates a wishlist radar item.
+
+#### \`DELETE /api/v1/wishes/:id\`
+Deletes a tracked wishlist item.
+
+### 4.6 Synchronization & Snapshots
+
+#### \`POST /api/v1/sync\`
+Triggers an immediate background synchronization pass with Google Calendar and Gmail.
+
+#### \`GET /api/v1/backups\`
+Lists all available weekly automated cloud snapshots and pre-restore snapshots.
+
+#### \`GET /api/v1/export\`
+Exports a full JSON snapshot of trips, wishes, and home configuration.
+
+### 4.7 In-App AI Copilot Chat
+
+#### \`POST /api/v1/copilot/chat\`
+Allows external agents or companion tools to chat directly with RoamRadar's internal AI copilot with active trip context.
+`;
+
+const SKILL_MD = `---
+name: roamradar-travel-planner
+description: Comprehensive autonomous travel planning, itinerary management, Google Places exploration, contingency fallback orchestration, and wishlist radar skill for RoamRadar (888RoamTravel).
+---
+
+# RoamRadar Travel Planner Skill
+
+Use this skill when tasked with researching, structuring, modifying, or managing travel itineraries in RoamRadar (888RoamTravel). This skill gives you direct RESTful API access to manage multi-day trips, granular itinerary items, Google Places discovery, contingency fallback plans, wishlist radar, backups, and synchronizations.
+
+## Configuration & Headers
+- **Base URL**: \`https://<your-instance-domain>/api/v1\`
+- **Headers**:
+  \`\`\`http
+  Authorization: Bearer <AGENT_API_KEY>
+  Content-Type: application/json
+  \`\`\`
+
+## 7 Standard Categories
+Every itinerary segment must strictly use one of the following 7 categories:
+1. \`flight\` ✈️: Flights, connections, airport departure/arrival.
+2. \`hotel\` 🏨: Accommodations, hotels, ryokans, resorts, Airbnbs.
+3. \`restaurant\` 🍽️: Dining, restaurants, food stalls, cafes, bars.
+4. \`rail\` 🚆: Trains, Shinkansen, high-speed rail, subways.
+5. \`car\` 🚗: Rental cars, car hire pick-up and drop-off.
+6. \`ride\` 🚕: Taxis, airport transfers, ride-hailing services.
+7. \`other\` 📍: Sightseeing attractions, museums, activities, meetings.
+
+## Contingency & Fallback Plans
+Travelers encounter unexpected queues, closures, and weather changes. Whenever proposing restaurants or outdoor activities, attach a viable alternative in the \`fallback\` object:
+\`\`\`json
+{
+  "type": "restaurant",
+  "name": "Primary Target Restaurant",
+  "address": "Primary Address",
+  "start": "2026-10-16T18:30",
+  "note": "18:30 dinner",
+  "fallback": {
+    "name": "Alternative Backup Restaurant",
+    "address": "Backup Address nearby",
+    "note": "Backup in case line exceeds 30m or booked out"
+  }
+}
+\`\`\`
+
+---
+
+## Available Tool Actions & Endpoints
+
+### 1. \`get_status\`
+Check instance health, version, trip counts, and active integration flags.
+- **Method**: \`GET /api/v1/status\`
+
+### 2. \`list_trips\`
+Retrieve all existing trips to check dates or find a trip ID.
+- **Method**: \`GET /api/v1/trips\`
+
+### 3. \`get_trip\`
+Fetch complete trip details including all segments and notes.
+- **Method**: \`GET /api/v1/trips/:id\`
+
+### 4. \`create_trip\`
+Create a new multi-day trip container.
+- **Method**: \`POST /api/v1/trips\`
+
+### 5. \`update_trip\`
+Modify trip dates, destination, notes, timezone, or photo.
+- **Method**: \`PUT /api/v1/trips/:id\`
+
+### 6. \`delete_trip\`
+Delete a trip and its entire itinerary.
+- **Method**: \`DELETE /api/v1/trips/:id\`
+
+### 7. \`add_segments\` (Batch or Single)
+Add itinerary items to a trip. Pass an array of items for high-performance batch creation.
+- **Method**: \`POST /api/v1/trips/:id/segments\`
+
+### 8. \`update_segment\`
+Update an individual itinerary item.
+- **Method**: \`PUT /api/v1/trips/:id/segments/:sid\`
+
+### 9. \`delete_segment\`
+Delete a segment. Deletion is automatically tombstoned to prevent calendar/email sync resurrection.
+- **Method**: \`DELETE /api/v1/trips/:id/segments/:sid\`
+
+### 10. \`swap_fallback\`
+1-Click Contingency Swap: Promotes the configured fallback plan to primary and sets the former primary as fallback.
+- **Method**: \`POST /api/v1/trips/:id/segments/:sid/swap-fallback\`
+
+### 11. \`search_places\`
+Search Google Places for verified venues, ratings, review counts, and open status.
+- **Method**: \`POST /api/v1/places/search\`
+
+### 12. \`get_place_details\`
+Retrieve operating hours, phone, website, and location details for a Google Place ID.
+- **Method**: \`POST /api/v1/places/details\`
+
+### 13. \`list_wishes\`
+List tracked travel wishlist destinations, preferred months, and budgets.
+- **Method**: \`GET /api/v1/wishes\`
+
+### 14. \`add_wish\`
+Add or update a travel wishlist item.
+- **Method**: \`POST /api/v1/wishes\`
+
+### 15. \`delete_wish\`
+Delete a wishlist radar item.
+- **Method**: \`DELETE /api/v1/wishes/:id\`
+
+### 16. \`trigger_sync\`
+Trigger on-demand background sync with Google Calendar and Gmail.
+- **Method**: \`POST /api/v1/sync\`
+
+### 17. \`list_backups\`
+List automated cloud snapshot backups.
+- **Method**: \`GET /api/v1/backups\`
+
+### 18. \`export_data\`
+Download full instance JSON export.
+- **Method**: \`GET /api/v1/export\`
+
+### 19. \`chat_copilot\`
+Query RoamRadar's internal AI copilot with active trip context.
+- **Method**: \`POST /api/v1/copilot/chat\`
+`;
