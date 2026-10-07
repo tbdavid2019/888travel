@@ -15,11 +15,11 @@ It's one static file. Easiest options:
 - **Cloudflare Pages**: new project -> point at this repo, build command none,
   output directory `website`.
 - **Netlify / Vercel**, or host `website/index.html` at your own domain (e.g.
-  giovannibrees.com) with the app keeping its `travel.` subdomain.
+  david888.com) with the app keeping its `travel.` subdomain.
 
-The **Download** buttons and the giant CTA already point at the live app
-(`https://travel.giovannibrees.com`). The footer credits link to
-`giovannibrees.com`.
+The **Download** buttons and the giant CTA point at the live app
+(`https://travel.david888.com/app`). The footer credits link to
+`david888.com`.
 
 ## Before going wide: swap the photos
 The past-trip and travel-log thumbnails are **hotlinked** from Unsplash and

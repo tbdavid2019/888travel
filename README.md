@@ -3,9 +3,21 @@
 > **一個免費、開源、100% 個人自架的單頁式旅遊行程管理中心。**  
 > 將所有航班、住宿、租車、交通接駁、倒數計時、願望清單與過往足跡整合在單一動態旅程時間軸。支援 Google 行事曆、Gmail 智慧解析（支援 Gemini / OpenAI / Groq / DeepSeek / Claude Haiku 等任意相容模型），以及 Resend 信箱 OTP 驗證碼登入。完全託管於您個人的 Cloudflare Worker 雲端帳戶，無須共用伺服器，資料隱私 100% 操之在己。  
 > 
-> *A free, open-source, self-hosted personal travel hub running entirely on your own Cloudflare Worker account. Original architecture by [Giovanni Brees](https://www.giovannibrees.com), enhanced with full Traditional Chinese (繁體中文) & English i18n, Universal OpenAI-compatible LLMs, Resend OTP Login, and CJK Craft Typography by [tbdavid2019](https://github.com/tbdavid2019).*
+> *A free, open-source, self-hosted personal travel hub running entirely on your own Cloudflare Worker account. Official live deployment at [travel.david888.com](https://travel.david888.com/). Original architecture by [Giovanni Brees](https://www.giovannibrees.com), enhanced with full Traditional Chinese (繁體中文) & English i18n, Universal OpenAI-compatible LLMs, Resend OTP Login, and CJK Craft Typography by [tbdavid2019](https://github.com/tbdavid2019).*
+>
+> 🌐 **官方正式站點與線上入口**：
+> - 🚀 **官方展示首頁 (Official Landing)**：[https://travel.david888.com/](https://travel.david888.com/)
+> - 📱 **個人旅程中樞應用 (Live Web App)**：[https://travel.david888.com/app](https://travel.david888.com/app)
+> - 🤖 **機器人與 Agent 規範文件**：[`skill.md`](https://travel.david888.com/skill.md) · [`llms.txt`](https://travel.david888.com/llms.txt) · [`llms-full.txt`](https://travel.david888.com/llms-full.txt)
+> - 📄 **GitHub Pages 靜態鏡像**：[https://tbdavid2019.github.io/888travel/](https://tbdavid2019.github.io/888travel/)
 
 ---
+
+<p align="center">
+  <a href="https://travel.david888.com/"><img src="https://img.shields.io/badge/Official%20Production-travel.david888.com-1E40FF?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Official Live Site"></a>
+  <a href="https://travel.david888.com/app"><img src="https://img.shields.io/badge/Live%20App-/app-1B8A57?style=for-the-badge&logo=safari&logoColor=white" alt="Live App"></a>
+  <a href="https://tbdavid2019.github.io/888travel/"><img src="https://img.shields.io/badge/GitHub%20Pages-Mirror-black?style=for-the-badge&logo=github" alt="GitHub Pages"></a>
+</p>
 
 [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-1E40FF.svg)](LICENSE)
 ![Self-hosted](https://img.shields.io/badge/self--hosted-yes-1B8A57.svg)
@@ -79,7 +91,7 @@
 
 ## 🚀 5 分鐘快速部署指南 (Deploy in ≈5 Mins, Free)
 
-本專案運行於 Cloudflare 免費層（Free Plan 額度充裕），零主機伺服器費用。
+本專案運行於 Cloudflare 免費層（Free Plan 額度充裕），零主機伺服器費用。若想先體驗實際操作效果，歡迎隨時造訪官方正式站點：**[https://travel.david888.com/](https://travel.david888.com/)**。
 
 ### 方法 A：一鍵網頁部署（最推薦）
 

@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - 儲存庫由 `tbdavid2019/travel-roamradar` 正式更名為 **`tbdavid2019/888travel`**。
   - GitHub Pages 部署站點自動同步更新至：`https://tbdavid2019.github.io/888travel/`。
   - 啟用 GitHub Pages `build_type: workflow` 機制，修復先前尚未啟用 Pages 導致之 Actions 部署失敗問題。
-  - 同步更新 `README.md` 一鍵部署按鈕連結、Git Clone 指令以及 `website/index.html` 結構化資料庫（Schema.org `codeRepository`）。
+  - 同步更新 `README.md` 醒目置入官方正式站點 (`https://travel.david888.com/`)、Web App 入口、AI 旅程特助 (Copilot) 與 Agent API 完整功能規格，並更新一鍵部署按鈕連結與 Git Clone 指令。
 
 ## [2.6.7] - 2026-10-07
 
