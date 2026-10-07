@@ -229,6 +229,7 @@ export default {
       const gIcs = (await env.TRIPS.get("g_ics")) || "";
       const llm = await getLLMConfig(env);
       const resend = await getResendConfig(env);
+      const places = await getGooglePlacesConfig(env);
       const home = (await env.TRIPS.get("home")) || "";
       const homeTz = (await env.TRIPS.get("home_tz")) || "";
       const units = (await env.TRIPS.get("units")) || "";
@@ -255,6 +256,9 @@ export default {
         resendConfigured: !!resend.apiKey,
         resendFrom: resend.from,
         resendSource: resend.source,
+        // Google Places Configuration
+        googlePlacesConfigured: places.configured,
+        googlePlacesSource: places.source,
       }));
     }
 
@@ -450,6 +454,129 @@ export default {
         return cors(json({ ok: false, error: err.message || String(err) }, 500));
       }
     }
+
+    // Google Places API Settings (In-app key configuration)
+    if (url.pathname === "/settings/places" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      const apiKey = ((body && body.apiKey) || "").replace(/\s+/g, "");
+      if (apiKey === "") {
+        await env.TRIPS.delete("google_places_key");
+        delete env._placesConfig;
+        return cors(json({ ok: true, cleared: true }));
+      }
+      await env.TRIPS.put("google_places_key", apiKey);
+      delete env._placesConfig;
+      return cors(json({ ok: true }));
+    }
+
+    // Google Places API Test Connection
+    if (url.pathname === "/settings/places/test" && request.method === "POST") {
+      const places = await getGooglePlacesConfig(env);
+      if (!places.apiKey) {
+        return cors(json({ ok: false, error: "尚未設定 Google Places API Key / Google Places API Key not configured" }, 400));
+      }
+      const body = await request.json().catch(() => ({}));
+      const query = ((body && body.query) || "Tokyo Tower").trim();
+      try {
+        const res = await fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${places.apiKey}&language=zh-TW`);
+        const data = await res.json();
+        if (data.status === "REQUEST_DENIED") {
+          return cors(json({ ok: false, error: `Google Places 授權失敗: ${data.error_message || "API Key 權限被拒絕，請確認已在 Google Cloud 啟用 Places API"}` }, 403));
+        }
+        if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
+          return cors(json({ ok: false, error: `Google Places 錯誤 (${data.status}): ${data.error_message || ""}` }, 400));
+        }
+        const sample = (data.results || [])[0];
+        return cors(json({
+          ok: true,
+          count: (data.results || []).length,
+          sample: sample ? { name: sample.name, address: sample.formatted_address, rating: sample.rating } : null
+        }));
+      } catch (err) {
+        return cors(json({ ok: false, error: "連線至 Google Places 失敗: " + (err.message || String(err)) }, 500));
+      }
+    }
+
+    // Google Places Search (Find restaurants, attractions, addresses, ratings, and open status)
+    if (url.pathname === "/places/search" && request.method === "POST") {
+      const places = await getGooglePlacesConfig(env);
+      if (!places.apiKey) {
+        return cors(json({ error: "Google Places API 尚未設定 / Google Places API not configured" }, 400));
+      }
+      const body = await request.json().catch(() => ({}));
+      const query = ((body && body.query) || "").trim();
+      const lang = ((body && body.language) || "zh-TW").trim();
+      if (!query) return cors(json({ error: "搜尋關鍵字為必填 / Search query required" }, 400));
+
+      try {
+        const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${places.apiKey}&language=${encodeURIComponent(lang)}`;
+        const res = await fetch(searchUrl);
+        if (!res.ok) {
+          return cors(json({ error: `Google Places API 查詢失敗 (${res.status})` }, res.status));
+        }
+        const data = await res.json();
+        if (data.status === "REQUEST_DENIED") {
+          return cors(json({ error: `Google Places API 授權失敗: ${data.error_message || "API Key 無效或未開通 Places API"}` }, 403));
+        }
+        if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
+          return cors(json({ error: `Google Places API 異常: ${data.status} - ${data.error_message || ""}` }, 400));
+        }
+
+        const results = (data.results || []).slice(0, 5).map(p => ({
+          placeId: p.place_id,
+          name: p.name,
+          address: p.formatted_address,
+          rating: p.rating || null,
+          userRatingsTotal: p.user_ratings_total || null,
+          priceLevel: p.price_level !== undefined ? p.price_level : null,
+          openNow: p.opening_hours ? p.opening_hours.open_now : null,
+          types: p.types || [],
+          mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name)}&query_place_id=${p.place_id}`
+        }));
+
+        return cors(json({ ok: true, results }));
+      } catch (err) {
+        return cors(json({ error: "連線至 Google Places 失敗: " + (err.message || String(err)) }, 500));
+      }
+    }
+
+    // Google Places Details
+    if (url.pathname === "/places/details" && request.method === "POST") {
+      const places = await getGooglePlacesConfig(env);
+      if (!places.apiKey) return cors(json({ error: "Google Places API not configured" }, 400));
+      const body = await request.json().catch(() => ({}));
+      const placeId = ((body && body.placeId) || "").trim();
+      const lang = ((body && body.language) || "zh-TW").trim();
+      if (!placeId) return cors(json({ error: "placeId required" }, 400));
+
+      try {
+        const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(placeId)}&fields=name,formatted_address,rating,user_ratings_total,opening_hours,formatted_phone_number,website,url,price_level&key=${places.apiKey}&language=${encodeURIComponent(lang)}`;
+        const res = await fetch(detailUrl);
+        const data = await res.json();
+        if (data.status !== "OK") {
+          return cors(json({ error: data.error_message || data.status }, 400));
+        }
+        const r = data.result || {};
+        return cors(json({
+          ok: true,
+          place: {
+            placeId,
+            name: r.name,
+            address: r.formatted_address,
+            rating: r.rating || null,
+            userRatingsTotal: r.user_ratings_total || null,
+            priceLevel: r.price_level,
+            openNow: r.opening_hours ? r.opening_hours.open_now : null,
+            weekdayText: r.opening_hours ? r.opening_hours.weekday_text : null,
+            phone: r.formatted_phone_number || null,
+            website: r.website || null,
+            mapsUrl: r.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.name)}&query_place_id=${placeId}`
+          }
+        }));
+      } catch (err) {
+        return cors(json({ error: "Details fetch failed: " + (err.message || String(err)) }, 500));
+      }
+    }
     // What can the Google connection actually see? Split by stage, so "no travel
     // info appeared" points at the exact culprit.
     if (url.pathname === "/google/test" && request.method === "GET") {
@@ -617,7 +744,7 @@ export default {
         const manual = (body.segments || []).filter((s) => !s.source || s.source === "manual");
         store.trips[id] = { ...existing, from: body.from, to: body.to, start: body.start, end: body.end,
           label: body.label, notes: body.notes || "", timezone: body.timezone !== undefined ? body.timezone : (existing.timezone || ""),
-          segments: dedupeSegs([...ingested, ...manual]),
+          segments: dedupeSegs([...manual, ...ingested]),
           photo: body.photo !== undefined ? body.photo : (existing.photo || ""), updatedAt: Date.now() };
       } else {
         store.trips[id] = { id, from: body.from || "", to: body.to || "",
@@ -1119,6 +1246,16 @@ async function sendEmailViaResend(env, { to, subject, html, text }) {
   return await res.json();
 }
 
+// Google Places API Configuration
+async function getGooglePlacesConfig(env) {
+  if (env._placesConfig) return env._placesConfig;
+  const envKey = (env.GOOGLE_PLACES_API_KEY || "").trim();
+  const kvKey = ((await env.TRIPS.get("google_places_key")) || "").trim();
+  const apiKey = envKey || kvKey;
+  const source = envKey ? "secret" : (kvKey ? "in-app" : "none");
+  return (env._placesConfig = { apiKey, source, configured: Boolean(apiKey) });
+}
+
 // Returns an ARRAY of segment objects (a return ticket = one per flight, so
 // nothing in the email is lost; empty = "this email is not a booking"), or
 // undefined ("could not ask" - no key / API down; caller retries later).
@@ -1127,7 +1264,7 @@ async function extractSegments(env, emailText, deliberate) {
   if (!llm.apiKey) return undefined;
 
   const sysInstruction = "You are an expert travel booking confirmation extractor. From the travel email provided, extract booking details and return ONLY a valid JSON array of objects conforming to this schema:\n"
-    + '[{"type":"flight|hotel|car|ride|rail|other","name":"","city":"","start":"YYYY-MM-DD","end":"YYYY-MM-DD","address":"","conf":"","note":""}].\n'
+    + '[{"type":"flight|hotel|car|ride|rail|restaurant|other","name":"","city":"","start":"YYYY-MM-DD","end":"YYYY-MM-DD","address":"","conf":"","note":""}].\n'
     + "Rules:\n"
     + "- Return ONLY the raw JSON array. Never wrap in markdown codeblocks (no ```json). No introductory or concluding text.\n"
     + "- One object per bookable item: a return ticket = one object per flight (outbound AND return), a hotel stay = ONE object for the whole stay. Max 5 objects.\n"
@@ -1354,10 +1491,10 @@ function segSortKey(s) {
   const m = /([01]?\d|2[0-3]):([0-5]\d)/.exec(s.note || "");
   return (s.start || "") + "T" + (m ? ("0" + m[1]).slice(-2) + ":" + m[2] : "12:00");
 }
-const SEG_RANK = { flight: 0, rail: 1, car: 2, ride: 3, hotel: 4 };
+const SEG_RANK = { flight: 0, rail: 1, car: 2, ride: 3, hotel: 4, restaurant: 5 };
 function segCmp(a, b) {
   const ka = segSortKey(a), kb = segSortKey(b);
-  return ka < kb ? -1 : ka > kb ? 1 : (SEG_RANK[a.type] !== undefined ? SEG_RANK[a.type] : 5) - (SEG_RANK[b.type] !== undefined ? SEG_RANK[b.type] : 5);
+  return ka < kb ? -1 : ka > kb ? 1 : (SEG_RANK[a.type] !== undefined ? SEG_RANK[a.type] : 6) - (SEG_RANK[b.type] !== undefined ? SEG_RANK[b.type] : 6);
 }
 function findTripForDate(store, dateISO) {
   return Object.values(store.trips).find((t) => t.start && t.end && dateISO >= t.start && dateISO <= t.end);
@@ -1411,7 +1548,8 @@ function guessType(s) {
   if (/hotel|airbnb|booking|stay|inn|resort/.test(s)) return "hotel";
   if (/car|rental|hertz|avis|sixt/.test(s)) return "car";
   if (/uber|bolt|ride|pickup|driver|transfer/.test(s)) return "ride";
-  if (/train|rail|sncf|trenitalia/.test(s)) return "rail";
+  if (/train|rail|sncf|trenitalia|shinkansen|jr/.test(s)) return "rail";
+  if (/restaurant|cafe|coffee|dining|bistro|dinner|lunch|bar|food|ramen|sushi|table|resy|opentable|tabelog|bbq|steak|pizza|michelin/.test(s)) return "restaurant";
   return "other";
 }
 function norm(d) { return d ? String(d).slice(0, 10) : ""; }

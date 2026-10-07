@@ -26,7 +26,7 @@
     --line:rgba(22,19,12,.12); --line-strong:rgba(22,19,12,.22); --card:#FFFFFF;
     --cobalt:#1E40FF; --coral:#FF5A35; --amber:#E89A2B; --green:#1B8A57; --purple:#7C4DFF;
     --cream:#F4EFE4; --soft:#F6F2E9;
-    --flight:var(--cobalt); --hotel:var(--green); --car:var(--amber); --ride:var(--purple); --rail:var(--coral); --other:var(--muted);
+    --flight:var(--cobalt); --hotel:var(--green); --car:var(--amber); --ride:var(--purple); --rail:var(--coral); --restaurant:#FF5A35; --other:var(--muted);
     --display:'Bricolage Grotesque',-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Heiti TC",sans-serif; --body:'Archivo',-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Heiti TC","Microsoft JhengHei",system-ui,sans-serif; --mono:'JetBrains Mono',"SF Mono","PingFang TC",ui-monospace,monospace;
   }
   *{box-sizing:border-box} html,body{margin:0;padding:0}
@@ -143,6 +143,28 @@
   .plan>div{min-width:0}
   .plan .ttl .nm{overflow-wrap:anywhere}
   .plan .sub{font-size:13px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .fb-badge{font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(232,154,43,.14);color:var(--amber);display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+  .rating-badge{font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(255,200,0,.18);color:#9E7300;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+  .plan .fb-sub{color:var(--amber);font-size:12px;margin-top:3px;display:flex;align-items:center;gap:5px}
+  .plan .fb-sub .fb-tag{font-weight:700;font-family:var(--mono);font-size:10px;padding:1px 5px;border-radius:4px;background:rgba(232,154,43,.18);color:var(--amber)}
+  .pd-fb-card{margin-top:14px;background:rgba(232,154,43,.06);border:1px solid rgba(232,154,43,.25);border-radius:12px;padding:12px 14px}
+  .pd-fb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .pd-fb-tag{font-size:12px;font-weight:700;color:var(--amber);display:flex;align-items:center;gap:5px}
+  .pd-fb-tip{font-size:11px;color:var(--muted)}
+  .pd-fb-name{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink);margin-bottom:4px}
+  .pd-fb-addr{font-size:13px;color:var(--muted);margin-bottom:4px}
+  .pd-fb-note{font-size:13px;color:var(--ink);margin-bottom:8px;padding:6px 10px;background:var(--soft);border-radius:6px;border:1px solid var(--line)}
+  .pd-fb-actions{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .pd-fb-actions .btn{padding:5px 12px;font-size:12px}
+  .places-box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.08);margin-top:6px}
+  .places-item{padding:8px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px;text-align:left}
+  .places-item:last-child{border-bottom:none}
+  .places-item-header{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .places-name{font-weight:700;font-size:13px;color:var(--ink)}
+  .places-rating{font-family:var(--mono);font-size:11px;color:#9E7300;background:rgba(255,200,0,.15);padding:1px 6px;border-radius:999px;white-space:nowrap}
+  .places-addr{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .places-acts{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+  .places-acts button, .places-acts a{font-size:11px;padding:3px 8px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
   .plan .pmeta{display:flex;align-items:center;gap:12px}
   .plan .when{font-family:var(--mono);font-size:13px;color:var(--ink);white-space:nowrap}
   .plan .x{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;font-size:14px;line-height:1}
@@ -863,11 +885,11 @@
     a.href=URL.createObjectURL(b);a.download=(codeify(t.to)||"trip")+".ics";document.body.appendChild(a);a.click();document.body.removeChild(a);toast(isZH()?"行事曆檔案已備妥":"Calendar file ready");
   }
 
-  var CAT={flight:{c:"var(--flight)",t:"rgba(30,64,255,.1)"},hotel:{c:"var(--hotel)",t:"rgba(27,138,87,.12)"},car:{c:"var(--car)",t:"rgba(232,154,43,.14)"},ride:{c:"var(--ride)",t:"rgba(124,77,255,.12)"},rail:{c:"var(--rail)",t:"rgba(255,90,53,.12)"},other:{c:"var(--other)",t:"rgba(117,109,94,.12)"}};
+  var CAT={flight:{c:"var(--flight)",t:"rgba(30,64,255,.1)"},hotel:{c:"var(--hotel)",t:"rgba(27,138,87,.12)"},restaurant:{c:"var(--restaurant)",t:"rgba(255,90,53,.14)"},car:{c:"var(--car)",t:"rgba(232,154,43,.14)"},ride:{c:"var(--ride)",t:"rgba(124,77,255,.12)"},rail:{c:"var(--rail)",t:"rgba(255,90,53,.12)"},other:{c:"var(--other)",t:"rgba(117,109,94,.12)"}};
   function cat(type){return CAT[type]||CAT.other;}
   function segTypeName(type){
-    var zhMap={flight:"航班",hotel:"住宿飯店",car:"租車自駕",ride:"交通接駁",rail:"鐵路高鐵",other:"其他項目"};
-    return isZH() ? (zhMap[type]||type) : (type||"plan");
+    var zhMap={flight:"航班",hotel:"住宿飯店",restaurant:"餐廳美食",car:"租車自駕",ride:"交通接駁",rail:"鐵路高鐵",other:"其他項目"};
+    return isZH() ? (zhMap[type]||type) : (type==="restaurant" ? "Restaurant" : (type||"plan"));
   }
 
   
@@ -958,8 +980,8 @@
   function segSortKey(s){var m=/([01]?\d|2[0-3]):([0-5]\d)/.exec(s.note||"");return (s.start||"")+"T"+(m?("0"+m[1]).slice(-2)+":"+m[2]:"12:00");}
   // No time known on either? Travel logic breaks the tie: you fly, then you
   // check in - flights first, transfers next, hotel after, the rest last.
-  var SEG_RANK={flight:0,rail:1,car:2,ride:3,hotel:4};
-  function segRank(s){return SEG_RANK[s.type]!==undefined?SEG_RANK[s.type]:5;}
+  var SEG_RANK={flight:0,rail:1,car:2,ride:3,hotel:4,restaurant:5};
+  function segRank(s){return SEG_RANK[s.type]!==undefined?SEG_RANK[s.type]:6;}
   function segCmp(a,b){var ka=segSortKey(a),kb=segSortKey(b);return ka<kb?-1:ka>kb?1:segRank(a)-segRank(b);}
   function itinerary(t){
     var segs=(t.segments||[]).slice().sort(segCmp);
@@ -971,12 +993,18 @@
       var cc=cat(s.type);
       var when=s.start?(fmtSeg(s.start)+(s.end&&s.end!==s.start?" - "+fmtSeg(s.end):"")):"";
       var dispAddr=(s.address||"").replace(/https?:\/\/\S+/g,"").replace(/[-\u2013\u00b7|,\s]+$/,"").trim();
+      var hasFb = s.fallback && s.fallback.name;
+      var fbBadge = hasFb ? '<span class="fb-badge" title="'+esc(s.fallback.name)+'">💡 '+(isZH()?"備案已就緒":"Backup ready")+'</span>' : '';
+      var ratingBadge = s.rating ? '<span class="rating-badge">⭐ '+s.rating+(s.userRatingsTotal?' ('+s.userRatingsTotal+')':'')+'</span>' : '';
       return '<div class="plan" data-plan="'+t.id+'|'+s.sid+'">'+
         '<div class="dotwrap"><span class="dot" style="background:'+cc.c+';box-shadow:0 0 0 4px var(--card),0 0 0 5px '+cc.c+'"></span></div>'+
         '<div><div class="ttl"><span class="nm">'+esc(s.name||(isZH()?"預訂規劃":"Booking"))+'</span>'+
-          '<span class="type" style="color:'+cc.c+';background:'+cc.t+'">'+esc(segTypeName(s.type))+'</span></div>'+
+          '<span class="type" style="color:'+cc.c+';background:'+cc.t+'">'+esc(segTypeName(s.type))+'</span>'+
+          ratingBadge+fbBadge+'</div>'+
           (s.note?'<div class="sub">'+esc(s.note)+'</div>':'')+
-          (dispAddr?'<div class="sub">'+esc(dispAddr)+'</div>':'')+'</div>'+
+          (dispAddr?'<div class="sub">'+esc(dispAddr)+'</div>':'')+
+          (hasFb?'<div class="sub fb-sub"><span class="fb-tag">'+(isZH()?"備案":"Backup")+'</span> '+esc(s.fallback.name)+(s.fallback.address?' · '+esc(s.fallback.address):'')+'</div>':'')+
+        '</div>'+
         '<div class="pmeta">'+(when?'<span class="when">'+when+'</span>':'')+
           '<button class="mini" data-editseg="'+t.id+'|'+s.sid+'">'+(isZH()?"編輯":"Edit")+'</button>'+
           '<button class="x" data-delseg="'+t.id+'|'+s.sid+'" title="'+(isZH()?"刪除":"Delete")+'">&times;</button></div>'+
@@ -1174,10 +1202,12 @@
   function ensureIds(){trips.forEach(function(t){if(!t.id)t.id=uid();(t.segments||[]).forEach(function(s){if(!s.sid)s.sid=uid();});});}
 
   /* ---- segment (plan) form ---- */
+  var currentPlace = null;
   function segForm(s){
     var types=[
       ["flight", isZH() ? "航班" : "Flight"],
       ["hotel", isZH() ? "飯店 / 住宿" : "Hotel / stay"],
+      ["restaurant", isZH() ? "🍽️ 餐廳 / 美食" : "🍽️ Restaurant / Dining"],
       ["car", isZH() ? "租車自駕" : "Rental car"],
       ["ride", isZH() ? "接駁 / 叫車" : "Ride / transfer"],
       ["rail", isZH() ? "鐵路 / 高鐵" : "Train"],
@@ -1186,13 +1216,46 @@
     var opts=types.map(function(p){return '<option value="'+p[0]+'"'+(s.type===p[0]?' selected':'')+'>'+p[1]+'</option>';}).join("");
     var showConf=s.conf&&String(s.conf).indexOf("seed")!==0&&String(s.conf).indexOf("man:")!==0?s.conf:"";
     var optL=isZH()?"(選填)":"(optional)";
+
+    // Google Places Search Trigger (ONLY rendered if settings.googlePlacesConfigured is true)
+    var placesSearchHtml = "";
+    if(settings.googlePlacesConfigured){
+      placesSearchHtml = '<div style="display:flex;justify-content:flex-end;margin-top:-6px;margin-bottom:10px">'+
+        '<button type="button" class="btn" id="g_places_btn" style="font-size:12px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px;border-color:var(--coral);color:var(--coral)">'+
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>'+
+          '<span>'+(isZH()?"Google 查詢景點/餐廳評價與營業時間":"Search Google Places")+'</span>'+
+        '</button>'+
+      '</div>'+
+      '<div id="g_places_box" style="display:none;margin-bottom:12px"></div>';
+    }
+
+    // Fallback Plan Accordion (Always available for travel safety)
+    var hasFb = s.fallback && s.fallback.name;
+    var fbHtml = '<div style="margin-top:14px;border:1px dashed var(--line);border-radius:10px;padding:12px;background:rgba(255,255,255,0.02)">'+
+      '<div id="fb_toggle_btn" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">'+
+        '<div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--ink)">'+
+          '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(255,90,53,0.12);color:var(--coral);font-weight:bold;font-size:14px">+</span>'+
+          '<span>'+(isZH()?"備用替代方案 (Fallback Plan)":"Backup / Fallback Plan")+'</span>'+
+          (hasFb ? '<span class="c-badge done" style="font-size:11px;padding:1px 6px">'+(isZH()?"已填寫":"Ready")+'</span>' : '<span style="font-size:12px;color:var(--muted);font-weight:normal">'+(isZH()?"(客滿/休息/延誤備案)":"(optional backup)")+'</span>')+
+        '</div>'+
+        '<span id="fb_caret" style="font-size:12px;color:var(--muted)">'+(hasFb ? '▲' : '▼')+'</span>'+
+      '</div>'+
+      '<div id="fb_fields" style="'+(hasFb ? '' : 'display:none;')+'margin-top:12px">'+
+        field(isZH()?"備案名稱":"Fallback Name","g_fb_name","text",s.fallback?s.fallback.name:"",isZH()?"例如：備選拉麵店、鄰近咖啡廳、備案景點":"e.g., Alternative restaurant",optL)+
+        field(isZH()?"備案地址 / 地點":"Fallback Address","g_fb_addr","text",s.fallback?s.fallback.address:"",isZH()?"例如：東京都台東區上野...":"Address or location",optL)+
+        field(isZH()?"備案備註":"Fallback Notes","g_fb_note","text",s.fallback?s.fallback.note:"",isZH()?"例如：無需預約，營業至 23:00":"Notes, opening hours",optL)+
+      '</div>'+
+    '</div>';
+
     return '<h3>'+(s.sid?(isZH()?"編輯細項規劃":"Edit plan"):(isZH()?"新增細項規劃":"Add plan"))+'</h3>'+
       '<div class="field"><label>'+(isZH()?"類別":"Type")+'</label><select id="g_type">'+opts+'</select></div>'+
-      field(isZH()?"名稱":"Name","g_name","text",s.name,isZH()?"例如：長榮航空 BR87 台北至巴黎":"TAP TP1693 OPO to FNC")+
-      field(isZH()?"地址 / 地點":"Address","g_addr","text",s.address,isZH()?"例如：Rua do Castanheiro 31, Funchal":"Rua do Castanheiro 31, Funchal",optL)+
-      field(isZH()?"備註細節":"Details","g_note","text",s.note,isZH()?"例如：門禁密碼 4821# · 15:00 入住 · 班機 07:10":"Door code 4821# · check-in 15:00 · TP1479 OPO-LIS 07:10",optL)+
+      field(isZH()?"名稱":"Name","g_name","text",s.name,isZH()?"例如：一蘭拉麵 上野山下口店 / 長榮航空 BR87":"TAP TP1693 OPO to FNC")+
+      field(isZH()?"地址 / 地點":"Address","g_addr","text",s.address,isZH()?"例如：東京都台東區上野 7-1-1 / Google Maps 連結":"Rua do Castanheiro 31, Funchal",optL)+
+      placesSearchHtml+
+      field(isZH()?"備註細節":"Details","g_note","text",s.note,isZH()?"例如：營業至 23:00 · 門禁密碼 4821# · 15:00 入住":"Door code 4821# · check-in 15:00",optL)+
       '<div class="two">'+field(isZH()?"開始時間 / 日期":"Start","g_start","date",s.start,"")+field(isZH()?"結束時間 / 日期":"End","g_end","date",s.end,"",optL)+'</div>'+
       field(isZH()?"預訂確認代碼":"Confirmation","g_conf","text",showConf,"",optL)+
+      fbHtml+
       '<div class="err" id="gerr"></div>'+
       '<div class="modal-actions"><button class="btn" id="cancelBtn">'+(isZH()?"取消":"Cancel")+'</button><button class="btn solid" id="saveSeg">'+(s.sid?(isZH()?"儲存細項":"Save plan"):(isZH()?"新增細項":"Add plan"))+'</button></div>';
   }
@@ -1205,36 +1268,267 @@
     var raw=s.address||"";
     var urlM=raw.match(/https?:\/\/\S+/);
     var addrText=raw.replace(/https?:\/\/\S+/g,"").replace(/[-\u2013\u00b7|,\s]+$/,"").trim();
-    var mapsUrl=urlM?urlM[0]:(addrText?"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(addrText):"");
+    var mapsUrl=s.mapsUrl||(urlM?urlM[0]:(addrText?"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(addrText):""));
     var showConf=s.conf&&!/^(man:|seed|gcal:)/.test(String(s.conf))?s.conf:"";
+    var rSuffix = isZH() ? " 則" : "";
+    var openLabel = s.openNow === true ? (isZH() ? " · 🟢 營業中" : " · 🟢 Open") : (s.openNow === false ? (isZH() ? " · 🔴 休息中" : " · 🔴 Closed") : "");
+    var ratingHtml = s.rating ? ('<span class="rating-badge">⭐ '+s.rating+(s.userRatingsTotal?' ('+s.userRatingsTotal+rSuffix+')':'')+openLabel+'</span>') : '';
+
+    var fbHtml = "";
+    if(s.fallback && s.fallback.name){
+      var fbRaw = s.fallback.address||"";
+      var fbUrlM = fbRaw.match(/https?:\/\/\S+/);
+      var fbAddrText = fbRaw.replace(/https?:\/\/\S+/g,"").replace(/[-\u2013\u00b7|,\s]+$/,"").trim();
+      var fbMapsUrl = s.fallback.mapsUrl || (fbUrlM ? fbUrlM[0] : (fbAddrText ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(fbAddrText) : ""));
+      fbHtml = '<div class="pd-fb-card">' +
+        '<div class="pd-fb-header"><span class="pd-fb-tag">💡 '+(isZH()?"替代備案方案 (Fallback Plan)":"Fallback Plan")+'</span><span class="pd-fb-tip">'+(isZH()?"如遇客滿、休業或延誤可立即啟用":"Quick switch if closed or delayed")+'</span></div>' +
+        '<div class="pd-fb-name">'+esc(s.fallback.name)+'</div>' +
+        (fbAddrText ? '<div class="pd-fb-addr">📍 '+esc(fbAddrText)+'</div>' : '') +
+        (s.fallback.note ? '<div class="pd-fb-note">'+esc(s.fallback.note)+'</div>' : '') +
+        '<div class="pd-fb-actions">' +
+          (fbMapsUrl ? '<a class="btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:5px 12px" href="'+esc(fbMapsUrl)+'" target="_blank" rel="noopener">🗺️ '+(isZH()?"導航至備案":"Maps")+'</a>' : '') +
+          '<button class="btn solid" id="pd_swap_fb" style="font-size:12px;padding:5px 12px;background:var(--amber);border-color:var(--amber)">🔄 '+(isZH()?"切換為主要行程":"Switch to Primary")+'</button>' +
+        '</div>' +
+      '</div>';
+    }
+
     openModal('<h3 style="margin-bottom:6px">'+esc(s.name||(isZH()?"規劃項目":"Plan"))+'</h3>'+
-      '<div class="chips" style="margin-bottom:10px"><span class="type" style="color:'+cc.c+';background:'+cc.t+'">'+esc(segTypeName(s.type))+'</span>'+(when?'<span class="c-date">'+when+'</span>':'')+'</div>'+
+      '<div class="chips" style="margin-bottom:10px"><span class="type" style="color:'+cc.c+';background:'+cc.t+'">'+esc(segTypeName(s.type))+'</span>'+(when?'<span class="c-date">'+when+'</span>':'')+ratingHtml+'</div>'+
       (s.note?'<div class="pd-row"><div class="pd-k">'+(isZH()?"詳細內容":"Details")+'</div><div class="pd-v">'+esc(s.note)+'</div></div>':'')+
       (addrText?'<div class="pd-row"><div class="pd-k">'+(isZH()?"地址地點":"Address")+'</div><div class="pd-v">'+esc(addrText)+'</div></div>':'')+
       (showConf?'<div class="pd-row"><div class="pd-k">'+(isZH()?"確認代碼":"Confirmation")+'</div><div class="pd-v mono">'+esc(showConf)+'</div></div>':'')+
+      fbHtml+
       '<div class="modal-actions">'+
         (mapsUrl?'<a class="btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center" href="'+esc(mapsUrl)+'" target="_blank" rel="noopener">🗺️ '+(isZH()?"地圖導航":"Maps")+'</a>':'')+
         '<button class="btn" id="pd_edit">'+(isZH()?"編輯":"Edit")+'</button><button class="btn solid" id="pd_close">'+(isZH()?"關閉":"Close")+'</button></div>');
     document.getElementById("pd_close").onclick=closeModal;
     document.getElementById("pd_edit").onclick=function(){openSeg(tripId,sid);};
+    var swapBtn = document.getElementById("pd_swap_fb");
+    if(swapBtn){
+      swapBtn.onclick = async function(){
+        if(!confirm(isZH() ? "確定要將備案切換為主要行程嗎？（原本的主行程將自動變更為備案）" : "Swap this fallback with primary plan?")) return;
+        var prevName = s.name, prevAddr = s.address, prevNote = s.note;
+        var prevMaps = s.mapsUrl, prevRating = s.rating, prevRCount = s.userRatingsTotal, prevOpen = s.openNow, prevPid = s.placeId;
+
+        s.name = s.fallback.name;
+        s.address = s.fallback.address || "";
+        s.note = s.fallback.note || "";
+        s.mapsUrl = s.fallback.mapsUrl || "";
+        s.rating = s.fallback.rating || null;
+        s.userRatingsTotal = s.fallback.userRatingsTotal || null;
+        s.openNow = s.fallback.openNow !== undefined ? s.fallback.openNow : null;
+        s.placeId = s.fallback.placeId || "";
+        s.source = "manual";
+
+        s.fallback = {
+          name: prevName,
+          address: prevAddr,
+          note: prevNote,
+          mapsUrl: prevMaps,
+          rating: prevRating,
+          userRatingsTotal: prevRCount,
+          openNow: prevOpen,
+          placeId: prevPid
+        };
+
+        await persistTrip(tr, "update");
+        toast(isZH() ? "已切換！備案現已成為主要行程 ✓" : "Swapped! Backup is now primary ✓");
+        closeModal();
+        render();
+        openPlan(tripId, sid);
+      };
+    }
   }
+  var currentFallbackPlace = null;
   function openSeg(tripId,sid){
     var tr=trips.find(function(x){return x.id===tripId;});if(!tr)return;
     var s=sid?(tr.segments||[]).find(function(x){return x.sid===sid;}):{};
+    currentPlace = s ? { rating: s.rating, userRatingsTotal: s.userRatingsTotal, openNow: s.openNow, mapsUrl: s.mapsUrl, placeId: s.placeId } : null;
+    currentFallbackPlace = (s && s.fallback) ? { rating: s.fallback.rating, userRatingsTotal: s.fallback.userRatingsTotal, openNow: s.fallback.openNow, mapsUrl: s.fallback.mapsUrl, placeId: s.fallback.placeId } : null;
     modal.dataset.segTrip=tripId;modal.dataset.segSid=sid||"";
     openModal(segForm(s||{}));
     document.getElementById("cancelBtn").onclick=closeModal;
     document.getElementById("saveSeg").onclick=saveSeg;
+
+    // Toggle fallback plan accordion
+    var fbToggleBtn = document.getElementById("fb_toggle_btn");
+    var fbFields = document.getElementById("fb_fields");
+    var fbCaret = document.getElementById("fb_caret");
+    if(fbToggleBtn && fbFields){
+      fbToggleBtn.onclick = function(){
+        var isHidden = fbFields.style.display === "none";
+        fbFields.style.display = isHidden ? "" : "none";
+        if(fbCaret) fbCaret.textContent = isHidden ? "▲" : "▼";
+        if(isHidden){
+          var nInput = document.getElementById("g_fb_name");
+          if(nInput) nInput.focus();
+        }
+      };
+    }
+
+    // Google Places Search
+    var placesBtn = document.getElementById("g_places_btn");
+    var placesBox = document.getElementById("g_places_box");
+    if(placesBtn && placesBox){
+      placesBtn.onclick = async function(){
+        var q = val("g_name") || val("g_addr");
+        if(!q){
+          toast(isZH() ? "請先填寫規劃名稱或地址關鍵字以供查詢" : "Enter a plan name or address first");
+          return;
+        }
+        var origText = placesBtn.innerHTML;
+        placesBtn.disabled = true;
+        placesBtn.textContent = isZH() ? "查詢 Google Places 中…" : "Searching…";
+        placesBox.style.display = "block";
+        placesBox.innerHTML = '<div style="padding:12px;text-align:center;color:var(--muted);font-size:13px">' + (isZH() ? "連線 Google 查詢中…" : "Fetching place details…") + '</div>';
+        try{
+          var r = await fetch((settings.workerUrl||location.origin) + "/places/search", {
+            method: "POST",
+            headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+            body: JSON.stringify({ query: q, language: isZH() ? "zh-TW" : "en" })
+          });
+          var d = await r.json();
+          if(!r.ok || !d.ok){
+            placesBox.innerHTML = '<div style="padding:10px;color:var(--coral);font-size:13px">' + esc(d.error || (isZH() ? "查詢失敗" : "Search failed")) + '</div>';
+            return;
+          }
+          var results = d.results || [];
+          if(!results.length){
+            placesBox.innerHTML = '<div style="padding:10px;color:var(--muted);font-size:13px">' + (isZH() ? "查無符合地點，請嘗試更改關鍵字" : "No places found. Try another query.") + '</div>';
+            return;
+          }
+          var html = '<div class="places-box">';
+          var rOpenSuffix = isZH() ? " 則" : "";
+          results.forEach(function(p, idx){
+            var openStatus = p.openNow === true ? (isZH() ? ' · 🟢 營業中' : ' · 🟢 Open') : (p.openNow === false ? (isZH() ? ' · 🔴 休息中' : ' · 🔴 Closed') : '');
+            var rTag = p.rating ? ('<span class="places-rating">⭐ ' + p.rating + (p.userRatingsTotal ? ' (' + p.userRatingsTotal + rOpenSuffix + ')' : '') + openStatus + '</span>') : '';
+            html += '<div class="places-item" data-idx="' + idx + '">' +
+              '<div class="places-item-header"><span class="places-name">' + esc(p.name) + '</span>' + rTag + '</div>' +
+              '<div class="places-addr">' + esc(p.address || "") + '</div>' +
+              '<div class="places-acts">' +
+                '<button type="button" class="btn mini-btn" data-apply="primary" data-idx="' + idx + '">' + (isZH() ? "套用為主行程" : "Apply as Primary") + '</button>' +
+                '<button type="button" class="btn mini-btn" data-apply="fallback" data-idx="' + idx + '">' + (isZH() ? "套用為備用方案" : "Apply as Fallback") + '</button>' +
+                '<a class="btn mini-btn" href="' + esc(p.mapsUrl) + '" target="_blank" rel="noopener">🗺️ ' + (isZH() ? "Google 地圖" : "Google Maps") + '</a>' +
+              '</div>' +
+            '</div>';
+          });
+          html += '</div>';
+          placesBox.innerHTML = html;
+
+          // Wire up apply buttons
+          placesBox.querySelectorAll("button[data-apply]").forEach(function(btn){
+            btn.onclick = function(){
+              var applyType = btn.dataset.apply;
+              var p = results[parseInt(btn.dataset.idx, 10)];
+              if(!p) return;
+              var noteReviews = isZH() ? (p.userRatingsTotal + "則評價") : (p.userRatingsTotal + " reviews");
+              var noteStatus = p.openNow === true ? (isZH() ? " · 營業中" : " · Open") : "";
+              if(applyType === "primary"){
+                var nEl = document.getElementById("g_name"), aEl = document.getElementById("g_addr"), notEl = document.getElementById("g_note"), tEl = document.getElementById("g_type");
+                if(nEl) nEl.value = p.name;
+                if(aEl) aEl.value = p.address || "";
+                if(notEl && !notEl.value && p.rating){
+                  notEl.value = "⭐ " + p.rating + (p.userRatingsTotal ? " (" + noteReviews + ")" : "") + noteStatus;
+                }
+                if(tEl && p.types && (p.types.includes("restaurant") || p.types.includes("food") || p.types.includes("cafe"))){
+                  tEl.value = "restaurant";
+                }
+                currentPlace = {
+                  placeId: p.placeId,
+                  rating: p.rating,
+                  userRatingsTotal: p.userRatingsTotal,
+                  openNow: p.openNow,
+                  mapsUrl: p.mapsUrl
+                };
+                toast(isZH() ? "✅ 已套用 Google 地點資訊至主行程！" : "Applied place details to primary!");
+                placesBox.style.display = "none";
+              } else if(applyType === "fallback"){
+                // Open fallback fields
+                if(fbFields) fbFields.style.display = "";
+                if(fbCaret) fbCaret.textContent = "▲";
+                var fbn = document.getElementById("g_fb_name"), fba = document.getElementById("g_fb_addr"), fbnote = document.getElementById("g_fb_note");
+                if(fbn) fbn.value = p.name;
+                if(fba) fba.value = p.address || "";
+                if(fbnote && !fbnote.value && p.rating){
+                  fbnote.value = "⭐ " + p.rating + (p.userRatingsTotal ? " (" + noteReviews + ")" : "") + noteStatus;
+                }
+                currentFallbackPlace = {
+                  placeId: p.placeId,
+                  rating: p.rating,
+                  userRatingsTotal: p.userRatingsTotal,
+                  openNow: p.openNow,
+                  mapsUrl: p.mapsUrl
+                };
+                toast(isZH() ? "✅ 已套用為備用替代方案！" : "Applied as fallback plan!");
+                placesBox.style.display = "none";
+              }
+            };
+          });
+        }catch(e){
+          placesBox.innerHTML = '<div style="padding:10px;color:var(--coral);font-size:13px">' + (isZH() ? "無法連線至 Worker" : "Worker unreachable") + '</div>';
+        }finally{
+          placesBtn.disabled = false;
+          placesBtn.innerHTML = origText;
+        }
+      };
+    }
   }
   async function saveSeg(){
     var tripId=modal.dataset.segTrip,sid=modal.dataset.segSid;
     var tr=trips.find(function(x){return x.id===tripId;});if(!tr)return;
     var type=val("g_type"),name=val("g_name"),addr=val("g_addr"),start=val("g_start"),end=val("g_end"),conf=val("g_conf"),note=val("g_note");
+    var fbName=val("g_fb_name"),fbAddr=val("g_fb_addr"),fbNote=val("g_fb_note");
     var err=document.getElementById("gerr");err.textContent="";
     if(!name){err.textContent=isZH()?"請為此規劃填寫名稱。":"Give the plan a name.";return;}
     tr.segments=tr.segments||[];
-    if(sid){var s=tr.segments.find(function(x){return x.sid===sid;});Object.assign(s,{type:type,name:name,address:addr,note:note,start:start,end:end,conf:conf||s.conf});}
-    else tr.segments.push({sid:uid(),source:"manual",type:type,name:name,address:addr,note:note,start:start,end:end,conf:conf||("man:"+uid())});
+
+    var segData = {
+      type: type,
+      name: name,
+      address: addr,
+      note: note,
+      start: start,
+      end: end,
+      source: "manual"
+    };
+    if(fbName){
+      segData.fallback = {
+        name: fbName,
+        address: fbAddr,
+        note: fbNote
+      };
+      if(currentFallbackPlace){
+        if(currentFallbackPlace.rating) segData.fallback.rating = currentFallbackPlace.rating;
+        if(currentFallbackPlace.userRatingsTotal) segData.fallback.userRatingsTotal = currentFallbackPlace.userRatingsTotal;
+        if(currentFallbackPlace.openNow !== undefined) segData.fallback.openNow = currentFallbackPlace.openNow;
+        if(currentFallbackPlace.mapsUrl) segData.fallback.mapsUrl = currentFallbackPlace.mapsUrl;
+        if(currentFallbackPlace.placeId) segData.fallback.placeId = currentFallbackPlace.placeId;
+      }
+    } else {
+      segData.fallback = null;
+    }
+    if(currentPlace){
+      if(currentPlace.rating) segData.rating = currentPlace.rating;
+      if(currentPlace.userRatingsTotal) segData.userRatingsTotal = currentPlace.userRatingsTotal;
+      if(currentPlace.openNow !== undefined) segData.openNow = currentPlace.openNow;
+      if(currentPlace.mapsUrl) segData.mapsUrl = currentPlace.mapsUrl;
+      if(currentPlace.placeId) segData.placeId = currentPlace.placeId;
+    }
+
+    if(sid){
+      var s=tr.segments.find(function(x){return x.sid===sid;});
+      if(s){
+        segData.source = "manual";
+        segData.conf = conf || s.conf;
+        Object.assign(s, segData);
+        if(!fbName) delete s.fallback;
+      }
+    } else {
+      segData.sid = uid();
+      segData.source = "manual";
+      segData.conf = conf || ("man:" + uid());
+      tr.segments.push(segData);
+    }
     tr.segments.sort(function(a,b){return(a.start||"")<(b.start||"")?-1:1;});
     await persistTrip(tr,"update");closeModal();render();toast(sid?(isZH()?"細項已更新":"Plan updated"):(isZH()?"細項已新增":"Plan added"));
   }
@@ -1544,6 +1838,12 @@
       '<div class="hint">'+(isZH()?"用於發送 6 位數 OTP 登入驗證碼及重要行程提醒。前往 <b>resend.com/api-keys</b> 取得金鑰。若未綁定自有網域，可直接使用預設寄件地址。":"Used to send 6-digit OTP login verification codes and trip updates. Get a free key at <b>resend.com/api-keys</b>. You can use the default onboarding address if you haven't verified a custom domain.")+'</div>'+
       '<div class="modal-actions act-row"><button class="btn" id="resendSave">'+(isZH()?"儲存 Resend 設定":"Save Resend Config")+'</button><button class="btn" id="resendTest">'+(isZH()?"發送測試郵件":"Send Test Email")+'</button></div>'+
       '<div id="resendStatus" class="hint" style="margin-top:8px"></div>'+
+
+      '<h4 style="margin-top:24px">'+(isZH()?"Google Places API（景點與餐廳評價/營業時間）":"Google Places API (Ratings &amp; Hours)")+'</h4>'+
+      field(isZH()?"Google Places API 金鑰 (API Key)":"Google Places API Key","s_places_key","password","",isZH()?"AIzaSy…（留空清除）":"AIzaSy… (blank to clear)",isZH()?"可填於此或設於 Cloudflare":"stored in Worker KV or Cloudflare secret")+
+      '<div class="hint">'+(isZH()?"啟用後，在規劃細項（如餐廳、景點）時將顯示「📍 Google 查詢景點/餐廳評價與營業時間」。<b>若未設定，該功能將自動完全隱藏</b>。支援在 Cloudflare 填入 <code>GOOGLE_PLACES_API_KEY</code> 或直接在上方儲存於 KV。":"When configured, unlocks \"Search Google Places\" in plan forms. <b>If unconfigured, the search feature remains completely hidden</b>. Set in Cloudflare as GOOGLE_PLACES_API_KEY or save in KV above.")+'</div>'+
+      '<div class="modal-actions act-row"><button class="btn" id="placesSave">'+(isZH()?"儲存 Places 設定":"Save Places Key")+'</button><button class="btn" id="placesTest">'+(isZH()?"測試 Places 查詢":"Test Places API")+'</button></div>'+
+      '<div id="placesStatus" class="hint" style="margin-top:8px"></div>'+
       '<h4>'+(isZH()?"備份與匯入":"Backup &amp; import")+'</h4>'+
       '<div class="field"><textarea id="exp" readonly class="mono" style="min-height:90px">'+esc(snap)+'</textarea></div>'+
       '<div class="modal-actions" style="margin-top:0"><button class="btn" id="copyJson">'+(isZH()?"複製 JSON 資料":"Copy data")+'</button><button class="btn" id="dlJson">'+(isZH()?"下載檔案":"Download")+'</button><button class="btn" id="icsFeed">'+(isZH()?"複製日曆訂閱網址":"Copy calendar feed link")+'</button></div>'+
@@ -1597,6 +1897,15 @@
           rs.innerHTML = d.resendConfigured
             ? ('<span style="color:var(--green)">● '+(isZH()?'Resend 郵件已就緒':'Resend ready')+'</span> <span class="opt">('+(d.resendFrom||"default")+(d.resendSource==="secret"?' · secret':'')+')</span>')
             : ('<span style="color:var(--amber)">◐ '+(isZH()?'尚未設定 Resend API 金鑰 — 信箱 OTP 登入暫不可用':'Resend key not set — OTP login unavailable')+'</span>');
+        }
+
+        // Populate and display Google Places status
+        var ps = document.getElementById("placesStatus");
+        if(ps){
+          settings.googlePlacesConfigured = Boolean(d.googlePlacesConfigured);
+          ps.innerHTML = d.googlePlacesConfigured
+            ? ('<span style="color:var(--green)">● '+(isZH()?'Google Places API 已啟用':'Google Places ready')+'</span> <span class="opt">('+(d.googlePlacesSource==="secret"?'Cloudflare secret':'in-app KV')+')</span>')
+            : ('<span style="color:var(--muted)">○ '+(isZH()?'尚未設定 Google Places API（行程編輯中相關查詢功能將保持隱藏）':'Google Places not set — search tools remain hidden')+'</span>');
         }
         if(d.homeTz && document.getElementById("s_home_tz")){
           document.getElementById("s_home_tz").value = d.homeTz;
@@ -1772,6 +2081,29 @@
         var d=await r.json();
         if(!r.ok){toast(d.error||(isZH()?"測試信寄送失敗":"Send test failed"));return;}
         toast(isZH()?("測試信已成功寄出至 "+d.to+" ✓"):("Test email sent to "+d.to+" ✓"));
+      }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+    };
+
+    document.getElementById("placesSave").onclick=async function(){
+      var k=val("s_places_key");
+      try{
+        var r=await fetch(apiBase()+"/settings/places",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({apiKey:k})});
+        var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存 Places 設定":"Could not save Places config"));return;}
+        document.getElementById("s_places_key").value="";
+        toast(isZH()?"Google Places 設定已儲存 ✓":"Google Places config saved ✓");
+        await loadGStatus();
+      }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+    };
+
+    document.getElementById("placesTest").onclick=async function(){
+      toast(isZH()?"測試連線中…":"Testing Google Places…");
+      try{
+        var r=await fetch(apiBase()+"/settings/places/test",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({query:"Tokyo Tower"})});
+        var d=await r.json();
+        if(!r.ok || !d.ok){toast(d.error||(isZH()?"測試失敗":"Test failed"));return;}
+        var sName = d.sample ? d.sample.name : "Tokyo Tower";
+        toast(isZH()?("✅ 連線成功！成功檢索："+sName):("✅ Places API working! Found: "+sName));
+        await loadGStatus();
       }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
     };
 
@@ -2169,6 +2501,20 @@
     // may already authenticate us; refresh() prompts only if /trips returns 401.
   }
 
+  async function loadServerSettings(){
+    if(!settings.workerUrl)return;
+    try{
+      var r=await fetch(settings.workerUrl+"/settings",{headers:authHeaders()});
+      if(r.ok){
+        var d=await r.json();
+        settings.googlePlacesConfigured = Boolean(d.googlePlacesConfigured);
+        if(d.homeTz){ homeTz = d.homeTz; try{localStorage.setItem("travel:hometz",homeTz);}catch(e){} }
+        if(d.home) home = d.home;
+        if(d.units) settings.units = d.units;
+      }
+    }catch(e){}
+  }
+
   async function refresh(){
     if(!settings.workerUrl){syncState="local";updateStatusChip();render();return;}
     try{
@@ -2179,6 +2525,7 @@
       trips=(Array.isArray(data)?data:(data.trips||[])).map(function(t){return{id:t.id||uid(),from:t.from||"",to:t.to||"",start:norm(t.start),end:norm(t.end),label:t.label||"",notes:t.notes||"",segments:t.segments||[],photo:t.photo||"",calEventId:t.calEventId};});
       ensureIds();
       await save("trips",trips);syncState="synced";
+      loadServerSettings();
     }catch(e){syncState="offline";}
     updateStatusChip();render();
   }
@@ -2264,6 +2611,7 @@
     if(settings.workerUrl){
       render();
       await ensureAuth();                 // password gate (synced mode)
+      await loadServerSettings();
       await refresh();
       if(!trips.length)await syncNow();   // first open against an empty store: auto-pull from Calendar
     }else{render();}

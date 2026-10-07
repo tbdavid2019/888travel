@@ -36,7 +36,13 @@ id = "09abe45c640249fea47ddd93bce9c657"
 # No secret is stored in this file. Everything is optional and connects IN THE
 # APP (Settings) — no dashboard needed. Or set them as Worker secrets instead:
 # wrangler secret put NAME
-#   ANTHROPIC_API_KEY     (optional — Gmail -> trip parsing)
+#   GOOGLE_PLACES_API_KEY (optional — Google Places ratings, hours & address lookup)
+#   RESEND_API_KEY        (optional — Resend OTP login & notifications)
+#   RESEND_FROM           (optional — verified sender email)
+#   LLM_API_KEY           (optional — Gemini, OpenAI, Groq, DeepSeek, or Anthropic)
+#   LLM_BASE_URL          (optional — OpenAI-compatible base URL)
+#   LLM_MODEL             (optional — custom LLM model ID)
+#   ANTHROPIC_API_KEY     (optional — legacy Claude Gmail parsing)
 #   GOOGLE_CLIENT_ID      (optional — Google Calendar; or connect in-app:
 #   GOOGLE_CLIENT_SECRET   Settings -> Connect Google Calendar, no secrets needed)
 #   GOOGLE_REFRESH_TOKEN  (optional — minted for you by the in-app Connect flow)
