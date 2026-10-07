@@ -511,7 +511,7 @@ export default {
         return cors(json({
           ok: true,
           service: "888travel",
-          version: "2.6.4",
+          version: "2.6.5",
           instance: url.origin,
           serverTime: new Date().toISOString(),
           totalTrips: trips.length,
@@ -2166,10 +2166,14 @@ function addSegment(trip, seg, store) {
 // OPO-LGW 09:00-11:20", "18:00-21:30 · dinner"): first clock time found is
 // the sort key, no time = midday. When neither side has a time, travel logic
 // breaks the tie: flight, then transfers, then hotel, then the rest.
-// Keep in lockstep with the app's copy.
 function segSortKey(s) {
+  if (!s || !s.start) return "9999-12-31T12:00";
+  const tm = /[T\s](\d{1,2}):(\d{2})/.exec(s.start);
+  if (tm) {
+    return s.start.slice(0, 10) + "T" + ("0" + tm[1]).slice(-2) + ":" + tm[2];
+  }
   const m = /([01]?\d|2[0-3]):([0-5]\d)/.exec(s.note || "");
-  return (s.start || "") + "T" + (m ? ("0" + m[1]).slice(-2) + ":" + m[2] : "12:00");
+  return s.start.slice(0, 10) + "T" + (m ? ("0" + m[1]).slice(-2) + ":" + m[2] : "12:00");
 }
 const SEG_RANK = { flight: 0, rail: 1, car: 2, ride: 3, hotel: 4, restaurant: 5 };
 function segCmp(a, b) {

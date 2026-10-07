@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.6.5] - 2026-10-07
+
+### Fixed / 徹底修復細項行程 ISO 日期時間解析與排版 (Fix ISO Datetime Parsing & Eliminate `NaN日` Bug)
+- **全面支援 ISO 8601 日期時間解析 (Full ISO 8601 Datetime Parsing Resilience)**：
+  - 核心修復：原 `parse(iso)` 函式僅以 `-` 進行字串切割並將第三段強轉數字，當遇到外部 Agent 或 API 傳入的標準 ISO 8601 時間字串（如 `2026-10-11T07:00`）時，`+"11T07:00"` 產生 `NaN`，導致前端全數誤判為 `Invalid Date` 並渲染為 **`NaN日 – NaN日`**。
+  - 重構為正規表達式安全提取年、月、日、時、分、秒，無縫兼容 `YYYY-MM-DD`、`YYYY-MM-DDTHH:mm`、`YYYY-MM-DD HH:mm` 與完整 ISO UTC 時間戳。
+- **高質感時段區間排版工藝 (Impeccable Itinerary Time-Range Formatting)**：
+  - 新增 `fmtSegRange(start, end)` 排版函式：
+    - 同日跨時段：呈現清晰緊湊的 **`10月11日 07:00 – 11:00`**（英文：`11 Oct 07:00 – 11:00`）。
+    - 跨日長程：呈現 **`10月11日 14:00 – 10月13日 11:00`**。
+    - 單日活動：呈現 **`10月11日 07:00`**。
+    - 純日期無時間：維持簡潔 **`10月11日 – 10月12日`** 或 **`10月11日`**。
+  - 同步將時間軸、規劃項目詳情彈窗（Plan Modal）、AI 助理建議卡片全面換裝為此優雅排版。
+- **細項表單完整支援時間欄位（雙軌日期 + 時間輸入）(Dual Date & Time Inputs in Plan Form)**：
+  - 徹底解決使用者在介面上無法填寫與編輯具體時間的痛點。
+  - 將原本單一的 `<input type="date">` 升級為響應式日期與時間群組：
+    - 開始時間 / 日期：`[日期選擇器 📅]` + `[時間選擇器 🕒 (選填)]`。
+    - 結束時間 / 日期：`[日期選擇器 📅]` + `[時間選擇器 🕒 (選填)]`。
+    - 避免瀏覽器原生 `<input type="date">` 在接收到帶 `T` 的字串時因 HTML5 規格驗證失敗而將值清空的缺陷。
+    - 智慧推斷：若使用者僅填寫結束時間而留空結束日期，自動承襲開始日期（例：同日 07:00 至 11:00 只需填一次日期）。
+- **行程時間排序核心全面校準 (Aligned segSortKey Engine)**：
+  - 前後端（`travel-app.html` 與 `worker.js`）同步更新 `segSortKey`：優先判定 `start` 內之原生時分，次要備援自 `note` 備註提取，徹底根除雙重時間後綴（如 `...T07:00T12:00`），精準實現行程按真實時刻由早至晚流暢排列。
+
 ## [2.6.4] - 2026-10-07
 
 ### Changed / 品牌名稱全面統一為 888travel (Unify Brand Name to 888travel)

@@ -1029,7 +1029,20 @@
 
   /* ===================== date / util helpers (preserved) ===================== */
   function todayISO(){var d=new Date();d.setHours(0,0,0,0);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
-  function parse(iso){var p=iso.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+  function parse(iso){
+    if(!iso) return new Date(NaN);
+    if(iso instanceof Date) return iso;
+    var str = String(iso).trim();
+    var m = str.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+    if(m){
+      var yr = +m[1], mo = +m[2] - 1, day = +m[3];
+      var hr = m[4] != null ? +m[4] : 0;
+      var min = m[5] != null ? +m[5] : 0;
+      var sec = m[6] != null ? +m[6] : 0;
+      return new Date(yr, mo, day, hr, min, sec);
+    }
+    return new Date(str);
+  }
   function dayDiff(a,b){return Math.round((parse(b)-parse(a))/86400000);}
   var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   var MON_ZH=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
@@ -1043,7 +1056,60 @@
     }
     if(s===e)return sd+" "+sm+" "+sy; if(sy===ey&&ds.getMonth()===de.getMonth())return sd+"-"+ed+" "+sm+" "+sy;
     if(sy===ey)return sd+" "+sm+" - "+ed+" "+em+" "+sy; return sd+" "+sm+" "+sy+" - "+ed+" "+em+" "+ey;}
-  function fmtSeg(iso){if(!iso)return"";var d=parse(iso);return isZH() ? (getMon(d.getMonth())+d.getDate()+"日") : (d.getDate()+" "+MON[d.getMonth()]);}
+  function getSegTime(iso){
+    if(!iso) return "";
+    var m = /[T\s](\d{1,2}):(\d{2})/.exec(String(iso));
+    if(m) return ("0" + m[1]).slice(-2) + ":" + m[2];
+    return "";
+  }
+  function fmtSegDate(iso){
+    if(!iso) return "";
+    var d = parse(iso);
+    if(isNaN(d.getTime())) return "";
+    return isZH() ? (getMon(d.getMonth()) + d.getDate() + "日") : (d.getDate() + " " + MON[d.getMonth()]);
+  }
+  function fmtSeg(iso){
+    if(!iso) return "";
+    var d = parse(iso);
+    if(isNaN(d.getTime())) return "";
+    var dt = fmtSegDate(iso);
+    var t = getSegTime(iso);
+    return t ? (dt + " " + t) : dt;
+  }
+  function fmtSegRange(start, end){
+    if(!start) return "";
+    var ds = parse(start);
+    if(isNaN(ds.getTime())) return "";
+    var ts = getSegTime(start);
+    var te = getSegTime(end);
+    var sDate = fmtSegDate(start);
+
+    if(!end || end === start){
+      return ts ? (sDate + " " + ts) : sDate;
+    }
+
+    var de = parse(end);
+    if(isNaN(de.getTime())){
+      return ts ? (sDate + " " + ts) : sDate;
+    }
+
+    var eDate = fmtSegDate(end);
+    var isSameDay = ds.getFullYear() === de.getFullYear() && ds.getMonth() === de.getMonth() && ds.getDate() === de.getDate();
+
+    if(isSameDay){
+      if(ts && te){
+        return sDate + " " + ts + " – " + te;
+      } else if(ts){
+        return sDate + " " + ts;
+      } else {
+        return sDate;
+      }
+    }
+
+    var sFull = ts ? (sDate + " " + ts) : sDate;
+    var eFull = te ? (eDate + " " + te) : eDate;
+    return sFull + " – " + eFull;
+  }
   // short form for the share card: 2-digit years so long ranges never crowd the row
   function fmtRangeS(s,e){var ds=parse(s),de=parse(e),sd=ds.getDate(),ed=de.getDate(),sm=getMon(ds.getMonth()),em=getMon(de.getMonth()),sy=String(ds.getFullYear()).slice(2),ey=String(de.getFullYear()).slice(2);
     if(isZH()){
@@ -1420,7 +1486,15 @@
   // OPO-LGW 09:00-11:20", "18:00-21:30 · dinner"): first clock time found is
   // the sort key, no time = midday. Otherwise a morning flight rendered after
   // dinner just because it was imported later.
-  function segSortKey(s){var m=/([01]?\d|2[0-3]):([0-5]\d)/.exec(s.note||"");return (s.start||"")+"T"+(m?("0"+m[1]).slice(-2)+":"+m[2]:"12:00");}
+  function segSortKey(s){
+    if(!s || !s.start) return "9999-12-31T12:00";
+    var tm = /[T\s](\d{1,2}):(\d{2})/.exec(s.start);
+    if(tm){
+      return s.start.slice(0, 10) + "T" + ("0" + tm[1]).slice(-2) + ":" + tm[2];
+    }
+    var m = /([01]?\d|2[0-3]):([0-5]\d)/.exec(s.note || "");
+    return s.start.slice(0, 10) + "T" + (m ? ("0" + m[1]).slice(-2) + ":" + m[2] : "12:00");
+  }
   // No time known on either? Travel logic breaks the tie: you fly, then you
   // check in - flights first, transfers next, hotel after, the rest last.
   var SEG_RANK={flight:0,rail:1,car:2,ride:3,hotel:4,restaurant:5};
@@ -1445,7 +1519,7 @@
     if(!segs.length)return '<div class="itin"><div class="empty">'+(isZH()?"尚無細項規劃。點擊下方新增，或透過同步自動匯入。":"No plans yet. Add one below, or synced bookings will land here.")+'</div>'+addBtn+'</div>';
     var rows=segs.map(function(s){
       var cc=cat(s.type);
-      var when=s.start?(fmtSeg(s.start)+(s.end&&s.end!==s.start?" - "+fmtSeg(s.end):"")):"";
+      var when=fmtSegRange(s.start, s.end);
       var dispAddr=(s.address||"").replace(/https?:\/\/\S+/g,"").replace(/[-\u2013\u00b7|,\s]+$/,"").trim();
       var hasFb = s.fallback && s.fallback.name;
       var fbBadge = hasFb ? '<span class="fb-badge" title="'+esc(s.fallback.name)+'">'+lucideIcon('shield-check',13)+' <span>'+(isZH()?"備案已就緒":"Backup ready")+'</span></span>' : '';
@@ -1780,7 +1854,7 @@
     if(placesBtnText) placesBtnText.textContent = p.placesBtn;
   }
 
-  function segForm(s){
+  function segForm(s, tr){
     var curType = s.type || "flight";
     var p = SEG_PRESETS[curType] || SEG_PRESETS.other;
     var types=[
@@ -1795,6 +1869,11 @@
     var opts=types.map(function(item){return '<option value="'+item[0]+'"'+(curType===item[0]?' selected':'')+'>'+item[1]+'</option>';}).join("");
     var showConf=s.conf&&String(s.conf).indexOf("seed")!==0&&String(s.conf).indexOf("man:")!==0?s.conf:"";
     var optL=isZH()?"(選填)":"(optional)";
+
+    var sStartDate = s.start ? s.start.slice(0, 10) : (tr && tr.start ? tr.start : "");
+    var sStartTime = getSegTime(s.start);
+    var sEndDate = s.end ? s.end.slice(0, 10) : "";
+    var sEndTime = getSegTime(s.end);
 
     // Google Places Search Trigger (ONLY rendered if settings.googlePlacesConfigured is true)
     var isPlacesReady = Boolean(settings.googlePlacesConfigured || (typeof localStorage !== "undefined" && localStorage.getItem("travel:places_configured") === "1"));
@@ -1833,7 +1912,22 @@
       field(p.addrLabel,"g_addr","text",s.address,p.addrPh,optL,"g_addr_lbl")+
       placesSearchHtml+
       field(p.noteLabel,"g_note","text",s.note,p.notePh,optL,"g_note_lbl")+
-      '<div class="two">'+field(isZH()?"開始時間 / 日期":"Start","g_start","date",s.start,"")+field(isZH()?"結束時間 / 日期":"End","g_end","date",s.end,"",optL)+'</div>'+
+      '<div class="two">'+
+        '<div class="field">'+
+          '<label for="g_start_date">'+(isZH()?"開始日期與時間":"Start Date & Time")+'</label>'+
+          '<div style="display:flex;gap:8px;align-items:center">'+
+            '<input id="g_start_date" type="date" value="'+esc(sStartDate)+'" style="flex:1.4">'+
+            '<input id="g_start_time" type="time" value="'+esc(sStartTime)+'" style="flex:1" title="'+(isZH()?"開始時間 (選填)":"Start Time (optional)")+'">'+
+          '</div>'+
+        '</div>'+
+        '<div class="field">'+
+          '<label for="g_end_date">'+(isZH()?"結束日期與時間":"End Date & Time")+' <span class="opt">'+optL+'</span></label>'+
+          '<div style="display:flex;gap:8px;align-items:center">'+
+            '<input id="g_end_date" type="date" value="'+esc(sEndDate)+'" style="flex:1.4">'+
+            '<input id="g_end_time" type="time" value="'+esc(sEndTime)+'" style="flex:1" title="'+(isZH()?"結束時間 (選填)":"End Time (optional)")+'">'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
       field(isZH()?"預訂確認代碼":"Confirmation","g_conf","text",showConf,p.confPh,optL,"g_conf_lbl")+
       fbHtml+
       '<div class="err" id="gerr"></div>'+
@@ -1844,7 +1938,7 @@
     var tr=trips.find(function(x){return x.id===tripId;});if(!tr)return;
     var s=(tr.segments||[]).find(function(x){return x.sid===sid;});if(!s)return;
     var cc=cat(s.type);
-    var when=s.start?(fmtSeg(s.start)+(s.end&&s.end!==s.start?" \u2013 "+fmtSeg(s.end):"")):"";
+    var when=fmtSegRange(s.start, s.end);
     var raw=s.address||"";
     var urlM=raw.match(/https?:\/\/\S+/);
     var addrText=raw.replace(/https?:\/\/\S+/g,"").replace(/[-\u2013\u00b7|,\s]+$/,"").trim();
@@ -1926,7 +2020,7 @@
     currentPlace = s ? { rating: s.rating, userRatingsTotal: s.userRatingsTotal, openNow: s.openNow, mapsUrl: s.mapsUrl, placeId: s.placeId } : null;
     currentFallbackPlace = (s && s.fallback) ? { rating: s.fallback.rating, userRatingsTotal: s.fallback.userRatingsTotal, openNow: s.fallback.openNow, mapsUrl: s.fallback.mapsUrl, placeId: s.fallback.placeId } : null;
     modal.dataset.segTrip=tripId;modal.dataset.segSid=sid||"";
-    openModal(segForm(s||{}));
+    openModal(segForm(s||{}, tr));
     document.getElementById("cancelBtn").onclick=closeModal;
     document.getElementById("saveSeg").onclick=saveSeg;
 
@@ -2083,7 +2177,14 @@
   async function saveSeg(){
     var tripId=modal.dataset.segTrip,sid=modal.dataset.segSid;
     var tr=trips.find(function(x){return x.id===tripId;});if(!tr)return;
-    var type=val("g_type"),name=val("g_name"),addr=val("g_addr"),start=val("g_start"),end=val("g_end"),conf=val("g_conf"),note=val("g_note");
+    var type=val("g_type"),name=val("g_name"),addr=val("g_addr"),conf=val("g_conf"),note=val("g_note");
+    var startDate=val("g_start_date"),startTime=val("g_start_time");
+    var endDate=val("g_end_date"),endTime=val("g_end_time");
+    var start=startDate?(startTime?(startDate+"T"+startTime):startDate):"";
+    var end=endDate?(endTime?(endDate+"T"+endTime):endDate):"";
+    if(!endDate&&endTime&&startDate){
+      end=startDate+"T"+endTime;
+    }
     var fbName=val("g_fb_name"),fbAddr=val("g_fb_addr"),fbNote=val("g_fb_note");
     var err=document.getElementById("gerr");err.textContent="";
     if(!name){err.textContent=isZH()?"請為此規劃填寫名稱。":"Give the plan a name.";return;}
@@ -3670,7 +3771,7 @@
         '</div>' +
         '<div class="copilot-prop-name" style="margin-top:4px">' + esc(s.name || (isZH() ? "未命名項目" : "Untitled")) + '</div>' +
         '<div class="copilot-prop-meta">' +
-          (s.start ? '<span>' + lucideIcon('clock', 12) + ' ' + esc(s.start.replace("T", " ")) + (s.end ? ' ~ ' + esc(s.end.replace("T", " ")) : '') + '</span>' : '') +
+          (s.start ? '<span>' + lucideIcon('clock', 12) + ' ' + esc(fmtSegRange(s.start, s.end)) + '</span>' : '') +
           (s.address ? '<span>' + lucideIcon('map-pin', 12) + ' ' + esc(s.address) + '</span>' : '') +
         '</div>' +
         (s.note ? '<div class="copilot-prop-note">' + esc(s.note) + '</div>' : '') +
