@@ -1,9 +1,9 @@
-# 888漫步旅遊 · 888RoamTravel (RoamRadar)
+# 888漫步旅遊 · 888travel
 
 > Single-tenant, privacy-first personal travel hub with multi-language itinerary planning, live calendar subscriptions, Google Places verification, contingency fallback management, and a dedicated RESTful Agent API.
 
 ## Overview
-RoamRadar is a personal travel command center designed to run serverlessly on Cloudflare Workers and Cloudflare KV. It aggregates bookings from Google Calendar, Gmail, and manual user inputs into a unified, chronological timeline.
+888travel is a personal travel command center designed to run serverlessly on Cloudflare Workers and Cloudflare KV. It aggregates bookings from Google Calendar, Gmail, and manual user inputs into a unified, chronological timeline.
 
 This instance provides a comprehensive RESTful API (`/api/v1`) designed specifically for external AI agents (Claude Code, Antigravity, Cursor, OpenAI Agents, LangChain) to plan, query, update, and manage trips, granular itinerary items, verified places, fallback plans, wishlist radar, backups, and live synchronization.
 
@@ -27,7 +27,7 @@ This instance provides a comprehensive RESTful API (`/api/v1`) designed specific
 6. **Wishlist Radar & Airfare Tracking**: Maintain future destinations, target budgets, and travel months (`GET`, `POST`, `DELETE /api/v1/wishes`).
 7. **On-Demand Sync Trigger**: Programmatically trigger Google Calendar & Gmail synchronization passes (`POST /api/v1/sync`).
 8. **Cloud Snapshots & Export**: Inspect automatic KV backup snapshots and download full data exports (`GET /api/v1/backups`, `GET /api/v1/export`).
-9. **In-App AI Copilot Chat**: Query RoamRadar's internal AI travel assistant with active trip context to generate structured proposal cards (`POST /api/v1/copilot/chat`).
+9. **In-App AI Copilot Chat**: Query 888travel's internal AI travel assistant with active trip context to generate structured proposal cards (`POST /api/v1/copilot/chat`).
 10. **Manual Invariant Protection**: All items created via the Agent API are stamped with `source: "manual"`. They will NEVER be overwritten or deleted by automated background calendar or email synchronization.
 11. **Instance Health & Status**: Inspect instance health, version, trip counts, and active integration flags (`GET /api/v1/status`).
 

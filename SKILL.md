@@ -1,11 +1,11 @@
 ---
-name: roamradar-travel-planner
-description: Comprehensive autonomous travel planning, itinerary management, Google Places exploration, contingency fallback orchestration, and wishlist radar skill for RoamRadar (888RoamTravel).
+name: 888travel-planner
+description: Comprehensive autonomous travel planning, itinerary management, Google Places exploration, contingency fallback orchestration, and wishlist radar skill for 888travel.
 ---
 
-# RoamRadar Travel Planner Skill
+# 888travel Travel Planner Skill
 
-Use this skill when tasked with researching, structuring, modifying, or managing travel itineraries in RoamRadar (888RoamTravel). This skill gives you direct RESTful API access to manage multi-day trips, granular itinerary items, Google Places discovery, contingency fallback plans, wishlist radar, backups, and synchronizations.
+Use this skill when tasked with researching, structuring, modifying, or managing travel itineraries in 888travel. This skill gives you direct RESTful API access to manage multi-day trips, granular itinerary items, Google Places discovery, contingency fallback plans, wishlist radar, backups, and synchronizations.
 
 ## Configuration & Headers
 - **Base URL**: `https://<your-instance-domain>/api/v1`
@@ -180,7 +180,7 @@ Download full instance JSON export.
 - **Method**: `GET /api/v1/export`
 
 ### 19. `chat_copilot`
-Query RoamRadar's internal AI copilot with active trip context.
+Query 888travel's internal AI copilot with active trip context.
 - **Method**: `POST /api/v1/copilot/chat`
 - **Payload**:
   ```json

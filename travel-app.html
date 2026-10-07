@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>888漫步旅遊 · 888RoamTravel</title>
+<title>888漫步旅遊 · 888travel</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#ECE7DC">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -794,8 +794,8 @@
   <footer class="app-footer">
     <div class="foot-brand">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-compass" style="display:inline-block;vertical-align:-0.18em;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-      <span id="footBrandText">888漫步旅遊 · RoamRadar</span>
-      <span class="foot-ver">v2.6.3</span>
+      <span id="footBrandText">888漫步旅遊 · 888travel</span>
+      <span class="foot-ver">v2.6.4</span>
     </div>
     <div class="foot-links">
       <a href="/llms.txt" target="_blank" rel="noopener" class="foot-link" title="LLM 探索規範索引 (llms.txt)"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot" style="display:inline-block;vertical-align:-0.18em;flex-shrink:0;"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></svg> llms.txt</a>
@@ -1282,7 +1282,7 @@
     var tz=t.timezone||getHomeTz();
     var desc=(t.segments||[]).map(function(s){return (s.type||"")+": "+(s.name||"");}).join("\\n");
     if(tz) desc = (desc ? desc + "\\n" : "") + "Timezone: " + tz;
-    return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//888RoamTravel//EN","X-WR-TIMEZONE:"+tz,"BEGIN:VEVENT","UID:"+t.id+"@travel",
+    return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//888travel//EN","X-WR-TIMEZONE:"+tz,"BEGIN:VEVENT","UID:"+t.id+"@travel",
       "DTSTART;VALUE=DATE:"+dt(t.start),"DTEND;VALUE=DATE:"+dtEnd(t.end),
       "SUMMARY:Trip: "+((t.label||codeify(t.to)||"Travel").replace(/[,;]/g," ")),"DESCRIPTION:"+desc,"END:VEVENT","END:VCALENDAR"].join("\r\n");
   }
@@ -1314,8 +1314,8 @@
   
   function updateStaticTexts(){
     var at = document.getElementById("appTitle");
-    if(at) at.textContent = isZH() ? "888漫步旅遊" : "888RoamTravel";
-    document.title = isZH() ? "888漫步旅遊 · 888RoamTravel" : "888RoamTravel · 888漫步旅遊";
+    if(at) at.textContent = isZH() ? "888漫步旅遊" : "888travel";
+    document.title = isZH() ? "888漫步旅遊 · 888travel" : "888travel · 888漫步旅遊";
     var bd = document.getElementById("brandDesc");
     if(bd) bd.textContent = isZH() ? "將所有航班、住宿與交通接駁，整合於動態旅程時間軸。" : "Every trip - its flights, stays and rides - on one living timeline.";
     var lb = document.getElementById("langBtn");
@@ -1352,7 +1352,7 @@
 
     var fbBrand = document.querySelector(".foot-brand");
     if(fbBrand) {
-      fbBrand.innerHTML = lucideIcon('compass', 18) + ' <span id="footBrandText">' + (isZH() ? "888漫步旅遊 · RoamRadar" : "888RoamTravel · RoamRadar") + '</span> <span class="foot-ver">v2.6.3</span>';
+      fbBrand.innerHTML = lucideIcon('compass', 18) + ' <span id="footBrandText">' + (isZH() ? "888漫步旅遊 · 888travel" : "888travel") + '</span> <span class="foot-ver">v2.6.4</span>';
     }
     var footLinks = document.querySelector(".foot-links");
     if(footLinks) {
@@ -2556,7 +2556,7 @@
 
         '<h4 style="margin-top:24px">'+(isZH()?"Resend 郵件寄送服務（OTP 登入與通知）":"Resend Email Delivery (OTP &amp; Alerts)")+'</h4>'+
         field(isZH()?"Resend API 金鑰 (API Key)":"Resend API Key","s_resend_key","password","","re_123456…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
-        field(isZH()?"寄件者地址 (From Address)":"From Address","s_resend_from","text","","888RoamTravel <onboarding@resend.dev>",isZH()?"(需符合 Resend 驗證網域或使用預設)":"(verified domain or onboarding@resend.dev)")+
+        field(isZH()?"寄件者地址 (From Address)":"From Address","s_resend_from","text","","888travel <onboarding@resend.dev>",isZH()?"(需符合 Resend 驗證網域或使用預設)":"(verified domain or onboarding@resend.dev)")+
         '<div class="hint">'+(isZH()?"用於發送 6 位數 OTP 登入驗證碼及重要行程提醒。前往 <b>resend.com/api-keys</b> 取得金鑰。若未綁定自有網域，可直接使用預設寄件地址。":"Used to send 6-digit OTP login verification codes and trip updates. Get a free key at <b>resend.com/api-keys</b>. You can use the default onboarding address if you haven't verified a custom domain.")+'</div>'+
         '<div class="modal-actions act-row"><button class="btn" id="resendSave" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存 Resend 設定":"Save Resend Config")+'</span></button><button class="btn" id="resendTest" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('mail', 14)+' <span>'+(isZH()?"發送測試郵件":"Send Test Email")+'</span></button></div>'+
         '<div id="resendStatus" class="hint" style="margin-top:8px"></div>'+
@@ -2982,8 +2982,8 @@
       copyPromptBtn.onclick = function() {
         var origin = apiBase();
         var bearer = currentAgentKey || "<YOUR_AGENT_API_KEY>";
-        var promptText = "# RoamRadar (888RoamTravel) AI Agent Instructions\n\n" +
-          "You are an autonomous travel planner and assistant integrating directly with the user's RoamRadar travel hub.\n\n" +
+        var promptText = "# 888travel (888漫步旅遊) AI Agent Instructions\n\n" +
+          "You are an autonomous travel planner and assistant integrating directly with the user's 888travel hub.\n\n" +
           "## Environment & Authentication\n" +
           "- Base URL: " + origin + "/api/v1\n" +
           "- Authorization Header: Authorization: Bearer " + bearer + "\n" +
@@ -3540,11 +3540,11 @@
     if(t){
       welcomeText = isZH()
         ? "您好！我是您的 888漫步旅遊 AI 特助。目前正針對「" + (t.label || t.to) + "」進行規劃討論。\n您可以隨時問我私房美食、交通動線、或要求我規劃易客滿/雨天的備用替代方案！"
-        : "Hello! I am your 888RoamTravel AI Copilot, assisting you with \"" + (t.label || t.to) + "\".\nFeel free to ask for restaurant recommendations, transit connections, or contingency backup plans!";
+        : "Hello! I am your 888travel AI Copilot, assisting you with \"" + (t.label || t.to) + "\".\nFeel free to ask for restaurant recommendations, transit connections, or contingency backup plans!";
     } else {
       welcomeText = isZH()
         ? "您好！我是您的 888漫步旅遊 AI 特助。\n我可以為您構思新旅程、推薦在地美食、安排交通動線，並在規劃時提供實用的雨天或客滿替代備案。"
-        : "Hello! I am your 888RoamTravel AI Copilot.\nI can help you brainstorm new trips, find authentic dining, map transport routes, and attach contingency backups.";
+        : "Hello! I am your 888travel AI Copilot.\nI can help you brainstorm new trips, find authentic dining, map transport routes, and attach contingency backups.";
     }
 
     var chips = getQuickChips(copilotTripId);
@@ -3723,7 +3723,7 @@
     div.className = "copilot-msg assistant";
     div.innerHTML = '<div class="copilot-bubble" style="border-color:rgba(232,154,43,.4);background:rgba(232,154,43,.06)">' +
       '<div style="font-weight:700;color:var(--amber);margin-bottom:6px;display:flex;align-items:center;gap:6px">'+lucideIcon('alert-triangle', 16, 2, '', 'color:var(--amber)')+' <span>' + (isZH() ? "尚未設定 AI 語言模型金鑰" : "No LLM API Key Configured") + '</span></div>' +
-      '<p style="font-size:14px;line-height:1.55;color:var(--ink)">' + (isZH() ? "RoamRadar AI 助理支援 Groq、Gemini、DeepSeek、OpenAI 或 Anthropic 等多種模型。請先前往設定填寫您的 API Key。" : "RoamRadar AI Copilot supports Groq, Gemini, DeepSeek, OpenAI, or Anthropic. Please configure your API key in Settings.") + '</p>' +
+      '<p style="font-size:14px;line-height:1.55;color:var(--ink)">' + (isZH() ? "888travel AI 助理支援 Groq、Gemini、DeepSeek、OpenAI 或 Anthropic 等多種模型。請先前往設定填寫您的 API Key。" : "888travel AI Copilot supports Groq, Gemini, DeepSeek, OpenAI, or Anthropic. Please configure your API key in Settings.") + '</p>' +
       '<button class="btn solid" id="copilotOpenSettingsBtn" style="margin-top:8px;font-size:14.5px;padding:10px 18px;display:inline-flex;align-items:center;gap:6px">'+lucideIcon('settings', 15)+' <span>' + (isZH() ? "立即前往「設定」配置金鑰" : "Go to Settings") + '</span></button>' +
     '</div>';
     copilotStream.appendChild(div);

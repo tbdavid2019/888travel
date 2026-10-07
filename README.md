@@ -104,13 +104,13 @@ wrangler deploy
 
 ## 📱 安裝至手機主畫面 (PWA 指引)
 
-RoamRadar 是一套 Progressive Web App (PWA)。加入主畫面後即可全螢幕沉浸運行，享有原生 App 般的體驗：
+888travel (888漫步旅遊) 是一套 Progressive Web App (PWA)。加入主畫面後即可全螢幕沉浸運行，享有原生 App 般的體驗：
 
 ### iPhone / iPad (Safari)
-1. 在 **Safari** 瀏覽器中開啟您的專屬 App 網址（例如 `https://travel-roamradar.<you>.workers.dev/app`）。
+1. 在 **Safari** 瀏覽器中開啟您的專屬 App 網址（例如 `https://travel.david888.com/app`）。
 2. 點擊瀏覽器下方的 **「分享」** 按鈕（向上箭頭方形圖示）。
 3. 往下滑動並點選 **「加入主畫面」** (Add to Home Screen)。
-4. 確認名稱為「RoamRadar 旅遊雷達」後點擊右上角 **「新增」**。
+4. 確認名稱為「888漫步旅遊」或「888travel」後點擊右上角 **「新增」**。
 5. 點擊主畫面圖示開啟並登入一次，可保持登入狀態 30 天。
 
 ### Android (Chrome)
@@ -179,21 +179,21 @@ RoamRadar 是一套 Progressive Web App (PWA)。加入主畫面後即可全螢�
 
 ## ❓ 常見問答 (FAQ)
 
-**Q：RoamRadar 是免費的嗎？**  
+**Q：888travel 是免費的嗎？**  
 A：是的。本專案為開源專案，且 Cloudflare Workers 的免費方案每日提供 100,000 次請求額度，個人使用完全無需任何主機費用。
 
 **Q：是否支援繁體中文與多語系？**  
 A：完整支援！介面提供「繁體中文」與「English」雙語即時切換，包含所有導覽、設定、表單、行程卡片與使用說明指南。
 
 **Q：一定要串接 Google 帳號或 Anthropic 金鑰才能使用嗎？**  
-A：完全不需要。RoamRadar 可以純手動輸入並管理所有旅程細項，第三方串接純粹是為了提供自動匯入的便利性。
+A：完全不需要。888travel 可以純手動輸入並管理所有旅程細項，第三方串接純粹是為了提供自動匯入的便利性。
 
 ---
 
 ## ❤️ 特別鳴謝與作者資訊 (Acknowledgments & Credits)
 
 - **Original Creator (原作者)**：  
-  誠摯感謝 **[Giovanni Brees](https://www.giovannibrees.com)** 開源打造出這套架構精巧、設計優雅的 RoamRadar 個人旅遊中樞！其在單租戶架構與 AI 代理人開發上的先驅實踐，為本專案奠定了最卓越的基礎。
+  誠摯感謝 **[Giovanni Brees](https://www.giovannibrees.com)** 開源打造出這套架構精巧、設計優雅的 RoamRadar 個人旅遊中樞原型！其在單租戶架構與 AI 代理人開發上的先驅實踐，為本專案奠定了最卓越的基礎。
   - 個人網站：https://www.giovannibrees.com
   - LinkedIn：https://www.linkedin.com/in/giovannibrees/
   - Podcast 節目《The Zero-Employee Company》：https://open.spotify.com/show/033TuF4FmEurDDvBZlOAYr

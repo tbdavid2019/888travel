@@ -1,4 +1,4 @@
-// RoamRadar sync worker (Cloudflare)
+// 888travel (RoamRadar) sync worker (Cloudflare)
 // One hub. Your app is the only UI. Everything else is headless:
 //   - Google Calendar    reads events you already drop in (Booking, Airbnb...) as trip segments, writes one clean event per trip
 //   - Gmail + Claude      parses confirmation emails (drivers, transfers) into segments
@@ -82,11 +82,11 @@ export default {
       try {
         await sendEmailViaResend(env, {
           to: email,
-          subject: `【888漫步旅遊 / 888RoamTravel】您的登入驗證碼：${code}`,
-          text: `您好！\n\n您的 888漫步旅遊 (888RoamTravel) 登入驗證碼為：\n\n${code}\n\n驗證碼有效期為 10 分鐘。如果您並未要求此驗證碼，請忽略此郵件。`,
+          subject: `【888漫步旅遊 / 888travel】您的登入驗證碼：${code}`,
+          text: `您好！\n\n您的 888漫步旅遊 (888travel) 登入驗證碼為：\n\n${code}\n\n驗證碼有效期為 10 分鐘。如果您並未要求此驗證碼，請忽略此郵件。`,
           html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC',sans-serif;max-width:480px;margin:0 auto;background:#ECE7DC;padding:36px 24px;border-radius:18px;">
             <div style="background:#FFFFFF;border-radius:14px;padding:32px 28px;box-shadow:0 12px 36px rgba(22,19,12,0.08);text-align:center;">
-              <div style="font-size:20px;font-weight:800;color:#16130C;margin-bottom:8px;">888漫步旅遊 · 888RoamTravel</div>
+              <div style="font-size:20px;font-weight:800;color:#16130C;margin-bottom:8px;">888漫步旅遊 · 888travel</div>
               <div style="font-size:14px;color:#756D5E;margin-bottom:24px;">一次性登入安全驗證碼 (One-Time Password)</div>
               <div style="background:#F6F2E9;border:1px solid rgba(22,19,12,0.1);border-radius:10px;padding:18px;margin:18px 0;">
                 <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;font-size:36px;font-weight:800;letter-spacing:8px;color:#FF5A35;line-height:1;">${code}</div>
@@ -510,7 +510,8 @@ export default {
         const upcoming = trips.filter(t => (t.end || t.start) >= now).length;
         return cors(json({
           ok: true,
-          version: "2.6.3",
+          service: "888travel",
+          version: "2.6.4",
           instance: url.origin,
           serverTime: new Date().toISOString(),
           totalTrips: trips.length,
@@ -915,7 +916,7 @@ export default {
         return cors(json({ error: "Resend API Key 通常以 re_ 開頭，請至 resend.com/api-keys 取得 / Resend API key usually starts with re_" }, 400));
       }
 
-      const resendData = { apiKey, from: from || "888RoamTravel <onboarding@resend.dev>" };
+      const resendData = { apiKey, from: from || "888travel <onboarding@resend.dev>" };
       await env.TRIPS.put("resend_config", JSON.stringify(resendData));
       delete env._resendConfig;
       return cors(json({ ok: true }));
@@ -931,12 +932,12 @@ export default {
       try {
         const res = await sendEmailViaResend(env, {
           to: targetEmail,
-          subject: "【888漫步旅遊 / 888RoamTravel】Resend 郵件寄送測試成功！",
-          text: `恭喜！您的 888漫步旅遊 (888RoamTravel) Resend 郵件服務已成功連線！\n發送時間：${new Date().toLocaleString()}`,
+          subject: "【888漫步旅遊 / 888travel】Resend 郵件寄送測試成功！",
+          text: `恭喜！您的 888漫步旅遊 (888travel) Resend 郵件服務已成功連線！\n發送時間：${new Date().toLocaleString()}`,
           html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'PingFang TC',sans-serif;max-width:480px;margin:0 auto;background:#ECE7DC;padding:32px 20px;border-radius:16px;">
             <div style="background:#FFF;border-radius:12px;padding:28px 24px;text-align:center;">
               <h3 style="color:#1B8A57;margin:0 0 12px;">✓ Resend 郵件寄送測試成功</h3>
-              <p style="color:#756D5E;font-size:14px;line-height:1.6;margin:0 0 16px;">恭喜！您的 888漫步旅遊 (888RoamTravel) 郵件發送服務已正常啟用，後續可用於 OTP 驗證碼登入及行程通知。</p>
+              <p style="color:#756D5E;font-size:14px;line-height:1.6;margin:0 0 16px;">恭喜！您的 888漫步旅遊 (888travel) 郵件發送服務已正常啟用，後續可用於 OTP 驗證碼登入及行程通知。</p>
               <div style="font-size:12px;color:#A39A89;">測試時間：${new Date().toISOString()}</div>
             </div>
           </div>`
@@ -1633,7 +1634,7 @@ async function getResendConfig(env) {
   } catch (e) {}
 
   const apiKey = env.RESEND_API_KEY || (kvConfig && kvConfig.apiKey) || (await env.TRIPS.get("resend_key")) || "";
-  const from = env.RESEND_FROM || (kvConfig && kvConfig.from) || (await env.TRIPS.get("resend_from")) || "888RoamTravel <onboarding@resend.dev>";
+  const from = env.RESEND_FROM || (kvConfig && kvConfig.from) || (await env.TRIPS.get("resend_from")) || "888travel <onboarding@resend.dev>";
   const source = env.RESEND_API_KEY ? "secret" : (apiKey ? "in-app" : "none");
 
   return (env._resendConfig = { apiKey, from, source });
@@ -1816,7 +1817,7 @@ ${segSummary || "（目前尚無細項安排）"}`;
 ${upcoming || "（目前尚未建立任何行程）"}`;
   }
 
-  const sysPrompt = `你是一位專業、敏銳且細緻的個人旅遊規劃特助 (RoamRadar Travel Copilot)。
+  const sysPrompt = `你是一位專業、敏銳且細緻的個人旅遊規劃特助 (888travel Copilot)。
 你的任務是協助旅客構思、討論與優化行程規劃（包含餐廳美食、飯店住宿、航班、鐵路、交通接駁、景點活動與雨天/客滿備案）。
 
 ${tripContext}
@@ -2334,7 +2335,7 @@ function buildIcs(store) {
       desc ? "DESCRIPTION:" + icsEscape(desc) : "",
       "END:VEVENT"].filter(Boolean).join("\r\n");
   }).join("\r\n");
-  return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//888RoamTravel//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:888漫步旅遊 · 888RoamTravel\r\nX-WR-TIMEZONE:Asia/Taipei\r\n" + ev + "\r\nEND:VCALENDAR\r\n";
+  return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//888travel//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:888漫步旅遊 · 888travel\r\nX-WR-TIMEZONE:Asia/Taipei\r\n" + ev + "\r\nEND:VCALENDAR\r\n";
 }
 
 async function loadStore(env) {
@@ -2416,12 +2417,12 @@ function cors(res) {
 
 
 
-const LLMS_TXT = `# 888漫步旅遊 · 888RoamTravel (RoamRadar)
+const LLMS_TXT = `# 888漫步旅遊 · 888travel
 
 > Single-tenant, privacy-first personal travel hub with multi-language itinerary planning, live calendar subscriptions, Google Places verification, contingency fallback management, and a dedicated RESTful Agent API.
 
 ## Overview
-RoamRadar is a personal travel command center designed to run serverlessly on Cloudflare Workers and Cloudflare KV. It aggregates bookings from Google Calendar, Gmail, and manual user inputs into a unified, chronological timeline.
+888travel is a personal travel command center designed to run serverlessly on Cloudflare Workers and Cloudflare KV. It aggregates bookings from Google Calendar, Gmail, and manual user inputs into a unified, chronological timeline.
 
 This instance provides a comprehensive RESTful API (\`/api/v1\`) designed specifically for external AI agents (Claude Code, Antigravity, Cursor, OpenAI Agents, LangChain) to plan, query, update, and manage trips, granular itinerary items, verified places, fallback plans, wishlist radar, backups, and live synchronization.
 
@@ -2445,7 +2446,7 @@ This instance provides a comprehensive RESTful API (\`/api/v1\`) designed specif
 6. **Wishlist Radar & Airfare Tracking**: Maintain future destinations, target budgets, and travel months (\`GET\`, \`POST\`, \`DELETE /api/v1/wishes\`).
 7. **On-Demand Sync Trigger**: Programmatically trigger Google Calendar & Gmail synchronization passes (\`POST /api/v1/sync\`).
 8. **Cloud Snapshots & Export**: Inspect automatic KV backup snapshots and download full data exports (\`GET /api/v1/backups\`, \`GET /api/v1/export\`).
-9. **In-App AI Copilot Chat**: Query RoamRadar's internal AI travel assistant with active trip context to generate structured proposal cards (\`POST /api/v1/copilot/chat\`).
+9. **In-App AI Copilot Chat**: Query 888travel's internal AI travel assistant with active trip context to generate structured proposal cards (\`POST /api/v1/copilot/chat\`).
 10. **Manual Invariant Protection**: All items created via the Agent API are stamped with \`source: "manual"\`. They will NEVER be overwritten or deleted by automated background calendar or email synchronization.
 11. **Instance Health & Status**: Inspect instance health, version, trip counts, and active integration flags (\`GET /api/v1/status\`).
 
@@ -2483,15 +2484,15 @@ This instance provides a comprehensive RESTful API (\`/api/v1\`) designed specif
 3. Read [/skill.md](https://travel.david888.com/skill.md) or [/llms-full.txt](https://travel.david888.com/llms-full.txt) for detailed schemas and prompt engineering guidelines.
 `;
 
-const LLMS_FULL_TXT = `# 888漫步旅遊 · 888RoamTravel (RoamRadar) - Full LLM & API Reference
+const LLMS_FULL_TXT = `# 888漫步旅遊 · 888travel - Full LLM & API Reference
 
-> Machine-readable specification and guide for AI Agents, autonomous planners, and automation systems integrating with RoamRadar.
+> Machine-readable specification and guide for AI Agents, autonomous planners, and automation systems integrating with 888travel.
 
 ---
 
 ## 1. System Architecture & Invariants
 
-RoamRadar is a privacy-first, single-tenant personal travel hub. All data is persisted in Cloudflare KV as a unified store.
+888travel is a privacy-first, single-tenant personal travel hub. All data is persisted in Cloudflare KV as a unified store.
 
 ### The Invariant Rules
 1. **Manual Invariant**: Any segment created or updated via the Agent API is assigned \`source: "manual"\`. The background sync engine (which periodically scans Google Calendar and Gmail) will **NEVER** overwrite, modify, or delete manual plans.
@@ -2517,7 +2518,7 @@ Authorization: Bearer rr_agent_<token>
 Content-Type: application/json
 \`\`\`
 
-Agent keys are generated in the RoamRadar Web App (Settings -> AI Agent Integration). Tokens are prefixed with \`rr_agent_\` and can be regenerated or revoked at any time.
+Agent keys are generated in the 888travel Web App (Settings -> AI Agent Integration). Tokens are prefixed with \`rr_agent_\` and can be regenerated or revoked at any time.
 
 ---
 
@@ -2659,17 +2660,17 @@ Exports a full JSON snapshot of trips, wishes, and home configuration.
 ### 4.7 In-App AI Copilot Chat
 
 #### \`POST /api/v1/copilot/chat\`
-Allows external agents or companion tools to chat directly with RoamRadar's internal AI copilot with active trip context.
+Allows external agents or companion tools to chat directly with 888travel's internal AI copilot with active trip context.
 `;
 
 const SKILL_MD = `---
-name: roamradar-travel-planner
-description: Comprehensive autonomous travel planning, itinerary management, Google Places exploration, contingency fallback orchestration, and wishlist radar skill for RoamRadar (888RoamTravel).
+name: 888travel-planner
+description: Comprehensive autonomous travel planning, itinerary management, Google Places exploration, contingency fallback orchestration, and wishlist radar skill for 888travel.
 ---
 
-# RoamRadar Travel Planner Skill
+# 888travel Travel Planner Skill
 
-Use this skill when tasked with researching, structuring, modifying, or managing travel itineraries in RoamRadar (888RoamTravel). This skill gives you direct RESTful API access to manage multi-day trips, granular itinerary items, Google Places discovery, contingency fallback plans, wishlist radar, backups, and synchronizations.
+Use this skill when tasked with researching, structuring, modifying, or managing travel itineraries in 888travel. This skill gives you direct RESTful API access to manage multi-day trips, granular itinerary items, Google Places discovery, contingency fallback plans, wishlist radar, backups, and synchronizations.
 
 ## Configuration & Headers
 - **Base URL**: \`https://<your-instance-domain>/api/v1\`
@@ -2783,6 +2784,6 @@ Download full instance JSON export.
 - **Method**: \`GET /api/v1/export\`
 
 ### 19. \`chat_copilot\`
-Query RoamRadar's internal AI copilot with active trip context.
+Query 888travel's internal AI copilot with active trip context.
 - **Method**: \`POST /api/v1/copilot/chat\`
 `;

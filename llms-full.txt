@@ -1,12 +1,12 @@
-# 888漫步旅遊 · 888RoamTravel (RoamRadar) - Full LLM & API Reference
+# 888漫步旅遊 · 888travel - Full LLM & API Reference
 
-> Machine-readable specification and guide for AI Agents, autonomous planners, and automation systems integrating with RoamRadar.
+> Machine-readable specification and guide for AI Agents, autonomous planners, and automation systems integrating with 888travel.
 
 ---
 
 ## 1. System Architecture & Invariants
 
-RoamRadar is a privacy-first, single-tenant personal travel hub. All data is persisted in Cloudflare KV as a unified store.
+888travel is a privacy-first, single-tenant personal travel hub. All data is persisted in Cloudflare KV as a unified store.
 
 ### The Invariant Rules
 1. **Manual Invariant**: Any segment created or updated via the Agent API is assigned `source: "manual"`. The background sync engine (which periodically scans Google Calendar and Gmail) will **NEVER** overwrite, modify, or delete manual plans.
@@ -32,7 +32,7 @@ Authorization: Bearer rr_agent_<token>
 Content-Type: application/json
 ```
 
-Agent keys are generated in the RoamRadar Web App (Settings -> AI Agent Integration). Tokens are prefixed with `rr_agent_` and can be regenerated or revoked at any time.
+Agent keys are generated in the 888travel Web App (Settings -> AI Agent Integration). Tokens are prefixed with `rr_agent_` and can be regenerated or revoked at any time.
 
 ---
 
@@ -382,7 +382,7 @@ Exports a full JSON snapshot of trips, wishes, and home configuration.
 ### 4.7 In-App AI Copilot Chat
 
 #### `POST /api/v1/copilot/chat`
-Allows external agents or companion tools to chat directly with RoamRadar's internal AI copilot with active trip context.
+Allows external agents or companion tools to chat directly with 888travel's internal AI copilot with active trip context.
 - **Request Body**:
 ```json
 {

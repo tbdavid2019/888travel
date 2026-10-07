@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.6.4] - 2026-10-07
+
+### Changed / 品牌名稱全面統一為 888travel (Unify Brand Name to 888travel)
+- **品牌英文識別全面定案為 888travel (Official Brand Name 888travel)**：
+  - 徹底淘汰過去過渡時期殘留的 `RoamRadar` 與 `888RoamTravel`，全站中英文品牌識別正式統一為 **「888漫步旅遊 · 888travel」**（英文簡稱 **`888travel`**）。
+  - 與正式網域 `travel.david888.com` 及 888 生態系（888box, 888a2a）命名體系達成 100% 協調與一致性。
+  - 同步更新範圍：
+    - **應用程式端**：HTML `<title>`、頂部導航、頁尾品牌徽章、iCalendar `PRODID`（`PRODID:-//888travel//EN`）、Resend 寄件者預設地址（`888travel <onboarding@resend.dev>`）、AI Copilot 歡迎語與說明、Agent API 提示詞模版。
+    - **行銷官網與 PWA**：`website/index.html` 與 `public/index.html` 標題、Meta 標籤、OpenGraph、Twitter Card、JSON-LD Schema，以及 `manifest.webmanifest` 的 `name` 與 `short_name`。
+    - **後端 Worker 與 API**：`/api/v1/status` 回傳 `service: "888travel"` 與 `version: "2.6.4"`，OTP 登入信件範本與測試信主旨全面更新。
+    - **AI Discovery 規範**：`llms.txt`、`llms-full.txt` 與 `SKILL.md`（技能名稱升級為 `888travel-planner`）。
+    - 銘謝聲明中完整保留對 Giovanni Brees / RoamRadar 原型架構的誠摯致謝。
+
 ## [2.6.3] - 2026-10-07
 
 ### Enhanced / 介面排版、圖標工藝與全光譜 Agent API 跨世代升級
