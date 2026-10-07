@@ -10,7 +10,7 @@ layout match the app's design.
 ## Deploy
 It's one static file. Easiest options:
 - **GitHub Pages**: repo Settings -> Pages -> serve this `website/` folder (or
-  add a Pages workflow). It's live at `https://<user>.github.io/travel-roamradar/`.
+  add a Pages workflow). It's live at `https://<user>.github.io/888travel/`.
   (This does not affect the app - the Cloudflare Worker deploys separately.)
 - **Cloudflare Pages**: new project -> point at this repo, build command none,
   output directory `website`.

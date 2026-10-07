@@ -66,11 +66,11 @@
 
 點擊下方按鈕，即可將專案複製到您的 GitHub 並直接建立 Cloudflare Worker 與 KV 資料庫：
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tbdavid2019/travel-roamradar)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tbdavid2019/888travel)
 
 1. 點擊上方按鈕授權 Cloudflare 連線。
 2. 系統會自動在您的 Cloudflare 帳戶建立 Worker 與 `TRIPS` KV 命名空間。
-3. 部署完成後將獲得專屬網址（例如：`https://travel-roamradar.<your-subdomain>.workers.dev`）。
+3. 部署完成後將獲得專屬網址（例如：`https://888travel.<your-subdomain>.workers.dev`）。
 4. **立即開啟網址並設定帳號密碼**（首位註冊者即為管理員，請務必第一時間設定）。
 
 ---
@@ -81,8 +81,8 @@
 
 ```bash
 # 1. 複製儲存庫
-git clone https://github.com/tbdavid2019/travel-roamradar.git
-cd travel-roamradar
+git clone https://github.com/tbdavid2019/888travel.git
+cd 888travel
 
 # 2. 安裝 Cloudflare Wrangler CLI 並登入
 npm i -g wrangler
