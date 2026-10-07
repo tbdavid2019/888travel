@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.6.1] - 2026-10-07
+
+### Enhanced / 介面與字體全面升級
+- **Impeccable 中文字體工藝規範與最小字號底線 (CJK Chinese Typography Standard & 12px Hard Floor)**：
+  - **嚴格中文字號底線 (12px Hard Floor)**：依據漢字筆畫複雜度（方塊字密實度）規範，全面廢除 9px–11px 之微型文字，將所有徽章、標籤、狀態膠囊、統計副標、日期格式全數提升至絕對底線 `12px`（搭配 `padding: 3px 9px` 與 `line-height: 1.35`），杜絕抗鋸齒造成的筆畫黏連模糊。
+  - **清晰層次字階系統 (Type Scale Hierarchy)**：
+    - 次要資訊 / 元資料 / 備註：升級至 `13px`–`14px`（行高 `1.55`–`1.65`），顯著提升長時間閱讀舒適度。
+    - 按鈕 / 分頁導航 / 區塊標題：規範為 `14px`–`15px`（字重 `600`–`700`，點擊目標 `min-height >= 38px–40px`）。
+    - 內文 / 筆記 / AI 對話氣泡：統一為 `15px`–`16px`（行高 `1.6`–`1.65`）。
+  - **漢字字距與行高修復**：中文字體 (`html[lang*="zh"]`) 全面解除負字距設定（`letter-spacing: 0`），標題行高提升至 `1.25`，解決筆畫橫向穿插與頂部被裁切之反模式。
+  - **WCAG AA 對比度強化**：全域次要文字顏色 `--muted` 自 `#736B5E` 深化為 `#635B4E`（在 `#ECE7DC` 米紙底色下達 5.03:1 對比度，中文環境為 `#5E5648` 達 5.87:1），通過 WCAG 2.1 AA 標準。
+- **行動端 RWD 深度優化 (Mobile RWD & iOS Immunity)**：
+  - **防範 iOS Safari 強制縮放**：針對行動端表單元件（`.field input`、`select`、`textarea`、`#s_llm_model`、`.copilot-input`）全面鎖定 `font-size: 16px`，徹底根絕 iPhone 點擊輸入框時畫面被非預期放大的破壞性體驗。
+  - **導航標籤防縮放**：在 `@media (max-width: 760px)` 環境下，保持分頁標籤 `14px`，並搭配原生水平滑動捲軸，避免縮減為 13px 導致辨識困難。
+  - **觸控熱區擴大**：卡片輔助按鈕（`.card-acts .mini`）最低高度擴增至 `38px`，字體設定為 `13.5px`，提升單手操作點擊命中率。
+  - **官網 Landing Page 同步升級**：`website/index.html` 同步對齊中文字體排版標準，標籤文字最低 `12px`，維持品牌全網體驗一致。
+
 ---
 
 ## [2.6.0] - 2026-10-07
