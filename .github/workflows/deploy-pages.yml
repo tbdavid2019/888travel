@@ -1,7 +1,7 @@
 name: Deploy website to GitHub Pages
 
 # Publishes the static marketing site in website/ to GitHub Pages, giving the
-# project an indexable landing page at https://giovannibrees.github.io/travel-roamradar/
+# project an indexable landing page at https://tbdavid2019.github.io/travel-roamradar/
 # (or your custom domain). One-time setup: repo Settings -> Pages -> Source:
 # "GitHub Actions". The Cloudflare Worker app deploys separately and is unaffected.
 
