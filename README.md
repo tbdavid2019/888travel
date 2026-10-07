@@ -1,4 +1,4 @@
-# ✈️ 888漫步旅遊 · 888RoamTravel — 個人專屬雲端旅遊行程中樞
+# ✈️ 888漫步旅遊 · 888travel — 個人專屬雲端旅遊行程中樞
 
 > **一個免費、開源、100% 個人自架的單頁式旅遊行程管理中心。**  
 > 將所有航班、住宿、租車、交通接駁、倒數計時、願望清單與過往足跡整合在單一動態旅程時間軸。支援 Google 行事曆、Gmail 智慧解析（支援 Gemini / OpenAI / Groq / DeepSeek / Claude Haiku 等任意相容模型），以及 Resend 信箱 OTP 驗證碼登入。完全託管於您個人的 Cloudflare Worker 雲端帳戶，無須共用伺服器，資料隱私 100% 操之在己。  
@@ -135,7 +135,7 @@ wrangler deploy
   - 貼上您的 API Key 點擊「儲存 LLM 設定」即可。亦可透過 Worker Secrets 靜態配置：`LLM_API_KEY`、`LLM_BASE_URL`、`LLM_MODEL`、`LLM_PROVIDER`。
 - **Resend 郵件寄送與 OTP 驗證碼 (Email Delivery & OTP)**：
   - 至 [Resend](https://resend.com/api-keys) 免費建立 API Key（`re_...`）。
-  - 貼入 App 設定內的「Resend API 金鑰」與「寄件者地址」（若未設定網域可直接使用預設 `888RoamTravel <onboarding@resend.dev>`）。
+  - 貼入 App 設定內的「Resend API 金鑰」與「寄件者地址」（若未設定網域可直接使用預設 `888travel <onboarding@resend.dev>`）。
   - 點擊「發送測試郵件」確認連線成功，後續登入即可享受 6 位數免密碼 OTP 安全驗證碼！亦可透過 Worker Secrets 靜態配置：`RESEND_API_KEY`、`RESEND_FROM`。
 
 ---

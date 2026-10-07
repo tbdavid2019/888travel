@@ -1,12 +1,12 @@
 # AGENTS.md · AI Agent Guidelines & Architecture Manual
 
-> This document defines the engineering standards, architecture, data schemas, mirror rules, and development guidelines for AI agents (Antigravity, Claude, Cursor, Copilot, etc.) working on the **RoamRadar** codebase.
+> This document defines the engineering standards, architecture, data schemas, mirror rules, and development guidelines for AI agents (Antigravity, Claude, Cursor, Copilot, etc.) working on the **888travel** (888漫步旅遊, formerly RoamRadar) codebase.
 
 ---
 
 ## 1. Project Overview & Philosophy
 
-**RoamRadar** is a personal travel hub designed for a single user per instance:
+**888travel** (888漫步旅遊) is a personal travel hub designed for a single user per instance:
 - **Zero build step, zero heavy frameworks**: The frontend is pure Vanilla HTML5, CSS3, and JavaScript.
 - **Headless serverless backend**: Runs as a single Cloudflare Worker using Cloudflare KV for persistence.
 - **Single-tenant & privacy-first**: Every user self-hosts their own instance on their own Cloudflare account behind their own password gate.

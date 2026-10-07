@@ -1,9 +1,9 @@
 cff-version: 1.2.0
-title: RoamRadar
-message: "If you use RoamRadar, please cite it using these metadata."
+title: "888travel (RoamRadar)"
+message: "If you use 888travel (RoamRadar), please cite it using these metadata."
 type: software
 abstract: >-
-  RoamRadar is a free, open-source, self-hosted personal travel app. It keeps
+  888travel (originally RoamRadar) is a free, open-source, self-hosted personal travel app. It keeps
   every flight, hotel, ride, countdown, wishlist and past trip on one living
   timeline, and can pull bookings automatically from Google Calendar and Gmail.
   It runs as a single Cloudflare Worker on your own account. Built with AI agents.
