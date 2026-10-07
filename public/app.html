@@ -165,6 +165,8 @@
   .places-addr{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .places-acts{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
   .places-acts button, .places-acts a{font-size:11px;padding:3px 8px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+  #g_places_btn:hover{background:rgba(255,90,53,.14)!important;transform:translateY(-1px);box-shadow:0 2px 8px rgba(255,90,53,.15)}
+  #g_places_btn:active{transform:translateY(0)}
   .plan .pmeta{display:flex;align-items:center;gap:12px}
   .plan .when{font-family:var(--mono);font-size:13px;color:var(--ink);white-space:nowrap}
   .plan .x{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;font-size:14px;line-height:1}
@@ -888,8 +890,9 @@
   var CAT={flight:{c:"var(--flight)",t:"rgba(30,64,255,.1)"},hotel:{c:"var(--hotel)",t:"rgba(27,138,87,.12)"},restaurant:{c:"var(--restaurant)",t:"rgba(255,90,53,.14)"},car:{c:"var(--car)",t:"rgba(232,154,43,.14)"},ride:{c:"var(--ride)",t:"rgba(124,77,255,.12)"},rail:{c:"var(--rail)",t:"rgba(255,90,53,.12)"},other:{c:"var(--other)",t:"rgba(117,109,94,.12)"}};
   function cat(type){return CAT[type]||CAT.other;}
   function segTypeName(type){
-    var zhMap={flight:"航班",hotel:"住宿飯店",restaurant:"餐廳美食",car:"租車自駕",ride:"交通接駁",rail:"鐵路高鐵",other:"其他項目"};
-    return isZH() ? (zhMap[type]||type) : (type==="restaurant" ? "Restaurant" : (type||"plan"));
+    var zhMap={flight:"✈️ 航班",hotel:"🏨 住宿",restaurant:"🍽️ 餐廳",car:"🚗 租車",ride:"🚕 接駁",rail:"🚆 鐵路",other:"📌 景點/其他"};
+    var enMap={flight:"✈️ Flight",hotel:"🏨 Hotel",restaurant:"🍽️ Dining",car:"🚗 Car rental",ride:"🚕 Transfer",rail:"🚆 Rail",other:"📌 Plan"};
+    return isZH() ? (zhMap[type]||("📌 "+type)) : (enMap[type]||("📌 "+type));
   }
 
   
@@ -1197,33 +1200,159 @@
   function closeModal(){scrim.classList.remove("show");}
   scrim.addEventListener("click",function(e){if(e.target===scrim)closeModal();});
 
-  function field(label,id,type,val,ph,opt){return '<div class="field"><label>'+label+(opt?' <span class="opt">'+opt+'</span>':'')+'</label><input id="'+id+'" type="'+type+'" value="'+esc(val==null?"":val)+'" placeholder="'+esc(ph)+'"></div>';}
+  function field(label,id,type,val,ph,opt,labelId){return '<div class="field"><label'+(labelId?' id="'+labelId+'"':'')+'>'+label+(opt?' <span class="opt">'+opt+'</span>':'')+'</label><input id="'+id+'" type="'+type+'" value="'+esc(val==null?"":val)+'" placeholder="'+esc(ph)+'"></div>';}
   function val(id){var el=document.getElementById(id);return el?el.value.trim():"";}
   function ensureIds(){trips.forEach(function(t){if(!t.id)t.id=uid();(t.segments||[]).forEach(function(s){if(!s.sid)s.sid=uid();});});}
 
-  /* ---- segment (plan) form ---- */
+  /* ---- segment (plan) presets & form ---- */
   var currentPlace = null;
+  var SEG_PRESETS = {
+    flight: {
+      nameLabel: isZH() ? "航班名稱 / 航空公司與班次" : "Flight Name / Airline & Flight No.",
+      namePh: isZH() ? "例如：長榮航空 BR198 · 台北(TPE) ➔ 東京成田(NRT)" : "e.g., EVA Air BR198 · TPE ➔ NRT",
+      addrLabel: isZH() ? "出發與抵達機場 / 航廈資訊" : "Airports & Terminal Info",
+      addrPh: isZH() ? "例如：桃園機場第二航廈 ➔ 成田機場第一航廈" : "e.g., TPE Terminal 2 ➔ NRT Terminal 1",
+      noteLabel: isZH() ? "航班細節備註" : "Flight Details & Seat Info",
+      notePh: isZH() ? "例如：座位 23K · 行李 2 件 · 預計 13:00 起飛" : "e.g., Seat 23K · 2 checked bags · Dep 13:00",
+      confPh: isZH() ? "訂位代號 / PNR (例如: 6X9KLP)" : "Booking Ref / PNR (e.g. 6X9KLP)",
+      placesBtn: isZH() ? "Google 查詢機場/航廈與地址" : "Search Airport on Google Places",
+      fbNamePh: isZH() ? "例如：長榮 BR196 或 隔日早班備用航班" : "e.g., BR196 or next morning flight",
+      fbAddrPh: isZH() ? "例如：成田機場 T1 / 替代路線" : "e.g., NRT Terminal 1 / alternative route",
+      fbNotePh: isZH() ? "例如：機票可免費改簽一次" : "e.g., Ticket allows 1 free rebooking"
+    },
+    hotel: {
+      nameLabel: isZH() ? "飯店 / 住宿名稱" : "Hotel / Stay Name",
+      namePh: isZH() ? "例如：格拉斯麗新宿酒店 · 雙人房 3 晚" : "e.g., Hotel Gracery Shinjuku · 3 nights",
+      addrLabel: isZH() ? "飯店地址 / Google 地圖連結" : "Hotel Address / Maps link",
+      addrPh: isZH() ? "例如：東京都新宿區歌舞伎町 1-19-1 / 飯店 Google 地圖連結" : "e.g., 1-19-1 Kabukicho, Shinjuku / Maps link",
+      noteLabel: isZH() ? "入住細節備註" : "Stay Details & Check-in Info",
+      notePh: isZH() ? "例如：門禁密碼 4821# · 15:00 入住 · 訂房代號 #HG-8829" : "e.g., Door code 4821# · check-in 15:00 · Booking #",
+      confPh: isZH() ? "訂房確認號 (例如: BK-882910)" : "Reservation # (e.g. BK-882910)",
+      placesBtn: isZH() ? "Google 查詢飯店星級、評價與地址" : "Search Hotel on Google Places",
+      fbNamePh: isZH() ? "例如：新宿王子大飯店 (備選住宿)" : "e.g., Shinjuku Prince Hotel (Backup)",
+      fbAddrPh: isZH() ? "例如：東京都新宿區歌舞伎町 1-30-1" : "e.g., 1-30-1 Kabukicho, Shinjuku",
+      fbNotePh: isZH() ? "例如：可現場入住，含早餐" : "e.g., Walk-in available, breakfast included"
+    },
+    restaurant: {
+      nameLabel: isZH() ? "餐廳 / 美食店名" : "Restaurant Name",
+      namePh: isZH() ? "例如：築地玉壽司 晴空塔店 · 晚餐預約" : "e.g., Tsukiji Tama Sushi Sky Tree · Dinner",
+      addrLabel: isZH() ? "餐廳地址 / Google 地圖連結" : "Restaurant Address / Maps link",
+      addrPh: isZH() ? "例如：東京都墨田區押上 1-1-2 7F / 餐廳 Google 地圖連結" : "e.g., 1-1-2 Oshiage, Sumida 7F / Maps link",
+      noteLabel: isZH() ? "訂位細節備註" : "Dining Details & Reservation Notes",
+      notePh: isZH() ? "例如：已預約 19:30 · 訂位人 David 先生 · 靠窗景觀席" : "e.g., Reserved 19:30 · Name: David · Window seat",
+      confPh: isZH() ? "訂位代號 / 預約確認碼 (例如: RS-3021)" : "Reservation / Table Code (e.g. RS-3021)",
+      placesBtn: isZH() ? "Google 查詢餐廳評價、營業時間與地址" : "Search Restaurant on Google Places",
+      fbNamePh: isZH() ? "例如：一蘭拉麵 上野山下口店 (客滿備案/無需預約)" : "e.g., Ichiran Ramen Ueno (Walk-in backup)",
+      fbAddrPh: isZH() ? "例如：東京都台東區上野 7-1-1 (24 小時營業)" : "e.g., 7-1-1 Ueno, Taito (Open 24 hours)",
+      fbNotePh: isZH() ? "例如：營業至深夜，排隊約 15 分鐘" : "e.g., Open late, ~15 min queue"
+    },
+    car: {
+      nameLabel: isZH() ? "租車公司 / 車型" : "Rental Agency / Vehicle",
+      namePh: isZH() ? "例如：Toyota 租車 那霸機場店 · 油電混動車" : "e.g., Toyota Rent a Car Naha Airport",
+      addrLabel: isZH() ? "取車門市地址 / Google 地圖連結" : "Pick-up Location / Maps link",
+      addrPh: isZH() ? "例如：沖繩縣那霸市具志 3-24-1 / 門市 Google 地圖連結" : "e.g., 3-24-1 Gushi, Naha / Rental agency address",
+      noteLabel: isZH() ? "租車細節備註" : "Rental Details & Insurance Info",
+      notePh: isZH() ? "例如：預約號 #TR-9901 · 取車 10:00 · 含 ETC / 免責險" : "e.g., Res #TR-9901 · Pick up 10:00 · ETC card",
+      confPh: isZH() ? "租車預約單號 (例如: CAR-5501)" : "Rental Booking # (e.g. CAR-5501)",
+      placesBtn: isZH() ? "Google 查詢租車門市地址與營業時間" : "Search Rental Agency on Google Places",
+      fbNamePh: isZH() ? "例如：Times Car 租車 或 搭乘利木津巴士" : "e.g., Times Car Rental or Limousine Bus",
+      fbAddrPh: isZH() ? "例如：Times 租車門市地址 / 機場巴士站" : "e.g., Times rental office / Bus terminal",
+      fbNotePh: isZH() ? "例如：隨到隨租，或車班每 20 分鐘一班" : "e.g., Walk-in or bus runs every 20 min"
+    },
+    ride: {
+      nameLabel: isZH() ? "接駁項目 / 叫車平台" : "Ride / Transfer Service",
+      namePh: isZH() ? "例如：Uber 機場專車接送 · 尊榮轎車" : "e.g., Uber Airport Transfer · Premium",
+      addrLabel: isZH() ? "接送路線 (上車點 ➔ 下車點)" : "Route (Pickup ➔ Dropoff)",
+      addrPh: isZH() ? "例如：飯店大廳 ➔ 成田機場 T1 出發大廳" : "e.g., Hotel Lobby ➔ Airport Terminal 1",
+      noteLabel: isZH() ? "接送細節備註" : "Ride Details & Driver Contact",
+      notePh: isZH() ? "例如：車牌 練馬 500 あ 88-88 · 司機電話 090-xxxx-xxxx" : "e.g., Plate #88-88 · Driver 090-xxxx-xxxx",
+      confPh: isZH() ? "叫車行程單號 (例如: UB-7712)" : "Ride Confirmation # (e.g. UB-7712)",
+      placesBtn: isZH() ? "Google 查詢上車/下車地點位置" : "Search Pickup/Dropoff on Google Places",
+      fbNamePh: isZH() ? "例如：機場計程車排班站 或 Skyliner 電車" : "e.g., Airport Taxi Stand or Skyliner Train",
+      fbAddrPh: isZH() ? "例如：成田機場 B1 電車站台" : "e.g., Narita Airport B1 Train Station",
+      fbNotePh: isZH() ? "例如：車程 40 分鐘，票價約 2,570 日圓" : "e.g., Duration 40 min, fare ~2,570 JPY"
+    },
+    rail: {
+      nameLabel: isZH() ? "鐵路班次 / 列車名稱" : "Train Name / Service",
+      namePh: isZH() ? "例如：JR 新幹線 希望號 45 · 東京至新大阪" : "e.g., JR Shinkansen Nozomi 45",
+      addrLabel: isZH() ? "出發站與到達站 (含月台資訊)" : "Departure & Arrival Stations",
+      addrPh: isZH() ? "例如：東京車站 ➔ 新大阪車站 (14 號月台)" : "e.g., Tokyo Station ➔ Shin-Osaka (Platform 14)",
+      noteLabel: isZH() ? "乘車細節備註" : "Train Details & Seat Info",
+      notePh: isZH() ? "例如：7 車 12A (靠窗) · 指定席 · 車程 2 小時 30 分" : "e.g., Car 7, Seat 12A · Reserved · 2h 30m",
+      confPh: isZH() ? "乘車券 / 特急券代碼 (例如: EX-9921)" : "Ticket / Booking Code (e.g. EX-9921)",
+      placesBtn: isZH() ? "Google 查詢車站與月台位置" : "Search Station on Google Places",
+      fbNamePh: isZH() ? "例如：下一班 Hikari 光號 512 / 自由席" : "e.g., Next Hikari 512 / Non-reserved",
+      fbAddrPh: isZH() ? "例如：東京車站 15 號月台" : "e.g., Tokyo Station Platform 15",
+      fbNotePh: isZH() ? "例如：若延誤可改搭 15 分鐘後班次" : "e.g., Valid on trains 15 min later if delayed"
+    },
+    other: {
+      nameLabel: isZH() ? "景點名稱 / 規劃項目" : "Attraction / Activity Name",
+      namePh: isZH() ? "例如：東京晴空塔展望台門票 (Tembo Deck)" : "e.g., Tokyo Skytree Observation Deck",
+      addrLabel: isZH() ? "景點地址 / 活動地點" : "Attraction Address / Venue",
+      addrPh: isZH() ? "例如：東京都墨田區押上 1-1-2 / 活動景點地點" : "e.g., 1-1-2 Oshiage, Sumida / Venue location",
+      noteLabel: isZH() ? "活動細節備註" : "Activity Details & Voucher Info",
+      notePh: isZH() ? "例如：憑 QR Code 入場 · 預約時段 16:30 · 攜帶護照" : "e.g., QR voucher · 16:30 slot · Bring passport",
+      confPh: isZH() ? "電子憑證編號 / 票券代碼 (例如: KK-88219)" : "Voucher / Ticket ID (e.g. KK-88219)",
+      placesBtn: isZH() ? "Google 查詢景點資訊、評價與開放時間" : "Search Attraction on Google Places",
+      fbNamePh: isZH() ? "例如：墨田水族館 (雨天室內備案景點)" : "e.g., Sumida Aquarium (Indoor rainy-day backup)",
+      fbAddrPh: isZH() ? "例如：東京都墨田區押上 1-1-2 晴空塔 5F" : "e.g., Tokyo Skytree 5F",
+      fbNotePh: isZH() ? "例如：室內空調，免受天候影響" : "e.g., Indoor AC, weather independent"
+    }
+  };
+
+  function updateSegFormPlaceholders(type){
+    var p = SEG_PRESETS[type] || SEG_PRESETS.other;
+    var gName = document.getElementById("g_name");
+    var gAddr = document.getElementById("g_addr");
+    var gNote = document.getElementById("g_note");
+    var gConf = document.getElementById("g_conf");
+    var gFbName = document.getElementById("g_fb_name");
+    var gFbAddr = document.getElementById("g_fb_addr");
+    var gFbNote = document.getElementById("g_fb_note");
+    var placesBtnText = document.getElementById("g_places_btn_text");
+
+    var gNameLbl = document.getElementById("g_name_lbl");
+    var gAddrLbl = document.getElementById("g_addr_lbl");
+    var gNoteLbl = document.getElementById("g_note_lbl");
+
+    if(gNameLbl) gNameLbl.innerHTML = esc(p.nameLabel);
+    if(gAddrLbl) gAddrLbl.innerHTML = esc(p.addrLabel) + ' <span class="opt">' + (isZH() ? "(選填)" : "(optional)") + '</span>';
+    if(gNoteLbl) gNoteLbl.innerHTML = esc(p.noteLabel) + ' <span class="opt">' + (isZH() ? "(選填)" : "(optional)") + '</span>';
+
+    if(gName) gName.placeholder = p.namePh;
+    if(gAddr) gAddr.placeholder = p.addrPh;
+    if(gNote) gNote.placeholder = p.notePh;
+    if(gConf) gConf.placeholder = p.confPh;
+    if(gFbName) gFbName.placeholder = p.fbNamePh;
+    if(gFbAddr) gFbAddr.placeholder = p.fbAddrPh;
+    if(gFbNote) gFbNote.placeholder = p.fbNotePh;
+    if(placesBtnText) placesBtnText.textContent = p.placesBtn;
+  }
+
   function segForm(s){
+    var curType = s.type || "flight";
+    var p = SEG_PRESETS[curType] || SEG_PRESETS.other;
     var types=[
-      ["flight", isZH() ? "航班" : "Flight"],
-      ["hotel", isZH() ? "飯店 / 住宿" : "Hotel / stay"],
+      ["flight", isZH() ? "✈️ 航班" : "✈️ Flight"],
+      ["hotel", isZH() ? "🏨 飯店 / 住宿" : "🏨 Hotel / Stay"],
       ["restaurant", isZH() ? "🍽️ 餐廳 / 美食" : "🍽️ Restaurant / Dining"],
-      ["car", isZH() ? "租車自駕" : "Rental car"],
-      ["ride", isZH() ? "接駁 / 叫車" : "Ride / transfer"],
-      ["rail", isZH() ? "鐵路 / 高鐵" : "Train"],
-      ["other", isZH() ? "其他項目" : "Other"]
+      ["car", isZH() ? "🚗 租車自駕" : "🚗 Rental car"],
+      ["ride", isZH() ? "🚕 接駁 / 叫車" : "🚕 Ride / Transfer"],
+      ["rail", isZH() ? "🚆 鐵路 / 高鐵" : "🚆 Train / Rail"],
+      ["other", isZH() ? "📌 景點 / 其他項目" : "📌 Attraction / Other"]
     ];
-    var opts=types.map(function(p){return '<option value="'+p[0]+'"'+(s.type===p[0]?' selected':'')+'>'+p[1]+'</option>';}).join("");
+    var opts=types.map(function(item){return '<option value="'+item[0]+'"'+(curType===item[0]?' selected':'')+'>'+item[1]+'</option>';}).join("");
     var showConf=s.conf&&String(s.conf).indexOf("seed")!==0&&String(s.conf).indexOf("man:")!==0?s.conf:"";
     var optL=isZH()?"(選填)":"(optional)";
 
     // Google Places Search Trigger (ONLY rendered if settings.googlePlacesConfigured is true)
+    var isPlacesReady = Boolean(settings.googlePlacesConfigured || (typeof localStorage !== "undefined" && localStorage.getItem("travel:places_configured") === "1"));
     var placesSearchHtml = "";
-    if(settings.googlePlacesConfigured){
+    if(isPlacesReady){
       placesSearchHtml = '<div style="display:flex;justify-content:flex-end;margin-top:-6px;margin-bottom:10px">'+
-        '<button type="button" class="btn" id="g_places_btn" style="font-size:12px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px;border-color:var(--coral);color:var(--coral)">'+
+        '<button type="button" class="btn" id="g_places_btn" style="font-size:12px;padding:4px 12px;display:inline-flex;align-items:center;gap:6px;border-color:var(--coral);color:var(--coral);border-radius:20px;background:rgba(255,90,53,0.06);cursor:pointer;transition:all 0.15s ease">'+
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>'+
-          '<span>'+(isZH()?"Google 查詢景點/餐廳評價與營業時間":"Search Google Places")+'</span>'+
+          '<span id="g_places_btn_text">'+esc(p.placesBtn)+'</span>'+
         '</button>'+
       '</div>'+
       '<div id="g_places_box" style="display:none;margin-bottom:12px"></div>';
@@ -1241,20 +1370,20 @@
         '<span id="fb_caret" style="font-size:12px;color:var(--muted)">'+(hasFb ? '▲' : '▼')+'</span>'+
       '</div>'+
       '<div id="fb_fields" style="'+(hasFb ? '' : 'display:none;')+'margin-top:12px">'+
-        field(isZH()?"備案名稱":"Fallback Name","g_fb_name","text",s.fallback?s.fallback.name:"",isZH()?"例如：備選拉麵店、鄰近咖啡廳、備案景點":"e.g., Alternative restaurant",optL)+
-        field(isZH()?"備案地址 / 地點":"Fallback Address","g_fb_addr","text",s.fallback?s.fallback.address:"",isZH()?"例如：東京都台東區上野...":"Address or location",optL)+
-        field(isZH()?"備案備註":"Fallback Notes","g_fb_note","text",s.fallback?s.fallback.note:"",isZH()?"例如：無需預約，營業至 23:00":"Notes, opening hours",optL)+
+        field(isZH()?"備案名稱":"Fallback Name","g_fb_name","text",s.fallback?s.fallback.name:"",p.fbNamePh,optL,"g_fb_name_lbl")+
+        field(isZH()?"備案地址 / 地點":"Fallback Address","g_fb_addr","text",s.fallback?s.fallback.address:"",p.fbAddrPh,optL,"g_fb_addr_lbl")+
+        field(isZH()?"備案備註":"Fallback Notes","g_fb_note","text",s.fallback?s.fallback.note:"",p.fbNotePh,optL,"g_fb_note_lbl")+
       '</div>'+
     '</div>';
 
     return '<h3>'+(s.sid?(isZH()?"編輯細項規劃":"Edit plan"):(isZH()?"新增細項規劃":"Add plan"))+'</h3>'+
       '<div class="field"><label>'+(isZH()?"類別":"Type")+'</label><select id="g_type">'+opts+'</select></div>'+
-      field(isZH()?"名稱":"Name","g_name","text",s.name,isZH()?"例如：一蘭拉麵 上野山下口店 / 長榮航空 BR87":"TAP TP1693 OPO to FNC")+
-      field(isZH()?"地址 / 地點":"Address","g_addr","text",s.address,isZH()?"例如：東京都台東區上野 7-1-1 / Google Maps 連結":"Rua do Castanheiro 31, Funchal",optL)+
+      field(p.nameLabel,"g_name","text",s.name,p.namePh,"","g_name_lbl")+
+      field(p.addrLabel,"g_addr","text",s.address,p.addrPh,optL,"g_addr_lbl")+
       placesSearchHtml+
-      field(isZH()?"備註細節":"Details","g_note","text",s.note,isZH()?"例如：營業至 23:00 · 門禁密碼 4821# · 15:00 入住":"Door code 4821# · check-in 15:00",optL)+
+      field(p.noteLabel,"g_note","text",s.note,p.notePh,optL,"g_note_lbl")+
       '<div class="two">'+field(isZH()?"開始時間 / 日期":"Start","g_start","date",s.start,"")+field(isZH()?"結束時間 / 日期":"End","g_end","date",s.end,"",optL)+'</div>'+
-      field(isZH()?"預訂確認代碼":"Confirmation","g_conf","text",showConf,"",optL)+
+      field(isZH()?"預訂確認代碼":"Confirmation","g_conf","text",showConf,p.confPh,optL,"g_conf_lbl")+
       fbHtml+
       '<div class="err" id="gerr"></div>'+
       '<div class="modal-actions"><button class="btn" id="cancelBtn">'+(isZH()?"取消":"Cancel")+'</button><button class="btn solid" id="saveSeg">'+(s.sid?(isZH()?"儲存細項":"Save plan"):(isZH()?"新增細項":"Add plan"))+'</button></div>';
@@ -1350,6 +1479,13 @@
     document.getElementById("cancelBtn").onclick=closeModal;
     document.getElementById("saveSeg").onclick=saveSeg;
 
+    var typeSel = document.getElementById("g_type");
+    if(typeSel){
+      typeSel.onchange = function(){
+        updateSegFormPlaceholders(this.value);
+      };
+    }
+
     // Toggle fallback plan accordion
     var fbToggleBtn = document.getElementById("fb_toggle_btn");
     var fbFields = document.getElementById("fb_fields");
@@ -1373,7 +1509,9 @@
       placesBtn.onclick = async function(){
         var q = val("g_name") || val("g_addr");
         if(!q){
-          toast(isZH() ? "請先填寫規劃名稱或地址關鍵字以供查詢" : "Enter a plan name or address first");
+          toast(isZH() ? "請先填寫規劃名稱或地點關鍵字以供查詢" : "Enter a plan name or location first");
+          var nInput = document.getElementById("g_name");
+          if(nInput) nInput.focus();
           return;
         }
         var origText = placesBtn.innerHTML;
@@ -1430,8 +1568,26 @@
                 if(notEl && !notEl.value && p.rating){
                   notEl.value = "⭐ " + p.rating + (p.userRatingsTotal ? " (" + noteReviews + ")" : "") + noteStatus;
                 }
-                if(tEl && p.types && (p.types.includes("restaurant") || p.types.includes("food") || p.types.includes("cafe"))){
-                  tEl.value = "restaurant";
+                if(tEl && p.types && Array.isArray(p.types)){
+                  if(p.types.includes("restaurant") || p.types.includes("food") || p.types.includes("cafe") || p.types.includes("bar") || p.types.includes("bakery")){
+                    tEl.value = "restaurant";
+                    updateSegFormPlaceholders("restaurant");
+                  } else if(p.types.includes("lodging") || p.types.includes("hotel")){
+                    tEl.value = "hotel";
+                    updateSegFormPlaceholders("hotel");
+                  } else if(p.types.includes("car_rental")){
+                    tEl.value = "car";
+                    updateSegFormPlaceholders("car");
+                  } else if(p.types.includes("transit_station") || p.types.includes("train_station") || p.types.includes("subway_station")){
+                    tEl.value = "rail";
+                    updateSegFormPlaceholders("rail");
+                  } else if(p.types.includes("airport")){
+                    tEl.value = "flight";
+                    updateSegFormPlaceholders("flight");
+                  } else if(p.types.includes("tourist_attraction") || p.types.includes("point_of_interest") || p.types.includes("museum") || p.types.includes("park")){
+                    tEl.value = "other";
+                    updateSegFormPlaceholders("other");
+                  }
                 }
                 currentPlace = {
                   placeId: p.placeId,
@@ -2089,6 +2245,8 @@
       try{
         var r=await fetch(apiBase()+"/settings/places",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({apiKey:k})});
         var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存 Places 設定":"Could not save Places config"));return;}
+        settings.googlePlacesConfigured = Boolean(k);
+        try{ localStorage.setItem("travel:places_configured", k ? "1" : "0"); }catch(e){}
         document.getElementById("s_places_key").value="";
         toast(isZH()?"Google Places 設定已儲存 ✓":"Google Places config saved ✓");
         await loadGStatus();
@@ -2496,6 +2654,10 @@
     try{st=await fetch(settings.workerUrl+"/auth/status");}catch(e){return;}
     if(!st.ok)return;                                 // old worker without auth -> no gate
     var d=await st.json();
+    if(d && d.googlePlacesConfigured !== undefined){
+      settings.googlePlacesConfigured = Boolean(d.googlePlacesConfigured);
+      try{ localStorage.setItem("travel:places_configured", d.googlePlacesConfigured ? "1" : "0"); }catch(e){}
+    }
     if(!d.set){await showAuth("create");return;}      // first time: set up email + password
     // Already set: don't force a login here. The session cookie (or stored token)
     // may already authenticate us; refresh() prompts only if /trips returns 401.
@@ -2508,6 +2670,7 @@
       if(r.ok){
         var d=await r.json();
         settings.googlePlacesConfigured = Boolean(d.googlePlacesConfigured);
+        try{ localStorage.setItem("travel:places_configured", d.googlePlacesConfigured ? "1" : "0"); }catch(e){}
         if(d.homeTz){ homeTz = d.homeTz; try{localStorage.setItem("travel:hometz",homeTz);}catch(e){} }
         if(d.home) home = d.home;
         if(d.units) settings.units = d.units;
@@ -2572,11 +2735,21 @@
       var c=new AbortController(),to=setTimeout(function(){c.abort();},4000);
       var res=await fetch(location.origin+"/auth/status",{signal:c.signal});  // unauthenticated worker check
       clearTimeout(to);
-      if(res.ok)settings.workerUrl=location.origin;   // not persisted: always reflects where it is served
+      if(res.ok){
+        settings.workerUrl=location.origin;   // not persisted: always reflects where it is served
+        var stData = await res.json().catch(function(){return null;});
+        if(stData && stData.googlePlacesConfigured !== undefined){
+          settings.googlePlacesConfigured = Boolean(stData.googlePlacesConfigured);
+          try{ localStorage.setItem("travel:places_configured", stData.googlePlacesConfigured ? "1" : "0"); }catch(e){}
+        }
+      }
     }catch(e){}
   }
   (async function(){
     trips=await load("trips",null);wishes=await load("wishes",null);home=await load("home",null);homeTz=await load("homeTz",null);settings=await load("settings",null)||{workerUrl:""};
+    settings.googlePlacesConfigured = (function(){
+      try{ return localStorage.getItem("travel:places_configured") === "1"; }catch(e){ return false; }
+    })();
     var firstRun=(trips===null&&wishes===null);
     if(trips===null)trips=[];if(wishes===null)wishes=[];
     if(!home)home=isZH()?"TPE":"OPO";

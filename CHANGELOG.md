@@ -7,7 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [2.4.0] - 2026-10-07
+## [2.4.1] - 2026-10-07
+
+### Enhanced / 介面與功能全面優化
+- **細項規劃 7 大類別整體視覺一致性與動態情境表單 (Comprehensive 7-Category Design & Dynamic Form Placeholders)**：
+  - **統一圖標選單**：為所有規劃類別全面補齊專屬 Emoji 圖標（✈️ 航班、🏨 飯店 / 住宿、🍽️ 餐廳 / 美食、🚗 租車自駕、🚕 接駁 / 叫車、🚆 鐵路 / 高鐵、📌 景點 / 其他項目），徹底告別單一項目突兀的不對稱感。
+  - **動態情境欄位與範例提示**：在下拉選單切換類別時，名稱、地點/路線、細節備註、預訂代號、備案欄位（名稱/地址/備註）與 Google 查詢按鈕文字即時聯動切換為專屬情境範例（例如選擇航班時提示機場/航廈與機票代碼，選擇租車時提示取車門市與 ETC 保險等）。
+  - **時間軸與詳情卡片統一標籤**：旅程時間軸及詳情卡片中的類別標籤全面對齊 Emoji 視覺，強化行程一覽時的辨識度。
+  - **Google Places 狀態即時穿透與快取**：Worker 端 `/auth/status` 公開端點直接回傳 `googlePlacesConfigured` 布林狀態，前端於本機持久化快取，確保在任何頁面載入與登入狀態下皆能零延遲偵測 Places API 並解鎖按鈕。
+
 
 ### Added / 新增功能
 - **Google Places API 景點/餐廳評分與營業時間查詢 (Google Places Integration with Conditional Visibility)**：

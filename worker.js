@@ -21,11 +21,13 @@ export default {
       const authSet = !!(await env.TRIPS.get("auth"));
       const authEmail = (await env.TRIPS.get("auth_email")) || null;
       const resendKey = await getResendKey(env);
+      const places = await getGooglePlacesConfig(env);
       return cors(json({
         set: authSet,
         email: authEmail ? maskEmail(authEmail) : null,
         fullEmail: authEmail,
-        resendConfigured: !!resendKey
+        resendConfigured: !!resendKey,
+        googlePlacesConfigured: places.configured
       }));
     }
     if (url.pathname === "/auth/login" && request.method === "POST") {
