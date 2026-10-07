@@ -1,0 +1,49 @@
+# 888漫步旅遊 · 888RoamTravel (RoamRadar)
+
+> Single-tenant, privacy-first personal travel hub with multi-language itinerary planning, live calendar subscriptions, and a dedicated RESTful Agent API.
+
+## Overview
+RoamRadar is a personal travel command center designed to run serverlessly on Cloudflare Workers and Cloudflare KV. It aggregates bookings from Google Calendar, Gmail, and manual user inputs into a unified, chronological timeline.
+
+This instance provides a RESTful API (`/api/v1`) designed specifically for external AI agents, LLM assistants, and automation workflows to plan, query, update, and manage trips and granular itinerary items.
+
+## Machine-Readable Documents
+- [/skill.md](https://travel.david888.com/skill.md): Canonical Agent Skill specification with tool definitions and instructions.
+- [/llms-full.txt](https://travel.david888.com/llms-full.txt): Comprehensive API documentation, full JSON schemas, and usage examples.
+
+## Key Capabilities & Rules
+1. **Full Trips CRUD**: Create, read, update, and delete multi-day travel itineraries.
+2. **Granular Segment Planning**: Append, edit, or remove itinerary segments individually or in batch.
+3. **Supported Categories**:
+   - `flight` ✈️: Airline flights and connections.
+   - `hotel` 🏨: Accommodations, hotels, ryokans, and Airbnbs.
+   - `restaurant` 🍽️: Dining reservations, food spots, and cafes.
+   - `rail` 🚆: Trains, Shinkansen, metro, and rail passes.
+   - `car` 🚗: Rental cars and car hires.
+   - `ride` 🚕: Taxis, airport transfers, and ride-hailing.
+   - `other` 📍: Attractions, activities, museums, and meetings.
+4. **Smart Contingency & Fallback Plans**: Attach alternative plans (e.g. backup restaurant or bad-weather indoor plan) to any itinerary item with 1-click in-app promotion.
+5. **Manual Invariant Protection**: All items created via the Agent API are stamped with `source: "manual"`. They will NEVER be overwritten or deleted by automated background calendar or email synchronization.
+6. **Subscribed ICS Feed**: Private calendar feed exportable to Apple Calendar, Google Calendar, and Outlook.
+
+## Quick API Reference
+
+### Base URL & Authentication
+- Base URL: `https://<your-instance-domain>/api/v1`
+- Header: `Authorization: Bearer rr_agent_<your-token>`
+- Content-Type: `application/json`
+
+### Endpoints
+- `GET /api/v1/trips`: List all trips with summary metrics and segments.
+- `POST /api/v1/trips`: Create a new trip with destination, dates, notes, and optional initial segments.
+- `GET /api/v1/trips/:id`: Retrieve single trip details by ID.
+- `PUT /api/v1/trips/:id`: Update trip destination, dates, timezone, photo, or notes.
+- `DELETE /api/v1/trips/:id`: Delete a trip and its itinerary.
+- `POST /api/v1/trips/:id/segments`: Append single segment or batch array of segments (with optional fallback plans).
+- `PUT /api/v1/trips/:id/segments/:sid`: Update an existing segment.
+- `DELETE /api/v1/trips/:id/segments/:sid`: Delete an itinerary segment with automatic tombstoning.
+
+## Getting Started for Agents
+1. Have the user generate an Agent API Key in the web app under Settings -> AI Agent Integration.
+2. Verify connectivity with `GET /api/v1/trips`.
+3. Read [/skill.md](https://travel.david888.com/skill.md) or [/llms-full.txt](https://travel.david888.com/llms-full.txt) for detailed schemas and prompt engineering guidelines.

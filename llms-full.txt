@@ -1,0 +1,229 @@
+# 888漫步旅遊 · 888RoamTravel (RoamRadar) - Full LLM & API Reference
+
+> Machine-readable specification and guide for AI Agents, autonomous planners, and automation systems integrating with RoamRadar.
+
+---
+
+## 1. System Architecture & Invariants
+
+RoamRadar is a privacy-first, single-tenant personal travel hub. All data is persisted in Cloudflare KV as a unified store.
+
+### The Invariant Rules
+1. **Manual Invariant**: Any segment created or updated via the Agent API is assigned `source: "manual"`. The background sync engine (which periodically scans Google Calendar and Gmail) will **NEVER** overwrite, modify, or delete manual plans.
+2. **Category Fidelity**: Categories must strictly match one of the 7 supported values:
+   - `flight` ✈️: Flight bookings, airport codes, flight numbers.
+   - `hotel` 🏨: Accommodations, hotels, ryokans, villas, Airbnbs.
+   - `restaurant` 🍽️: Dining, restaurants, cafes, food stalls, ramen shops, izakayas.
+   - `rail` 🚆: Trains, high-speed rail (Shinkansen, TGV, ICE), subways, scenic railways.
+   - `car` 🚗: Rental cars, car hire pick-up and drop-off.
+   - `ride` 🚕: Taxi, airport pick-up, Uber, private chauffeur.
+   - `other` 📍: Sightseeing attractions, theme parks, museum entries, appointments.
+3. **Contingency / Fallback Plans**: Any segment can hold an embedded `fallback` object representing a backup alternative. If the primary plan is full, closed, or delayed, the user can switch to the fallback plan in 1 click in the UI.
+
+---
+
+## 2. Authentication
+
+External agents authenticate using an HTTP Bearer token in the `Authorization` header:
+
+```http
+Authorization: Bearer rr_agent_<token>
+Content-Type: application/json
+```
+
+Agent keys are generated in the RoamRadar Web App (Settings -> AI Agent Integration). Tokens are prefixed with `rr_agent_` and can be regenerated or revoked at any time.
+
+---
+
+## 3. Data Schemas
+
+### Trip Schema
+```json
+{
+  "id": "t_202610_tokyo",             // string (unique ID; auto-assigned if omitted)
+  "from": "TPE",                      // string (origin airport IATA or city name)
+  "to": "NRT",                        // string (destination airport IATA or city name)
+  "start": "2026-10-15",              // string (YYYY-MM-DD)
+  "end": "2026-10-20",                // string (YYYY-MM-DD)
+  "label": "Tokyo Autumn Voyage",     // string (human-friendly trip title)
+  "notes": "Flight booked via BR198", // string (free-text trip notes)
+  "timezone": "Asia/Tokyo",           // string (IANA timezone, e.g. "Asia/Tokyo")
+  "photo": "https://example.com/p.jpg", // string (optional custom banner photo URL)
+  "segments": [],                     // Segment[] (itinerary plans)
+  "updatedAt": 1729000000000          // number (epoch timestamp ms)
+}
+```
+
+### Segment Schema
+```json
+{
+  "sid": "s_123456",                  // string (unique segment ID; auto-assigned if omitted)
+  "type": "restaurant",               // string ("flight"|"hotel"|"restaurant"|"car"|"ride"|"rail"|"other")
+  "name": "Ichiran Ramen Shibuya",    // string (plan title / business name)
+  "address": "1-22-7 Jinnan, Shibuya",// string (optional formatted address or location)
+  "note": "18:00 Dinner reservation", // string (optional notes, times, seat info)
+  "start": "2026-10-15T18:00",        // string (YYYY-MM-DD or YYYY-MM-DDTHH:mm)
+  "end": "2026-10-15T19:30",          // string (optional YYYY-MM-DD or YYYY-MM-DDTHH:mm)
+  "conf": "RES-889900",               // string (optional confirmation / booking reference)
+  "source": "manual",                 // string (always "manual" for agent items)
+  "rating": 4.5,                      // number (optional Google rating, 1.0 - 5.0)
+  "userRatingsTotal": 2450,           // number (optional total review count)
+  "openNow": true,                    // boolean (optional current open status)
+  "mapsUrl": "https://maps.google.com/?cid=123", // string (optional Google Maps link)
+  "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4",      // string (optional Google Place ID)
+  "fallback": {                       // object (optional contingency alternative)
+    "name": "Afuri Ramen Harajuku",
+    "address": "1-1-7 Jingumae, Shibuya",
+    "note": "Backup option if Ichiran line exceeds 30 mins",
+    "mapsUrl": "https://maps.google.com/?cid=456",
+    "rating": 4.3,
+    "userRatingsTotal": 1820
+  }
+}
+```
+
+---
+
+## 4. API Endpoints Specification
+
+### 4.1 Trips Endpoints
+
+#### `GET /api/v1/trips`
+Retrieves all trips sorted chronologically by start date.
+- **Request**: No body required.
+- **Response**: `200 OK`
+```json
+{
+  "ok": true,
+  "count": 1,
+  "trips": [
+    {
+      "id": "t_202610_tokyo",
+      "from": "TPE",
+      "to": "NRT",
+      "start": "2026-10-15",
+      "end": "2026-10-20",
+      "label": "Tokyo Autumn Voyage",
+      "timezone": "Asia/Tokyo",
+      "segmentCount": 5,
+      "segments": [...]
+    }
+  ]
+}
+```
+
+#### `GET /api/v1/trips/:id`
+Retrieves details of a single trip by ID.
+- **Response**: `200 OK`
+```json
+{
+  "ok": true,
+  "trip": { ... }
+}
+```
+
+#### `POST /api/v1/trips`
+Creates a new trip.
+- **Request Body**:
+```json
+{
+  "from": "TPE",
+  "to": "NRT",
+  "start": "2026-10-15",
+  "end": "2026-10-20",
+  "label": "Tokyo Autumn Voyage",
+  "notes": "Trip planned by AI assistant",
+  "timezone": "Asia/Tokyo",
+  "segments": [ ... ]
+}
+```
+- **Response**: `201 Created` with created trip object.
+
+#### `PUT /api/v1/trips/:id`
+Updates an existing trip's properties (dates, destination, label, notes, timezone).
+- **Response**: `200 OK` with updated trip object.
+
+#### `DELETE /api/v1/trips/:id`
+Deletes a trip and all its segments.
+- **Response**: `200 OK`
+```json
+{
+  "ok": true,
+  "deleted": true,
+  "id": "t_202610_tokyo"
+}
+```
+
+---
+
+### 4.2 Segments Endpoints
+
+#### `POST /api/v1/trips/:id/segments`
+Appends one or more itinerary segments to an existing trip.
+- **Batch Support**: Accepts either a single segment object `{ ... }` or an array of segment objects `[ { ... }, { ... } ]`.
+- **Request Body (Batch Example)**:
+```json
+[
+  {
+    "type": "flight",
+    "name": "BR198 TPE to NRT",
+    "start": "2026-10-15T08:50",
+    "end": "2026-10-15T13:15",
+    "conf": "BR-78910",
+    "note": "Terminal 2, Seat 12A"
+  },
+  {
+    "type": "hotel",
+    "name": "Hotel Gracery Shinjuku",
+    "address": "1-19-1 Kabukicho, Shinjuku, Tokyo",
+    "start": "2026-10-15",
+    "end": "2026-10-20",
+    "conf": "HG-9921",
+    "note": "Check-in from 14:00"
+  },
+  {
+    "type": "restaurant",
+    "name": "Ramen Nagi Shinjuku Golden Gai",
+    "address": "1-1-10 Kabukicho, Shinjuku",
+    "start": "2026-10-15T19:00",
+    "note": "Top rated niboshi ramen",
+    "fallback": {
+      "name": "Ichiran Shinjuku Chuo-Higashiguchi",
+      "address": "3-34-11 Shinjuku",
+      "note": "Backup if Nagi wait exceeds 40 mins"
+    }
+  }
+]
+```
+- **Response**: `201 Created`
+```json
+{
+  "ok": true,
+  "count": 3,
+  "segments": [ ... ]
+}
+```
+
+#### `PUT /api/v1/trips/:id/segments/:sid`
+Updates an existing segment.
+- **Request Body**: Any editable fields (`name`, `address`, `note`, `start`, `end`, `conf`, `fallback`, `rating`, `openNow`, `mapsUrl`, etc.).
+- **Response**: `200 OK` with updated segment object.
+
+#### `DELETE /api/v1/trips/:id/segments/:sid`
+Removes a segment from the trip and records its confirmation reference into `deletedSegs` tombstone store.
+- **Response**: `200 OK`
+```json
+{
+  "ok": true,
+  "deleted": true,
+  "sid": "s_123456"
+}
+```
+
+---
+
+## 5. Agent Planning Best Practices
+
+1. **Chronological Consistency**: Ensure segment start times fall within the trip's `start` and `end` bounds.
+2. **Time Formatting in Notes**: RoamRadar's timeline parser automatically extracts clock times (e.g. `09:00-11:30` or `19:00`) from the `note` field to order same-day events. Include explicit times in either `start` or `note`.
+3. **Proactive Fallbacks**: When recommending popular dining or outdoor attractions, automatically attach a fallback alternative in the `fallback` field to provide the user with peace of mind.

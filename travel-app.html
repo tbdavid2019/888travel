@@ -2000,6 +2000,35 @@
       '<div class="hint">'+(isZH()?"啟用後，在規劃細項（如餐廳、景點）時將顯示「📍 Google 查詢景點/餐廳評價與營業時間」。<b>若未設定，該功能將自動完全隱藏</b>。支援在 Cloudflare 填入 <code>GOOGLE_PLACES_API_KEY</code> 或直接在上方儲存於 KV。":"When configured, unlocks \"Search Google Places\" in plan forms. <b>If unconfigured, the search feature remains completely hidden</b>. Set in Cloudflare as GOOGLE_PLACES_API_KEY or save in KV above.")+'</div>'+
       '<div class="modal-actions act-row"><button class="btn" id="placesSave">'+(isZH()?"儲存 Places 設定":"Save Places Key")+'</button><button class="btn" id="placesTest">'+(isZH()?"測試 Places 查詢":"Test Places API")+'</button></div>'+
       '<div id="placesStatus" class="hint" style="margin-top:8px"></div>'+
+
+      '<h4 style="margin-top:24px">'+(isZH()?"🤖 AI Agent 開發與整合 (AI Agent Integration)":"🤖 AI Agent Integration")+'</h4>'+
+      '<div class="hint">'+(isZH()?"產生個人的 Agent API Key，提供給 Claude Code、Antigravity、Cursor、ChatGPT 等 AI Agent 工具，即可讓 LLM 直接連線為您自動化規劃、新增、修改與刪除旅程及細項。":"Generate a personal Agent API Key for Claude Code, Antigravity, Cursor, or ChatGPT to autonomously plan, create, edit, and organize trips and itinerary items.")+'</div>'+
+      '<div class="field" style="margin-top:10px">'+
+        '<label style="display:flex;justify-content:space-between;align-items:center">'+
+          '<span>'+(isZH()?"Agent API 金鑰 (Bearer Token)":"Agent API Key")+'</span>'+
+          '<span id="agent_key_badge" style="font-size:12px;font-weight:normal;color:var(--muted)"></span>'+
+        '</label>'+
+        '<div style="display:flex;gap:8px;align-items:center">'+
+          '<input id="s_agent_key_disp" type="password" readonly class="mono" style="flex:1;background:var(--bg-card);font-size:13px;letter-spacing:1px" placeholder="'+(isZH()?"尚未產生金鑰，請點擊下方按鈕產生":"Not generated yet")+'">'+
+          '<button class="btn" id="agentKeyToggleMask" type="button" style="white-space:nowrap;padding:0 12px;font-size:12px">👁️ '+(isZH()?"顯示":"Show")+'</button>'+
+          '<button class="btn" id="agentKeyCopy" type="button" style="white-space:nowrap;padding:0 12px;font-size:12px">📋 '+(isZH()?"複製":"Copy")+'</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="modal-actions act-row" style="margin-top:8px">'+
+        '<button class="btn solid" id="agentKeyGen">'+(isZH()?"🔑 產生 / 重新產生金鑰":"🔑 Generate Key")+'</button>'+
+        '<button class="btn" id="agentKeyRevoke" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"撤銷金鑰":"Revoke")+'</button>'+
+      '</div>'+
+      '<div id="agentKeyStatus" class="hint" style="margin-top:6px"></div>'+
+      '<div style="background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:14px">'+
+        '<div style="font-weight:600;font-size:13px;color:var(--text);margin-bottom:6px">⚡ '+(isZH()?"快速串接與指令文件 (Quick Integration)":"Quick Integration & Docs")+'</div>'+
+        '<div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px">'+(isZH()?"一鍵複製已填妥當前站台網址與 API Key 的完整提示詞，或下載標準 SKILL.md 直接導入你的 Agent 環境。":"One-click copy of the complete System Prompt pre-filled with this instance URL and active Bearer token, or export standard SKILL.md.")+'</div>'+
+        '<div class="modal-actions act-row" style="margin-top:0">'+
+          '<button class="btn" id="copyAgentPrompt" style="display:inline-flex;align-items:center;gap:6px">📋 '+(isZH()?"複製 Agent 系統提示詞":"Copy Agent System Prompt")+'</button>'+
+          '<button class="btn" id="copySkillMd" style="display:inline-flex;align-items:center;gap:6px">📄 '+(isZH()?"複製 SKILL.md":"Copy SKILL.md")+'</button>'+
+          '<button class="btn" id="dlSkillMd" style="display:inline-flex;align-items:center;gap:6px">📥 '+(isZH()?"下載 SKILL.md":"Download SKILL.md")+'</button>'+
+          '<a class="btn" href="'+gOrigin+'/llms.txt" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">🌐 llms.txt</a>'+
+        '</div>'+
+      '</div>'+
       '<h4>'+(isZH()?"備份與匯入":"Backup &amp; import")+'</h4>'+
       '<div class="field"><textarea id="exp" readonly class="mono" style="min-height:90px">'+esc(snap)+'</textarea></div>'+
       '<div class="modal-actions" style="margin-top:0"><button class="btn" id="copyJson">'+(isZH()?"複製 JSON 資料":"Copy data")+'</button><button class="btn" id="dlJson">'+(isZH()?"下載檔案":"Download")+'</button><button class="btn" id="icsFeed">'+(isZH()?"複製日曆訂閱網址":"Copy calendar feed link")+'</button></div>'+
@@ -2072,6 +2101,7 @@
           document.getElementById("s_home").value = d.home;
           home = d.home;
         }
+        await loadAgentKeyStatus();
       }catch(e){setGStatus('<span style="color:var(--faint)">Worker not reachable.</span>');}
     }
 
@@ -2264,6 +2294,198 @@
         await loadGStatus();
       }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
     };
+
+    // --- AI Agent Integration Key Management & Prompt Generation ---
+    var currentAgentKey = "";
+    async function loadAgentKeyStatus() {
+      try {
+        var r = await fetch(apiBase() + "/settings/agent-key", { headers: authHeaders() });
+        var akd = document.getElementById("s_agent_key_disp"), akb = document.getElementById("agent_key_badge"), aks = document.getElementById("agentKeyStatus");
+        if (!r.ok) {
+          if (aks) aks.innerHTML = '<span style="color:var(--coral)">' + (isZH() ? "無法讀取 Agent Key 狀態" : "Could not fetch Agent Key") + '</span>';
+          return;
+        }
+        var d = await r.json();
+        if (d.configured && d.key) {
+          currentAgentKey = d.key;
+          if (akd) akd.value = d.key;
+          if (akb) akb.innerHTML = '<span style="color:var(--green)">● ' + (isZH() ? "已就緒" : "Active") + '</span>';
+          if (aks) aks.innerHTML = '<span style="color:var(--green)">● ' + (isZH() ? "金鑰已配置，外部 AI Agent 可直接透過 Bearer Token 存取 /api/v1。" : "Key active, ready for external AI Agents via Bearer Token.") + '</span>';
+        } else {
+          currentAgentKey = "";
+          if (akd) akd.value = "";
+          if (akb) akb.innerHTML = '<span style="color:var(--muted)">○ ' + (isZH() ? "未設定" : "None") + '</span>';
+          if (aks) aks.innerHTML = '<span style="color:var(--muted)">○ ' + (isZH() ? "尚未產生 Agent API Key，請點擊上方按鈕產生。" : "No key generated yet. Click Generate Key above.") + '</span>';
+        }
+      } catch (e) {
+        var aks = document.getElementById("agentKeyStatus");
+        if (aks) aks.innerHTML = '<span style="color:var(--muted)">' + (isZH() ? "Worker 尚未連線" : "Worker not connected") + '</span>';
+      }
+    }
+
+    var toggleBtn = document.getElementById("agentKeyToggleMask");
+    if (toggleBtn) {
+      toggleBtn.onclick = function() {
+        var inp = document.getElementById("s_agent_key_disp");
+        if (!inp) return;
+        var isPass = inp.type === "password";
+        inp.type = isPass ? "text" : "password";
+        toggleBtn.textContent = isPass ? (isZH() ? "🙈 隱藏" : "🙈 Hide") : (isZH() ? "👁️ 顯示" : "👁️ Show");
+      };
+    }
+
+    var copyKeyBtn = document.getElementById("agentKeyCopy");
+    if (copyKeyBtn) {
+      copyKeyBtn.onclick = function() {
+        if (!currentAgentKey) {
+          toast(isZH() ? "尚未產生 Agent API Key，請先點擊產生！" : "No key generated yet! Please generate one first.");
+          return;
+        }
+        copyText(currentAgentKey, isZH() ? "已複製 Agent API Key 至剪貼簿 ✓" : "Agent API Key copied to clipboard ✓");
+      };
+    }
+
+    var genKeyBtn = document.getElementById("agentKeyGen");
+    if (genKeyBtn) {
+      genKeyBtn.onclick = async function() {
+        if (currentAgentKey) {
+          if (!confirm(isZH() ? "確定要重新產生 Agent API Key 嗎？先前產生的金鑰將立即失效！" : "Regenerate Agent API Key? The previous key will stop working immediately!")) return;
+        }
+        try {
+          var r = await fetch(apiBase() + "/settings/agent-key", {
+            method: "POST",
+            headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+            body: JSON.stringify({})
+          });
+          var d = await r.json();
+          if (!r.ok || !d.ok) {
+            toast(d.error || (isZH() ? "產生金鑰失敗" : "Failed to generate key"));
+            return;
+          }
+          currentAgentKey = d.key;
+          var inp = document.getElementById("s_agent_key_disp");
+          if (inp) inp.value = d.key;
+          await loadAgentKeyStatus();
+          toast(isZH() ? "✅ 已成功產生新的 Agent API Key！" : "✅ New Agent API Key generated!");
+        } catch (e) {
+          toast(isZH() ? "連線至 Worker 失敗" : "Failed to connect to Worker");
+        }
+      };
+    }
+
+    var revokeKeyBtn = document.getElementById("agentKeyRevoke");
+    if (revokeKeyBtn) {
+      revokeKeyBtn.onclick = async function() {
+        if (!currentAgentKey) {
+          toast(isZH() ? "目前沒有啟用的金鑰可撤銷。" : "No active key to revoke.");
+          return;
+        }
+        if (!confirm(isZH() ? "確定要撤銷此 Agent API Key 嗎？撤銷後，所有已設定此金鑰的外部 Agent 將立即無法存取。" : "Revoke Agent API Key? All external agents using this key will immediately lose access.")) return;
+        try {
+          var r = await fetch(apiBase() + "/settings/agent-key", {
+            method: "DELETE",
+            headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+            body: JSON.stringify({})
+          });
+          var d = await r.json();
+          if (!r.ok || !d.ok) {
+            toast(d.error || (isZH() ? "撤銷金鑰失敗" : "Failed to revoke key"));
+            return;
+          }
+          currentAgentKey = "";
+          var inp = document.getElementById("s_agent_key_disp");
+          if (inp) inp.value = "";
+          await loadAgentKeyStatus();
+          toast(isZH() ? "已成功撤銷 Agent API Key" : "Agent API Key revoked");
+        } catch (e) {
+          toast(isZH() ? "連線至 Worker 失敗" : "Failed to connect to Worker");
+        }
+      };
+    }
+
+    var copyPromptBtn = document.getElementById("copyAgentPrompt");
+    if (copyPromptBtn) {
+      copyPromptBtn.onclick = function() {
+        if (!currentAgentKey) {
+          if (!confirm(isZH() ? "您尚未產生 Agent API Key。是否仍要複製（提示詞中金鑰將標記為需手動填入）？" : "No Agent API Key generated yet. Copy prompt with placeholder key?")) return;
+        }
+        var origin = apiBase();
+        var bearer = currentAgentKey || "<YOUR_AGENT_API_KEY>";
+        var promptText = "# RoamRadar (888RoamTravel) AI Agent Instructions\n\n" +
+          "You are an autonomous travel planner and assistant integrating directly with the user's RoamRadar travel hub.\n\n" +
+          "## Environment & Authentication\n" +
+          "- Base URL: " + origin + "/api/v1\n" +
+          "- Authorization Header: Authorization: Bearer " + bearer + "\n" +
+          "- Content-Type: application/json\n\n" +
+          "## Core Capabilities\n" +
+          "You have full CRUD access to the user's travel itineraries:\n" +
+          "1. List trips: GET " + origin + "/api/v1/trips\n" +
+          "2. Create a trip: POST " + origin + "/api/v1/trips\n" +
+          "3. View single trip: GET " + origin + "/api/v1/trips/:id\n" +
+          "4. Update trip info: PUT " + origin + "/api/v1/trips/:id\n" +
+          "5. Delete a trip: DELETE " + origin + "/api/v1/trips/:id\n" +
+          "6. Add itinerary segments: POST " + origin + "/api/v1/trips/:id/segments (supports single object or batch array!)\n" +
+          "7. Update a segment: PUT " + origin + "/api/v1/trips/:id/segments/:sid\n" +
+          "8. Delete a segment: DELETE " + origin + "/api/v1/trips/:id/segments/:sid\n\n" +
+          "## Supported Categories\n" +
+          "Always classify segments strictly into one of the 7 supported types:\n" +
+          "- flight: Airline bookings, flight numbers\n" +
+          "- hotel: Accommodations, hotels, ryokans, Airbnbs\n" +
+          "- restaurant: Dining, restaurants, cafes, food reservations\n" +
+          "- rail: High-speed rail, Shinkansen, trains, subways\n" +
+          "- car: Rental car pickups and returns\n" +
+          "- ride: Taxis, airport transfers, ride-hailing\n" +
+          "- other: Attractions, museums, activities, sightseeing\n\n" +
+          "## Fallback Contingency Plans\n" +
+          "When proposing dining or outdoor plans, attach a fallback alternative in the 'fallback' field so the traveler has an immediate contingency ready if the primary venue is full or closed:\n" +
+          "\"fallback\": { \"name\": \"Backup Venue Name\", \"address\": \"Nearby Address\", \"note\": \"Contingency plan note\" }\n\n" +
+          "## Batch Operations\n" +
+          "When adding multiple items for an itinerary, always pass a JSON array to POST " + origin + "/api/v1/trips/:id/segments in a single HTTP request for speed and efficiency.\n\n" +
+          "## Invariant Protection\n" +
+          "All items you create are stamped with source: \"manual\", protecting them against being overwritten by calendar/email background syncs.\n\n" +
+          "## Reference Documents\n" +
+          "- Full Spec: " + origin + "/llms-full.txt\n" +
+          "- Agent Skill: " + origin + "/skill.md\n";
+
+        copyText(promptText, isZH() ? "已複製完整 Agent 系統提示詞 ✓" : "Agent System Prompt copied ✓");
+      };
+    }
+
+    var copySkillBtn = document.getElementById("copySkillMd");
+    if (copySkillBtn) {
+      copySkillBtn.onclick = async function() {
+        try {
+          var r = await fetch(apiBase() + "/skill.md");
+          if (!r.ok) throw new Error("Fetch failed");
+          var text = await r.text();
+          copyText(text, isZH() ? "已複製 SKILL.md ✓" : "SKILL.md copied ✓");
+        } catch (e) {
+          toast(isZH() ? "無法取得 SKILL.md" : "Failed to load SKILL.md");
+        }
+      };
+    }
+
+    var dlSkillBtn = document.getElementById("dlSkillMd");
+    if (dlSkillBtn) {
+      dlSkillBtn.onclick = async function() {
+        try {
+          var r = await fetch(apiBase() + "/skill.md");
+          if (!r.ok) throw new Error("Fetch failed");
+          var text = await r.text();
+          var blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "SKILL.md";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          toast(isZH() ? "已下載 SKILL.md ✓" : "SKILL.md downloaded ✓");
+        } catch (e) {
+          toast(isZH() ? "無法下載 SKILL.md" : "Failed to download SKILL.md");
+        }
+      };
+    }
+
 
     document.getElementById("gSave").onclick=async function(){
       var id=val("s_gid"),sec=val("s_gsecret");

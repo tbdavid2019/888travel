@@ -218,6 +218,269 @@ export default {
       return new Response(buildIcs(store), { headers: { "Content-Type": "text/calendar; charset=utf-8" } });
     }
 
+    // --- Machine-readable Discovery (llms.txt, llms-full.txt, SKILL.md) ---
+    if ((url.pathname === "/llms.txt" || url.pathname === "/api/llms.txt") && request.method === "GET") {
+      return cors(new Response(LLMS_TXT, { headers: { "Content-Type": "text/plain; charset=utf-8" } }));
+    }
+    if (url.pathname === "/llms-full.txt" && request.method === "GET") {
+      return cors(new Response(LLMS_FULL_TXT, { headers: { "Content-Type": "text/plain; charset=utf-8" } }));
+    }
+    if (url.pathname === "/skill.md" && request.method === "GET") {
+      return cors(new Response(SKILL_MD, { headers: { "Content-Type": "text/markdown; charset=utf-8" } }));
+    }
+
+    // --- Agent RESTful API v1 (/api/v1/*) ---
+    if (url.pathname.startsWith("/api/v1/")) {
+      const agentBlocked = await agentAuthGuard(request, env);
+      if (agentBlocked) return cors(agentBlocked);
+
+      // GET /api/v1/trips - List all trips
+      if (url.pathname === "/api/v1/trips" && request.method === "GET") {
+        const store = await loadStore(env);
+        const trips = Object.values(store.trips)
+          .sort((a, b) => ((a.start || "") < (b.start || "") ? -1 : 1))
+          .map(t => ({
+            id: t.id,
+            from: t.from || "",
+            to: t.to || "",
+            start: t.start || "",
+            end: t.end || "",
+            label: t.label || "",
+            notes: t.notes || "",
+            timezone: t.timezone || "",
+            photo: t.photo || "",
+            updatedAt: t.updatedAt || null,
+            segmentCount: (t.segments || []).length,
+            segments: t.segments || []
+          }));
+        return cors(json({ ok: true, count: trips.length, trips }));
+      }
+
+      // POST /api/v1/trips - Create new trip
+      if (url.pathname === "/api/v1/trips" && request.method === "POST") {
+        const body = await request.json().catch(() => null);
+        if (!body || typeof body !== "object") return cors(json({ error: "Invalid JSON request body" }, 400));
+        if (!body.to || !body.start || !body.end) {
+          return cors(json({ error: "Missing required trip fields: 'to', 'start', and 'end' are required" }, 400));
+        }
+        const store = await loadStore(env);
+        const id = (body.id ? String(body.id).trim() : "") || uid();
+        const start = norm(body.start);
+        const end = norm(body.end);
+
+        const initialSegs = (Array.isArray(body.segments) ? body.segments : []).map(s => {
+          const sid = s.sid || uid();
+          const type = ["flight", "hotel", "restaurant", "car", "ride", "rail", "other"].includes(s.type) ? s.type : guessType(s.name || "");
+          const segObj = {
+            sid,
+            type,
+            name: String(s.name || "Plan").trim(),
+            address: s.address ? String(s.address).trim() : "",
+            note: s.note ? String(s.note).trim() : "",
+            start: s.start ? String(s.start).slice(0, 16) : "",
+            end: s.end ? String(s.end).slice(0, 16) : "",
+            conf: s.conf ? String(s.conf).trim() : ("man:" + uid()),
+            source: "manual",
+            rating: s.rating !== undefined ? Number(s.rating) : null,
+            userRatingsTotal: s.userRatingsTotal !== undefined ? Number(s.userRatingsTotal) : null,
+            openNow: s.openNow !== undefined ? Boolean(s.openNow) : null,
+            mapsUrl: s.mapsUrl ? String(s.mapsUrl) : "",
+            placeId: s.placeId ? String(s.placeId) : ""
+          };
+          if (s.fallback && s.fallback.name) {
+            segObj.fallback = {
+              name: String(s.fallback.name).trim(),
+              address: s.fallback.address ? String(s.fallback.address).trim() : "",
+              note: s.fallback.note ? String(s.fallback.note).trim() : "",
+              mapsUrl: s.fallback.mapsUrl ? String(s.fallback.mapsUrl) : "",
+              rating: s.fallback.rating !== undefined ? Number(s.fallback.rating) : null,
+              userRatingsTotal: s.fallback.userRatingsTotal !== undefined ? Number(s.fallback.userRatingsTotal) : null,
+              openNow: s.fallback.openNow !== undefined ? Boolean(s.fallback.openNow) : null,
+              placeId: s.fallback.placeId ? String(s.fallback.placeId) : ""
+            };
+          }
+          return segObj;
+        }).sort(segCmp);
+
+        store.trips[id] = {
+          id,
+          from: (body.from ? String(body.from).trim() : "").toUpperCase(),
+          to: String(body.to).trim().toUpperCase(),
+          start,
+          end,
+          label: body.label ? String(body.label).trim() : "",
+          notes: body.notes ? String(body.notes).trim() : "",
+          timezone: body.timezone ? String(body.timezone).trim() : "",
+          photo: body.photo ? String(body.photo).trim() : "",
+          segments: initialSegs,
+          updatedAt: Date.now()
+        };
+        await saveStore(env, store);
+        return cors(json({ ok: true, trip: store.trips[id] }, 201));
+      }
+
+      // POST /api/v1/trips/:id/segments - Append single or batch segments
+      const segBatchMatch = url.pathname.match(/^\/api\/v1\/trips\/([a-zA-Z0-9_-]+)\/segments\/?$/);
+      if (segBatchMatch && request.method === "POST") {
+        const tripId = segBatchMatch[1];
+        const store = await loadStore(env);
+        const t = store.trips[tripId];
+        if (!t) return cors(json({ error: "Trip not found" }, 404));
+
+        const body = await request.json().catch(() => null);
+        if (!body) return cors(json({ error: "Invalid JSON body" }, 400));
+        const isArray = Array.isArray(body);
+        const incoming = isArray ? body : (typeof body === "object" ? [body] : []);
+        if (!incoming.length) return cors(json({ error: "At least one segment required" }, 400));
+
+        t.segments = t.segments || [];
+        const added = [];
+        for (const item of incoming) {
+          if (!item || !item.name) continue;
+          const sid = item.sid || uid();
+          const type = ["flight", "hotel", "restaurant", "car", "ride", "rail", "other"].includes(item.type) ? item.type : guessType(item.name);
+          const segObj = {
+            sid,
+            type,
+            name: String(item.name).trim(),
+            address: item.address ? String(item.address).trim() : "",
+            note: item.note ? String(item.note).trim() : "",
+            start: item.start ? String(item.start).slice(0, 16) : "",
+            end: item.end ? String(item.end).slice(0, 16) : "",
+            conf: item.conf ? String(item.conf).trim() : ("man:" + uid()),
+            source: "manual", // invariant rule: strictly manual!
+            rating: item.rating !== undefined ? Number(item.rating) : null,
+            userRatingsTotal: item.userRatingsTotal !== undefined ? Number(item.userRatingsTotal) : null,
+            openNow: item.openNow !== undefined ? Boolean(item.openNow) : null,
+            mapsUrl: item.mapsUrl ? String(item.mapsUrl) : "",
+            placeId: item.placeId ? String(item.placeId) : ""
+          };
+          if (item.fallback && item.fallback.name) {
+            segObj.fallback = {
+              name: String(item.fallback.name).trim(),
+              address: item.fallback.address ? String(item.fallback.address).trim() : "",
+              note: item.fallback.note ? String(item.fallback.note).trim() : "",
+              mapsUrl: item.fallback.mapsUrl ? String(item.fallback.mapsUrl) : "",
+              rating: item.fallback.rating !== undefined ? Number(item.fallback.rating) : null,
+              userRatingsTotal: item.fallback.userRatingsTotal !== undefined ? Number(item.fallback.userRatingsTotal) : null,
+              openNow: item.fallback.openNow !== undefined ? Boolean(item.fallback.openNow) : null,
+              placeId: item.fallback.placeId ? String(item.fallback.placeId) : ""
+            };
+          }
+          t.segments.push(segObj);
+          added.push(segObj);
+        }
+        t.segments.sort(segCmp);
+        t.updatedAt = Date.now();
+        await saveStore(env, store);
+        return cors(json({ ok: true, count: added.length, segments: isArray ? added : added[0] }, 201));
+      }
+
+      // PUT /api/v1/trips/:id/segments/:sid - Update existing segment
+      const segItemMatch = url.pathname.match(/^\/api\/v1\/trips\/([a-zA-Z0-9_-]+)\/segments\/([a-zA-Z0-9_-]+)\/?$/);
+      if (segItemMatch && request.method === "PUT") {
+        const tripId = segItemMatch[1], sid = segItemMatch[2];
+        const store = await loadStore(env);
+        const t = store.trips[tripId];
+        if (!t) return cors(json({ error: "Trip not found" }, 404));
+        const s = (t.segments || []).find(x => x.sid === sid);
+        if (!s) return cors(json({ error: "Segment not found" }, 404));
+
+        const body = await request.json().catch(() => ({}));
+        if (body.type) s.type = ["flight", "hotel", "restaurant", "car", "ride", "rail", "other"].includes(body.type) ? body.type : s.type;
+        if (body.name !== undefined) s.name = String(body.name).trim();
+        if (body.address !== undefined) s.address = String(body.address).trim();
+        if (body.note !== undefined) s.note = String(body.note).trim();
+        if (body.start !== undefined) s.start = String(body.start).slice(0, 16);
+        if (body.end !== undefined) s.end = String(body.end).slice(0, 16);
+        if (body.conf !== undefined) s.conf = String(body.conf).trim();
+        if (body.rating !== undefined) s.rating = body.rating;
+        if (body.userRatingsTotal !== undefined) s.userRatingsTotal = body.userRatingsTotal;
+        if (body.openNow !== undefined) s.openNow = body.openNow;
+        if (body.mapsUrl !== undefined) s.mapsUrl = body.mapsUrl;
+        if (body.placeId !== undefined) s.placeId = body.placeId;
+        s.source = "manual";
+
+        if (body.fallback === null) {
+          delete s.fallback;
+        } else if (body.fallback && typeof body.fallback === "object" && body.fallback.name) {
+          s.fallback = {
+            name: String(body.fallback.name).trim(),
+            address: body.fallback.address ? String(body.fallback.address).trim() : "",
+            note: body.fallback.note ? String(body.fallback.note).trim() : "",
+            mapsUrl: body.fallback.mapsUrl ? String(body.fallback.mapsUrl) : "",
+            rating: body.fallback.rating !== undefined ? body.fallback.rating : null,
+            userRatingsTotal: body.fallback.userRatingsTotal !== undefined ? body.fallback.userRatingsTotal : null,
+            openNow: body.fallback.openNow !== undefined ? body.fallback.openNow : null,
+            placeId: body.fallback.placeId ? String(body.fallback.placeId) : ""
+          };
+        }
+
+        t.segments.sort(segCmp);
+        t.updatedAt = Date.now();
+        await saveStore(env, store);
+        return cors(json({ ok: true, segment: s }));
+      }
+
+      // DELETE /api/v1/trips/:id/segments/:sid - Delete segment with tombstoning
+      if (segItemMatch && request.method === "DELETE") {
+        const tripId = segItemMatch[1], sid = segItemMatch[2];
+        const store = await loadStore(env);
+        const t = store.trips[tripId];
+        if (!t) return cors(json({ error: "Trip not found" }, 404));
+        const s = (t.segments || []).find(x => x.sid === sid);
+        if (!s) return cors(json({ error: "Segment not found" }, 404));
+
+        store.deletedSegs = store.deletedSegs || {};
+        if (s.conf) store.deletedSegs[s.conf] = Date.now();
+        t.segments = (t.segments || []).filter(x => x.sid !== sid);
+        t.updatedAt = Date.now();
+        await saveStore(env, store);
+        return cors(json({ ok: true, deleted: true, sid }));
+      }
+
+      // Single trip routes: /api/v1/trips/:id
+      const tripMatch = url.pathname.match(/^\/api\/v1\/trips\/([a-zA-Z0-9_-]+)\/?$/);
+      if (tripMatch) {
+        const tripId = tripMatch[1];
+        const store = await loadStore(env);
+        const t = store.trips[tripId];
+
+        // GET /api/v1/trips/:id
+        if (request.method === "GET") {
+          if (!t) return cors(json({ error: "Trip not found" }, 404));
+          return cors(json({ ok: true, trip: t }));
+        }
+
+        // PUT /api/v1/trips/:id
+        if (request.method === "PUT") {
+          if (!t) return cors(json({ error: "Trip not found" }, 404));
+          const body = await request.json().catch(() => ({}));
+          if (body.from !== undefined) t.from = String(body.from).trim().toUpperCase();
+          if (body.to !== undefined) t.to = String(body.to).trim().toUpperCase();
+          if (body.start !== undefined) t.start = norm(body.start);
+          if (body.end !== undefined) t.end = norm(body.end);
+          if (body.label !== undefined) t.label = String(body.label).trim();
+          if (body.notes !== undefined) t.notes = String(body.notes).trim();
+          if (body.timezone !== undefined) t.timezone = String(body.timezone).trim();
+          if (body.photo !== undefined) t.photo = String(body.photo).trim();
+          t.updatedAt = Date.now();
+          await saveStore(env, store);
+          return cors(json({ ok: true, trip: t }));
+        }
+
+        // DELETE /api/v1/trips/:id
+        if (request.method === "DELETE") {
+          if (!t) return cors(json({ error: "Trip not found" }, 404));
+          delete store.trips[tripId];
+          await saveStore(env, store);
+          return cors(json({ ok: true, deleted: true, id: tripId }));
+        }
+      }
+
+      return cors(json({ error: "Not found" }, 404));
+    }
+
     const blocked = await authGuard(request, env);
     if (blocked) return cors(blocked);
 
@@ -235,6 +498,7 @@ export default {
       const home = (await env.TRIPS.get("home")) || "";
       const homeTz = (await env.TRIPS.get("home_tz")) || "";
       const units = (await env.TRIPS.get("units")) || "";
+      const agentKey = (await env.TRIPS.get("agent_api_key")) || "";
       return cors(json({
         home,
         homeTz,
@@ -261,8 +525,26 @@ export default {
         // Google Places Configuration
         googlePlacesConfigured: places.configured,
         googlePlacesSource: places.source,
+        // AI Agent Key Configuration
+        agentKeyConfigured: !!agentKey,
       }));
     }
+
+    // Agent API Key Management (In-app key generation, status, and revocation)
+    if (url.pathname === "/settings/agent-key" && request.method === "GET") {
+      const key = await env.TRIPS.get("agent_api_key");
+      return cors(json({ configured: !!key, key: key || null }));
+    }
+    if (url.pathname === "/settings/agent-key" && request.method === "POST") {
+      const newKey = "rr_agent_" + randHex(24);
+      await env.TRIPS.put("agent_api_key", newKey);
+      return cors(json({ ok: true, key: newKey }));
+    }
+    if (url.pathname === "/settings/agent-key" && request.method === "DELETE") {
+      await env.TRIPS.delete("agent_api_key");
+      return cors(json({ ok: true, cleared: true }));
+    }
+
 
     // --- In-app Google connection (self-host friendly).
     // Paste an OAuth client id/secret in Settings, click Connect, approve the
@@ -1699,11 +1981,46 @@ async function authGuard(request, env) {
   return (header === stored || cookie === stored) ? null : json({ error: "unauthorized" }, 401);
 }
 
+async function agentAuthGuard(request, env) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const storedAgentKey = await env.TRIPS.get("agent_api_key");
+
+  if (authHeader.toLowerCase().startsWith("bearer ")) {
+    const token = authHeader.slice(7).trim();
+    if (storedAgentKey && token === storedAgentKey) {
+      return null;
+    }
+  }
+
+  // Developer / admin session fallback (X-Auth or tk cookie)
+  const storedAuth = await env.TRIPS.get("auth");
+  const xAuth = request.headers.get("X-Auth") || "";
+  const m = (request.headers.get("Cookie") || "").match(/(?:^|;\s*)tk=([^;]+)/);
+  const cookie = m ? m[1] : "";
+  if (storedAuth && (xAuth === storedAuth || cookie === storedAuth)) {
+    return null;
+  }
+
+  if (!storedAgentKey && !storedAuth) {
+    return json({ error: "Setup required - configure instance first" }, 401);
+  }
+  if (!storedAgentKey) {
+    return json({ error: "Unauthorized: Agent API Key has not been generated yet in Settings" }, 401);
+  }
+  return json({ error: "Unauthorized: Invalid or missing Agent API Bearer token" }, 401);
+}
+
 function json(obj, status) { return new Response(JSON.stringify(obj), { status: status || 200, headers: { "Content-Type": "application/json" } }); }
 function cors(res) {
   const h = new Headers(res.headers);
   h.set("Access-Control-Allow-Origin", "*");
-  h.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  h.set("Access-Control-Allow-Headers", "Content-Type, X-Auth");
+  h.set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  h.set("Access-Control-Allow-Headers", "Content-Type, X-Auth, Authorization");
   return new Response(res.body, { status: res.status, headers: h });
 }
+
+
+
+const LLMS_TXT = "# 888漫步旅遊 · 888RoamTravel (RoamRadar)\n\n> Single-tenant, privacy-first personal travel hub with multi-language itinerary planning, live calendar subscriptions, and a dedicated RESTful Agent API.\n\n## Overview\nRoamRadar is a personal travel command center designed to run serverlessly on Cloudflare Workers and Cloudflare KV. It aggregates bookings from Google Calendar, Gmail, and manual user inputs into a unified, chronological timeline.\n\nThis instance provides a RESTful API (`/api/v1`) designed specifically for external AI agents, LLM assistants, and automation workflows to plan, query, update, and manage trips and granular itinerary items.\n\n## Machine-Readable Documents\n- [/skill.md](https://travel.david888.com/skill.md): Canonical Agent Skill specification with tool definitions and instructions.\n- [/llms-full.txt](https://travel.david888.com/llms-full.txt): Comprehensive API documentation, full JSON schemas, and usage examples.\n\n## Key Capabilities & Rules\n1. **Full Trips CRUD**: Create, read, update, and delete multi-day travel itineraries.\n2. **Granular Segment Planning**: Append, edit, or remove itinerary segments individually or in batch.\n3. **Supported Categories**:\n   - `flight` ✈️: Airline flights and connections.\n   - `hotel` 🏨: Accommodations, hotels, ryokans, and Airbnbs.\n   - `restaurant` 🍽️: Dining reservations, food spots, and cafes.\n   - `rail` 🚆: Trains, Shinkansen, metro, and rail passes.\n   - `car` 🚗: Rental cars and car hires.\n   - `ride` 🚕: Taxis, airport transfers, and ride-hailing.\n   - `other` 📍: Attractions, activities, museums, and meetings.\n4. **Smart Contingency & Fallback Plans**: Attach alternative plans (e.g. backup restaurant or bad-weather indoor plan) to any itinerary item with 1-click in-app promotion.\n5. **Manual Invariant Protection**: All items created via the Agent API are stamped with `source: \"manual\"`. They will NEVER be overwritten or deleted by automated background calendar or email synchronization.\n6. **Subscribed ICS Feed**: Private calendar feed exportable to Apple Calendar, Google Calendar, and Outlook.\n\n## Quick API Reference\n\n### Base URL & Authentication\n- Base URL: `https://<your-instance-domain>/api/v1`\n- Header: `Authorization: Bearer rr_agent_<your-token>`\n- Content-Type: `application/json`\n\n### Endpoints\n- `GET /api/v1/trips`: List all trips with summary metrics and segments.\n- `POST /api/v1/trips`: Create a new trip with destination, dates, notes, and optional initial segments.\n- `GET /api/v1/trips/:id`: Retrieve single trip details by ID.\n- `PUT /api/v1/trips/:id`: Update trip destination, dates, timezone, photo, or notes.\n- `DELETE /api/v1/trips/:id`: Delete a trip and its itinerary.\n- `POST /api/v1/trips/:id/segments`: Append single segment or batch array of segments (with optional fallback plans).\n- `PUT /api/v1/trips/:id/segments/:sid`: Update an existing segment.\n- `DELETE /api/v1/trips/:id/segments/:sid`: Delete an itinerary segment with automatic tombstoning.\n\n## Getting Started for Agents\n1. Have the user generate an Agent API Key in the web app under Settings -> AI Agent Integration.\n2. Verify connectivity with `GET /api/v1/trips`.\n3. Read [/skill.md](https://travel.david888.com/skill.md) or [/llms-full.txt](https://travel.david888.com/llms-full.txt) for detailed schemas and prompt engineering guidelines.\n";
+const LLMS_FULL_TXT = "# 888漫步旅遊 · 888RoamTravel (RoamRadar) - Full LLM & API Reference\n\n> Machine-readable specification and guide for AI Agents, autonomous planners, and automation systems integrating with RoamRadar.\n\n---\n\n## 1. System Architecture & Invariants\n\nRoamRadar is a privacy-first, single-tenant personal travel hub. All data is persisted in Cloudflare KV as a unified store.\n\n### The Invariant Rules\n1. **Manual Invariant**: Any segment created or updated via the Agent API is assigned `source: \"manual\"`. The background sync engine (which periodically scans Google Calendar and Gmail) will **NEVER** overwrite, modify, or delete manual plans.\n2. **Category Fidelity**: Categories must strictly match one of the 7 supported values:\n   - `flight` ✈️: Flight bookings, airport codes, flight numbers.\n   - `hotel` 🏨: Accommodations, hotels, ryokans, villas, Airbnbs.\n   - `restaurant` 🍽️: Dining, restaurants, cafes, food stalls, ramen shops, izakayas.\n   - `rail` 🚆: Trains, high-speed rail (Shinkansen, TGV, ICE), subways, scenic railways.\n   - `car` 🚗: Rental cars, car hire pick-up and drop-off.\n   - `ride` 🚕: Taxi, airport pick-up, Uber, private chauffeur.\n   - `other` 📍: Sightseeing attractions, theme parks, museum entries, appointments.\n3. **Contingency / Fallback Plans**: Any segment can hold an embedded `fallback` object representing a backup alternative. If the primary plan is full, closed, or delayed, the user can switch to the fallback plan in 1 click in the UI.\n\n---\n\n## 2. Authentication\n\nExternal agents authenticate using an HTTP Bearer token in the `Authorization` header:\n\n```http\nAuthorization: Bearer rr_agent_<token>\nContent-Type: application/json\n```\n\nAgent keys are generated in the RoamRadar Web App (Settings -> AI Agent Integration). Tokens are prefixed with `rr_agent_` and can be regenerated or revoked at any time.\n\n---\n\n## 3. Data Schemas\n\n### Trip Schema\n```json\n{\n  \"id\": \"t_202610_tokyo\",             // string (unique ID; auto-assigned if omitted)\n  \"from\": \"TPE\",                      // string (origin airport IATA or city name)\n  \"to\": \"NRT\",                        // string (destination airport IATA or city name)\n  \"start\": \"2026-10-15\",              // string (YYYY-MM-DD)\n  \"end\": \"2026-10-20\",                // string (YYYY-MM-DD)\n  \"label\": \"Tokyo Autumn Voyage\",     // string (human-friendly trip title)\n  \"notes\": \"Flight booked via BR198\", // string (free-text trip notes)\n  \"timezone\": \"Asia/Tokyo\",           // string (IANA timezone, e.g. \"Asia/Tokyo\")\n  \"photo\": \"https://example.com/p.jpg\", // string (optional custom banner photo URL)\n  \"segments\": [],                     // Segment[] (itinerary plans)\n  \"updatedAt\": 1729000000000          // number (epoch timestamp ms)\n}\n```\n\n### Segment Schema\n```json\n{\n  \"sid\": \"s_123456\",                  // string (unique segment ID; auto-assigned if omitted)\n  \"type\": \"restaurant\",               // string (\"flight\"|\"hotel\"|\"restaurant\"|\"car\"|\"ride\"|\"rail\"|\"other\")\n  \"name\": \"Ichiran Ramen Shibuya\",    // string (plan title / business name)\n  \"address\": \"1-22-7 Jinnan, Shibuya\",// string (optional formatted address or location)\n  \"note\": \"18:00 Dinner reservation\", // string (optional notes, times, seat info)\n  \"start\": \"2026-10-15T18:00\",        // string (YYYY-MM-DD or YYYY-MM-DDTHH:mm)\n  \"end\": \"2026-10-15T19:30\",          // string (optional YYYY-MM-DD or YYYY-MM-DDTHH:mm)\n  \"conf\": \"RES-889900\",               // string (optional confirmation / booking reference)\n  \"source\": \"manual\",                 // string (always \"manual\" for agent items)\n  \"rating\": 4.5,                      // number (optional Google rating, 1.0 - 5.0)\n  \"userRatingsTotal\": 2450,           // number (optional total review count)\n  \"openNow\": true,                    // boolean (optional current open status)\n  \"mapsUrl\": \"https://maps.google.com/?cid=123\", // string (optional Google Maps link)\n  \"placeId\": \"ChIJN1t_tDeuEmsRUsoyG83frY4\",      // string (optional Google Place ID)\n  \"fallback\": {                       // object (optional contingency alternative)\n    \"name\": \"Afuri Ramen Harajuku\",\n    \"address\": \"1-1-7 Jingumae, Shibuya\",\n    \"note\": \"Backup option if Ichiran line exceeds 30 mins\",\n    \"mapsUrl\": \"https://maps.google.com/?cid=456\",\n    \"rating\": 4.3,\n    \"userRatingsTotal\": 1820\n  }\n}\n```\n\n---\n\n## 4. API Endpoints Specification\n\n### 4.1 Trips Endpoints\n\n#### `GET /api/v1/trips`\nRetrieves all trips sorted chronologically by start date.\n- **Request**: No body required.\n- **Response**: `200 OK`\n```json\n{\n  \"ok\": true,\n  \"count\": 1,\n  \"trips\": [\n    {\n      \"id\": \"t_202610_tokyo\",\n      \"from\": \"TPE\",\n      \"to\": \"NRT\",\n      \"start\": \"2026-10-15\",\n      \"end\": \"2026-10-20\",\n      \"label\": \"Tokyo Autumn Voyage\",\n      \"timezone\": \"Asia/Tokyo\",\n      \"segmentCount\": 5,\n      \"segments\": [...]\n    }\n  ]\n}\n```\n\n#### `GET /api/v1/trips/:id`\nRetrieves details of a single trip by ID.\n- **Response**: `200 OK`\n```json\n{\n  \"ok\": true,\n  \"trip\": { ... }\n}\n```\n\n#### `POST /api/v1/trips`\nCreates a new trip.\n- **Request Body**:\n```json\n{\n  \"from\": \"TPE\",\n  \"to\": \"NRT\",\n  \"start\": \"2026-10-15\",\n  \"end\": \"2026-10-20\",\n  \"label\": \"Tokyo Autumn Voyage\",\n  \"notes\": \"Trip planned by AI assistant\",\n  \"timezone\": \"Asia/Tokyo\",\n  \"segments\": [ ... ]\n}\n```\n- **Response**: `201 Created` with created trip object.\n\n#### `PUT /api/v1/trips/:id`\nUpdates an existing trip's properties (dates, destination, label, notes, timezone).\n- **Response**: `200 OK` with updated trip object.\n\n#### `DELETE /api/v1/trips/:id`\nDeletes a trip and all its segments.\n- **Response**: `200 OK`\n```json\n{\n  \"ok\": true,\n  \"deleted\": true,\n  \"id\": \"t_202610_tokyo\"\n}\n```\n\n---\n\n### 4.2 Segments Endpoints\n\n#### `POST /api/v1/trips/:id/segments`\nAppends one or more itinerary segments to an existing trip.\n- **Batch Support**: Accepts either a single segment object `{ ... }` or an array of segment objects `[ { ... }, { ... } ]`.\n- **Request Body (Batch Example)**:\n```json\n[\n  {\n    \"type\": \"flight\",\n    \"name\": \"BR198 TPE to NRT\",\n    \"start\": \"2026-10-15T08:50\",\n    \"end\": \"2026-10-15T13:15\",\n    \"conf\": \"BR-78910\",\n    \"note\": \"Terminal 2, Seat 12A\"\n  },\n  {\n    \"type\": \"hotel\",\n    \"name\": \"Hotel Gracery Shinjuku\",\n    \"address\": \"1-19-1 Kabukicho, Shinjuku, Tokyo\",\n    \"start\": \"2026-10-15\",\n    \"end\": \"2026-10-20\",\n    \"conf\": \"HG-9921\",\n    \"note\": \"Check-in from 14:00\"\n  },\n  {\n    \"type\": \"restaurant\",\n    \"name\": \"Ramen Nagi Shinjuku Golden Gai\",\n    \"address\": \"1-1-10 Kabukicho, Shinjuku\",\n    \"start\": \"2026-10-15T19:00\",\n    \"note\": \"Top rated niboshi ramen\",\n    \"fallback\": {\n      \"name\": \"Ichiran Shinjuku Chuo-Higashiguchi\",\n      \"address\": \"3-34-11 Shinjuku\",\n      \"note\": \"Backup if Nagi wait exceeds 40 mins\"\n    }\n  }\n]\n```\n- **Response**: `201 Created`\n```json\n{\n  \"ok\": true,\n  \"count\": 3,\n  \"segments\": [ ... ]\n}\n```\n\n#### `PUT /api/v1/trips/:id/segments/:sid`\nUpdates an existing segment.\n- **Request Body**: Any editable fields (`name`, `address`, `note`, `start`, `end`, `conf`, `fallback`, `rating`, `openNow`, `mapsUrl`, etc.).\n- **Response**: `200 OK` with updated segment object.\n\n#### `DELETE /api/v1/trips/:id/segments/:sid`\nRemoves a segment from the trip and records its confirmation reference into `deletedSegs` tombstone store.\n- **Response**: `200 OK`\n```json\n{\n  \"ok\": true,\n  \"deleted\": true,\n  \"sid\": \"s_123456\"\n}\n```\n\n---\n\n## 5. Agent Planning Best Practices\n\n1. **Chronological Consistency**: Ensure segment start times fall within the trip's `start` and `end` bounds.\n2. **Time Formatting in Notes**: RoamRadar's timeline parser automatically extracts clock times (e.g. `09:00-11:30` or `19:00`) from the `note` field to order same-day events. Include explicit times in either `start` or `note`.\n3. **Proactive Fallbacks**: When recommending popular dining or outdoor attractions, automatically attach a fallback alternative in the `fallback` field to provide the user with peace of mind.\n";
+const SKILL_MD = "---\nname: roamradar-travel-planner\ndescription: Autonomous travel planning agent skill for RoamRadar (888RoamTravel). Plans multi-day trips, manages itinerary segments across all 7 categories (flight, hotel, restaurant, rail, car, ride, other), and configures contingency fallback plans via RESTful API.\n---\n\n# RoamRadar Travel Planner Skill\n\nUse this skill when tasked with researching, structuring, or managing travel itineraries in RoamRadar (888RoamTravel). This skill gives you direct RESTful API access to create and modify trips and detailed itinerary segments.\n\n## Configuration & Headers\n- **Base URL**: `https://<your-instance-domain>/api/v1`\n- **Headers**:\n  ```http\n  Authorization: Bearer <AGENT_API_KEY>\n  Content-Type: application/json\n  ```\n\n## 7 Standard Categories\nEvery itinerary segment must use one of the following 7 categories:\n1. `flight` ✈️: Flights, connections, airport departure/arrival.\n2. `hotel` 🏨: Accommodations, hotels, ryokans, resorts, Airbnbs.\n3. `restaurant` 🍽️: Dining, restaurants, food stalls, cafes, bars.\n4. `rail` 🚆: Trains, Shinkansen, high-speed rail, subways.\n5. `car` 🚗: Rental cars, car hire pick-up and drop-off.\n6. `ride` 🚕: Taxis, airport transfers, ride-hailing services.\n7. `other` 📍: Sightseeing attractions, museums, activities, meetings.\n\n## Contingency & Fallback Plans\nTravelers encounter unexpected queues, closures, and weather changes. Whenever proposing restaurants or outdoor activities, attach a viable alternative in the `fallback` object:\n```json\n{\n  \"type\": \"restaurant\",\n  \"name\": \"Primary Target Restaurant\",\n  \"address\": \"Primary Address\",\n  \"start\": \"2026-10-16T18:30\",\n  \"note\": \"18:30 dinner\",\n  \"fallback\": {\n    \"name\": \"Alternative Backup Restaurant\",\n    \"address\": \"Backup Address nearby\",\n    \"note\": \"Backup in case line exceeds 30m or booked out\"\n  }\n}\n```\n\n## Available Tool Actions & Endpoints\n\n### 1. `list_trips`\nRetrieve all existing trips to check dates or find a trip ID.\n- **Method**: `GET /api/v1/trips`\n- **Example Response**:\n  ```json\n  {\n    \"ok\": true,\n    \"count\": 2,\n    \"trips\": [\n      {\n        \"id\": \"t_tokyo_2026\",\n        \"to\": \"NRT\",\n        \"from\": \"TPE\",\n        \"start\": \"2026-10-15\",\n        \"end\": \"2026-10-20\",\n        \"label\": \"Tokyo Autumn\",\n        \"segmentCount\": 6\n      }\n    ]\n  }\n  ```\n\n### 2. `create_trip`\nCreate a new multi-day trip container.\n- **Method**: `POST /api/v1/trips`\n- **Payload**:\n  ```json\n  {\n    \"from\": \"TPE\",\n    \"to\": \"NRT\",\n    \"start\": \"2026-10-15\",\n    \"end\": \"2026-10-20\",\n    \"label\": \"Tokyo Autumn Voyage\",\n    \"timezone\": \"Asia/Tokyo\",\n    \"notes\": \"Autumn trip to Tokyo and Hakone\"\n  }\n  ```\n\n### 3. `get_trip`\nFetch complete trip details including all segments and notes.\n- **Method**: `GET /api/v1/trips/:id`\n\n### 4. `update_trip`\nModify trip dates, notes, or destination.\n- **Method**: `PUT /api/v1/trips/:id`\n- **Payload**: `{ \"label\": \"Tokyo & Hakone Autumn\", \"notes\": \"Updated itinerary\" }`\n\n### 5. `delete_trip`\nDelete a trip and its itinerary.\n- **Method**: `DELETE /api/v1/trips/:id`\n\n### 6. `add_segments` (Batch or Single)\nAdd itinerary items to a trip. Pass an array of items for high-performance batch creation.\n- **Method**: `POST /api/v1/trips/:id/segments`\n- **Payload**:\n  ```json\n  [\n    {\n      \"type\": \"flight\",\n      \"name\": \"BR198 TPE to NRT\",\n      \"start\": \"2026-10-15T08:50\",\n      \"end\": \"2026-10-15T13:15\",\n      \"note\": \"Terminal 2, Seat 12A\",\n      \"conf\": \"BR-78910\"\n    },\n    {\n      \"type\": \"restaurant\",\n      \"name\": \"Ginza Kagari Ramen\",\n      \"address\": \"6-4-12 Ginza, Chuo-ku, Tokyo\",\n      \"start\": \"2026-10-15T18:00\",\n      \"note\": \"Famous Tori Paitan ramen\",\n      \"fallback\": {\n        \"name\": \"Kyushu Jangara Ginza\",\n        \"address\": \"6-12-1 Ginza, Chuo-ku, Tokyo\",\n        \"note\": \"Quick tonkotsu backup\"\n      }\n    }\n  ]\n  ```\n\n### 7. `update_segment`\nUpdate an individual itinerary item.\n- **Method**: `PUT /api/v1/trips/:id/segments/:sid`\n- **Payload**: `{ \"note\": \"Updated table time to 19:00\" }`\n\n### 8. `delete_segment`\nDelete a segment. Deletion is automatically tombstoned to prevent calendar/email sync resurrection.\n- **Method**: `DELETE /api/v1/trips/:id/segments/:sid`\n\n## Operational Guidelines for Agents\n- When planning an entire itinerary, first call `GET /api/v1/trips` to find if a trip already exists for the dates, or create one using `POST /api/v1/trips`.\n- Use the batch `POST /api/v1/trips/:id/segments` endpoint to insert the entire itinerary in a single HTTP request to optimize token efficiency and speed.\n- In `note`, include key operational details such as flight times (`09:00-11:30`), confirmation codes, or booking deadlines.\n";

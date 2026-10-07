@@ -7,6 +7,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.5.0] - 2026-10-07
+
+### Added / 新增功能
+- **AI Agent 程式化介面與專屬權限架構 (RESTful Agent API & Bearer Authentication)**：
+  - **RESTful `/api/v1` 端點**：推出專為外部 AI 代理（Claude Code、Antigravity、Cursor、Windsurf、ChatGPT Custom GPT 等）量身打造的標準 RESTful API，全面支援 `GET`、`POST`、`PUT`、`DELETE` 操作與 CORS 跨來源存取。
+  - **獨立 Agent API Key (`rr_agent_...`)**：採用專屬且具隨機高熵的 Bearer Token，與管理者帳號密碼完全隔離，可隨時自設定面板產生、重新簽發或單鍵撤銷，兼顧極致便利與防禦深度。
+  - **旅程全生命週期 CRUD (`/api/v1/trips`)**：外部 Agent 可列出全部旅程（包含摘要統計、時區及細項計數）、查詢單趟旅程、建立新旅程、更新目的時區與說明，以及完整刪除旅程。
+  - **細項原子與高吞吐批次規劃 (`/api/v1/trips/:id/segments`)**：
+    - 支援單筆新增與高效批次陣列傳入（單一 HTTP 請求即可寫入整趟多日行程，大幅節省 LLM Token 與往返延遲）。
+    - 支援修改細項與單鍵安全刪除，內建自動墓碑記憶（Tombstoning in `store.deletedSegs`），杜絕後續背景同步復活。
+  - **手動資料不可侵犯守護 (The Manual Invariant Protection)**：
+    - 所有透過 Agent API 新增或變更的項目皆強制鎖定 `source: "manual"`，背景 Google Calendar 與 Gmail 同步引擎絕對無法覆寫或抹除 Agent 與人類精心規劃的行程。
+  - **全 7 大類別與替代備案全面連動**：完整涵蓋 `flight`、`hotel`、`restaurant`、`rail`、`car`、`ride`、`other`，並原生支援 `fallback` 備案物件注入。
+
+- **機器可讀規格與標準 Agent Skill 匯出 (`llms.txt`, `llms-full.txt`, `SKILL.md`)**：
+  - **標準 `llms.txt` 與 `llms-full.txt`**：於根路徑公開提供符合 llmstxt.org 標準之規範清單與完整 API 參考手冊，供網路爬蟲與 AI 客戶端零門檻探索。
+  - **標準 Agent Skill 規格 (`SKILL.md`)**：依現代 Coding Agent 規範產出含 YAML Frontmatter、工具定義、資料格式與最佳實踐之技能檔，支援 `GET /skill.md` 公開檢索。
+
+- **設定面板全新「AI Agent 開發與整合」專區 (In-App AI Agent Integration Hub)**：
+  - **API 金鑰管理**：提供「產生 / 重新產生金鑰」、「顯示/隱藏密碼遮罩」、「一鍵複製金鑰」與「撤銷金鑰」完整控制面板，狀態一目了然。
+  - **一鍵複製動態系統提示詞 (Copy Dynamic Agent System Prompt)**：一鍵複製已預先自動填入**當前 instance 伺服器網址**與**有效 Bearer Token**的完整 Prompt，直接貼給任何 LLM 即可瞬間學會操作 RoamRadar 為人類規劃旅遊！
+  - **SKILL.md 下載與複製**：提供「複製 SKILL.md」與「下載 SKILL.md」按鈕，方便隨時匯入本地專案或分享給協作團隊。
+
+---
+
 ## [2.4.1] - 2026-10-07
 
 ### Enhanced / 介面與功能全面優化
