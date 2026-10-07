@@ -28,6 +28,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - 支援 `✏️ 手動自訂輸入…` 與輸入框雙向即時聯動，並內建主流提供者常用模型推薦預設（Gemini、OpenAI、Groq、DeepSeek、Anthropic）。
   - 通過 Codex Code Review 嚴格審查，具備無死鎖事件同步、XSS 轉義防護與無障礙 `aria-label` 標籤支援。
 
+- **全新品牌視覺圖示 (888 Travel Brand Icons)**：
+  - 全站圖示改版為活力珊瑚橘底（`#FF5A35` 漸層）搭配純白粗體「888 Travel」微軟圓角（Squircle）設計。
+  - 同步重繪並生成包含 `favicon.svg`、`favicon.ico`、`favicon-32x32.png`、`favicon-16x16.png`、`icon-180.png`、`icon-192.png`、`icon-512.png` 之全套高清 PWA 與桌面/手機 Favicon 資源。
+
 ### Changed / 改善與優化
 - **官網頁尾作者標註與致敬更新 (Author Attribution & Credit)**：
   - 官網（Landing Page）頁尾正式更新為 **`Created with ❤️ for travel, by david888.com（修改於 Giovanni Brees）`**（英文版：`adapted from Giovanni Brees`），同時保留原作者連結致敬，明確標示 `david888.com` 為目前維護與分支修改者。

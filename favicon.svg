@@ -1,10 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="planeBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E40FF"/>
-      <stop offset="100%" stop-color="#0B2ACC"/>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6339"/>
+      <stop offset="50%" stop-color="#FF5A35"/>
+      <stop offset="100%" stop-color="#E84015"/>
     </linearGradient>
+    <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.16"/>
+    </filter>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#planeBg)"/>
-  <path d="M12 33 L52 13 L34 51 L28 35 Z" fill="#FFFFFF"/>
+  <rect width="512" height="512" rx="116" fill="url(#orangeGrad)"/>
+  <g text-anchor="middle" filter="url(#subtleShadow)">
+    <text x="256" y="270" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Bricolage Grotesque', 'Arial Black', sans-serif" font-size="185" font-weight="900" letter-spacing="-1" fill="#FFFFFF">888</text>
+    <text x="256" y="388" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Archivo', 'Arial', sans-serif" font-size="90" font-weight="800" letter-spacing="3" fill="#FFFFFF">Travel</text>
+  </g>
 </svg>
