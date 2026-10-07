@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.6.7] - 2026-10-07
+
+### Added & Enhanced / AI 雙軌備援模型機制與對話容錯防護 (Automatic LLM Fallback Model & Fault Tolerance)
+- **全面支援 AI 雙軌備援機制 (Automatic Multi-Model Fallback System)**：
+  - **後端無縫容錯調度 (Automatic Seamless Failover)**：在 `worker.js` 的 `dispatchAiChat` 與郵件智慧解析 `extractSegments` 中導入雙軌自動切換架構。當主要模型（如 `qwen/qwen3.8-27b`）遇到速率限制 (HTTP 429)、思考長度溢出 (`finish_reason === "length"` 空回覆)、模型文字重複退化 (`REPETITION_DEGENERATION`) 或伺服器異常時，系統會立即於背景無感切換至備援模型（預設為超大參數量且表現穩定的 `openai/gpt-oss-120b`），確保對話與行程規劃不中斷。
+  - **設定介面支援自訂備援模型 (Configurable Fallback Model in Settings)**：在「⚙️ 設定 ➔ 🤖 AI 模型」分頁中新增「🔄 自動備援模型 (Fallback Model)」下拉選單與自訂輸入框，具備各大提供者推薦清單（Groq: `openai/gpt-oss-120b`、Gemini: `gemini-2.0-flash`、OpenAI: `gpt-4o-mini`、Anthropic: `claude-3-5-haiku-latest`），並儲存於 Cloudflare KV `llm_config`。
+  - **直覺安心的前端備援徽章 (Visual Fallback Badge in Copilot)**：當對話成功透過備援模型挽回時，聊天抽屜中會以珊瑚橘精緻徽章標示 `🔄 已自動啟用備援模型: openai/gpt-oss-120b`，提供清晰透明的反饋。
+  - **短 TTL 快取改善 (In-Memory Config Cache with 15s TTL)**：Worker 中的 `getLLMConfig` 採用 15 秒短生命週期快取，既確保每秒高並發時的高效能，又能在使用者修改設定後於 15 秒內全球即時生效。
+  - **API 與狀態端點同步 (RESTful API & Status Sync)**：`GET /api/v1/status`、`GET /settings` 及 `POST /settings/llm` 全面支援 `fallbackModel` 欄位。
+
 ## [2.6.6] - 2026-10-07
 
 ### Enhanced & Fixed / 旅程備註 Markdown 排版與 AI 特助思考對話強化 (Markdown Notes & AI Copilot Resilience)

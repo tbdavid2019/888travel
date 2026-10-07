@@ -511,14 +511,14 @@ export default {
         return cors(json({
           ok: true,
           service: "888travel",
-          version: "2.6.6",
+          version: "2.6.7",
           instance: url.origin,
           serverTime: new Date().toISOString(),
           totalTrips: trips.length,
           upcomingTrips: upcoming,
           totalWishes: (store.wishes || []).length,
           integrations: {
-            llm: { configured: !!llm.apiKey, provider: llm.provider, model: llm.model },
+            llm: { configured: !!llm.apiKey, provider: llm.provider, model: llm.model, fallbackModel: llm.fallbackModel || null },
             googlePlaces: { configured: places.configured },
             googleCalendar: { configured: !!(gClient && gRefresh) },
             resend: { configured: !!resend.apiKey }
@@ -712,6 +712,7 @@ export default {
         llmProvider: llm.provider,
         llmBaseUrl: llm.baseUrl,
         llmModel: llm.model,
+        llmFallbackModel: llm.fallbackModel || "",
         llmConfigured: !!llm.apiKey,
         llmSource: llm.source,
         // Backward-compat flag
@@ -775,8 +776,9 @@ export default {
       const baseUrl = ((body && body.baseUrl) || "").trim();
       const apiKey = ((body && body.apiKey) || "").replace(/\s+/g, "");
       const model = ((body && body.model) || "").trim();
+      const fallbackModel = ((body && body.fallbackModel) || "").trim();
 
-      if (!apiKey && !baseUrl && !model) {
+      if (!apiKey && !baseUrl && !model && !fallbackModel) {
         // Clear custom configuration
         await env.TRIPS.delete("llm_config");
         await env.TRIPS.delete("anthropic_key");
@@ -790,7 +792,8 @@ export default {
         provider: provider || existing.provider || "openai",
         baseUrl: baseUrl !== undefined ? baseUrl : existing.baseUrl,
         apiKey: apiKey || existing.apiKey || "",
-        model: model || existing.model || ""
+        model: model || existing.model || "",
+        fallbackModel: fallbackModel !== undefined ? fallbackModel : (existing.fallbackModel || (provider === "groq" ? "openai/gpt-oss-120b" : ""))
       };
 
       if (!newConfig.apiKey) {
@@ -1569,7 +1572,7 @@ async function ingestFromGmail(store, env, maxEmails) {
 
 // Universal LLM Config: supports Anthropic and any OpenAI-compatible base URL (Gemini, Groq, OpenAI, DeepSeek, etc.)
 async function getLLMConfig(env) {
-  if (env._llmConfig) return env._llmConfig;
+  if (env._llmConfig && env._llmConfigTs && (Date.now() - env._llmConfigTs < 15000)) return env._llmConfig;
   let kvConfig = null;
   try {
     const raw = await env.TRIPS.get("llm_config");
@@ -1579,11 +1582,13 @@ async function getLLMConfig(env) {
   const envApiKey = env.LLM_API_KEY || env.ANTHROPIC_API_KEY || env.OPENAI_API_KEY || "";
   const envBaseUrl = env.LLM_BASE_URL || "";
   const envModel = env.LLM_MODEL || "";
+  const envFallbackModel = env.LLM_FALLBACK_MODEL || "";
   const envProvider = env.LLM_PROVIDER || "";
 
   let apiKey = envApiKey || (kvConfig && kvConfig.apiKey) || (await env.TRIPS.get("anthropic_key")) || "";
   let baseUrl = envBaseUrl || (kvConfig && kvConfig.baseUrl) || "";
   let model = envModel || (kvConfig && kvConfig.model) || "";
+  let fallbackModel = envFallbackModel || (kvConfig && kvConfig.fallbackModel) || "";
   let provider = envProvider || (kvConfig && kvConfig.provider) || "";
 
   // Infer provider if not specified
@@ -1596,13 +1601,21 @@ async function getLLMConfig(env) {
     else provider = "anthropic";
   }
 
-  // Sensible fallback models if user did not specify one
+  // Sensible default primary models if user did not specify one
   if (!model) {
     if (provider === "anthropic") model = "claude-3-5-haiku-latest";
     else if (provider === "gemini") model = "gemini-2.0-flash";
-    else if (provider === "groq") model = "openai/gpt-oss-120b";
+    else if (provider === "groq") model = "qwen/qwen3.8-27b";
     else if (provider === "deepseek") model = "deepseek-chat";
     else model = "gpt-4o";
+  }
+
+  // Sensible default fallback model if user did not specify one
+  if (!fallbackModel) {
+    if (provider === "groq") fallbackModel = "openai/gpt-oss-120b";
+    else if (provider === "gemini") fallbackModel = "gemini-1.5-flash";
+    else if (provider === "openai") fallbackModel = "gpt-4o-mini";
+    else if (provider === "anthropic") fallbackModel = "claude-3-5-haiku-latest";
   }
 
   // Default OpenAI-compatible base URLs
@@ -1613,9 +1626,10 @@ async function getLLMConfig(env) {
     else if (provider === "openai") baseUrl = "https://api.openai.com/v1";
   }
 
-  const source = (envApiKey || envBaseUrl || envModel) ? "secret" : (kvConfig || await env.TRIPS.get("anthropic_key")) ? "in-app" : "none";
+  const source = (envApiKey || envBaseUrl || envModel || envFallbackModel) ? "secret" : (kvConfig || await env.TRIPS.get("anthropic_key")) ? "in-app" : "none";
 
-  return (env._llmConfig = { provider, baseUrl, apiKey, model, source });
+  env._llmConfigTs = Date.now();
+  return (env._llmConfig = { provider, baseUrl, apiKey, model, fallbackModel, source });
 }
 
 // Backward compatible alias
@@ -1868,99 +1882,168 @@ ${tripContext}
 6. 對於熱門餐廳或戶外行程，強烈建議主動規劃可行的 fallback (備案方案)。
 7. proposal 內的 JSON 必須是標準 JSON，請勿包含尾隨逗號或註解。`;
 
-  let replyText = "";
-  try {
-    if (llm.provider === "anthropic" || (!llm.baseUrl && llm.apiKey.startsWith("sk-ant-"))) {
-      const anthropicMsgs = [];
-      for (const m of messages) {
-        if (anthropicMsgs.length === 0 && m.role !== "user") continue;
-        if (anthropicMsgs.length > 0 && anthropicMsgs[anthropicMsgs.length - 1].role === m.role) {
-          anthropicMsgs[anthropicMsgs.length - 1].content += "\n\n" + m.content;
-        } else {
-          anthropicMsgs.push({ role: m.role, content: m.content });
-        }
-      }
-      if (anthropicMsgs.length === 0) anthropicMsgs.push({ role: "user", content: "你好" });
-
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": llm.apiKey,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json"
-        },
-        body: JSON.stringify({
-          model: llm.model || "claude-3-5-haiku-latest",
-          max_tokens: 2000,
-          system: sysPrompt,
-          messages: anthropicMsgs
-        })
-      });
-
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "");
-        if (res.status === 429) return { ok: false, status: 429, error: "RATE_LIMITED", message: "AI 服務暫時超過速率限制，請稍候重試。" };
-        return { ok: false, status: res.status, error: "PROVIDER_ERROR", message: `Anthropic API 錯誤 (${res.status}): ${errText.slice(0, 200)}` };
-      }
-
-      const data = await res.json();
-      replyText = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
-    } else {
-      const baseUrl = (llm.baseUrl || "https://api.openai.com/v1").replace(/\/+$/, "");
-      const endpoint = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
-      const openAiMsgs = [{ role: "system", content: sysPrompt }, ...messages];
-
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${llm.apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: llm.model || "gpt-4o",
-          temperature: 0.4,
-          max_tokens: 3000,
-          messages: openAiMsgs
-        })
-      });
-
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "");
-        if (res.status === 429) return { ok: false, status: 429, error: "RATE_LIMITED", message: "AI 服務暫時超過速率限制，請稍候重試。" };
-        return { ok: false, status: res.status, error: "PROVIDER_ERROR", message: `AI 服務錯誤 (${res.status}): ${errText.slice(0, 200)}` };
-      }
-
-      const data = await res.json();
-      const choice = data.choices && data.choices[0];
-      replyText = (choice && choice.message && choice.message.content) || "";
-
-      if (!replyText && choice) {
-        if (choice.finish_reason === "length" || (choice.message && choice.message.reasoning && !choice.message.content)) {
-          return {
-            ok: false,
-            status: 400,
-            error: "REASONING_TOKEN_LIMIT",
-            message: "此 AI 模型的思考迴圈過長（已達到 Token 長度上限），未能產出回覆內容。建議在「設定 ⚙️」中將模型切換為 Qwen 3.8 27B 或加大 Token 額度。"
-          };
-        }
-        return {
-          ok: false,
-          status: 500,
-          error: "EMPTY_REPLY",
-          message: "AI 模型未產生任何回覆內容，請嘗試更換模型或重新提問。"
-        };
-      }
-    }
-  } catch (err) {
-    console.error("AI chat error:", err);
-    return { ok: false, status: 500, error: "PROVIDER_ERROR", message: "連線 AI 服務失敗: " + (err && err.message ? err.message : String(err)) };
+  function isDegeneratedRepetition(text) {
+    if (!text || text.length < 100) return false;
+    const norm = text.replace(/\s+/g, " ");
+    const match = norm.match(/(.{8,80}?)\s*\1\s*\1\s*\1/);
+    return Boolean(match);
   }
 
+  async function callModel(targetModel) {
+    if (!targetModel) return { ok: false, status: 400, error: "NO_MODEL", message: "未指定模型" };
+    try {
+      if (llm.provider === "anthropic" || (!llm.baseUrl && llm.apiKey.startsWith("sk-ant-"))) {
+        const anthropicMsgs = [];
+        for (const m of messages) {
+          if (anthropicMsgs.length === 0 && m.role !== "user") continue;
+          if (anthropicMsgs.length > 0 && anthropicMsgs[anthropicMsgs.length - 1].role === m.role) {
+            anthropicMsgs[anthropicMsgs.length - 1].content += "\n\n" + m.content;
+          } else {
+            anthropicMsgs.push({ role: m.role, content: m.content });
+          }
+        }
+        if (anthropicMsgs.length === 0) anthropicMsgs.push({ role: "user", content: "你好" });
+
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "x-api-key": llm.apiKey,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json"
+          },
+          body: JSON.stringify({
+            model: targetModel,
+            max_tokens: 2500,
+            system: sysPrompt,
+            messages: anthropicMsgs
+          })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          if (res.status === 429) return { ok: false, status: 429, error: "RATE_LIMITED", message: `AI 服務達到速率限制 (429) [${targetModel}]` };
+          return { ok: false, status: res.status, error: "PROVIDER_ERROR", message: `Anthropic API 錯誤 (${res.status}) [${targetModel}]: ${errText.slice(0, 200)}` };
+        }
+
+        const data = await res.json();
+        const replyText = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
+        if (!replyText) {
+          return { ok: false, status: 500, error: "EMPTY_REPLY", message: `模型 (${targetModel}) 未回傳文字內容` };
+        }
+        if (isDegeneratedRepetition(replyText)) {
+          return { ok: false, status: 500, error: "REPETITION_DEGENERATION", message: `模型 (${targetModel}) 陷入重複迴圈退化` };
+        }
+        return { ok: true, replyText, model: targetModel };
+      } else {
+        const baseUrl = (llm.baseUrl || "https://api.openai.com/v1").replace(/\/+$/, "");
+        const endpoint = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
+        const openAiMsgs = [{ role: "system", content: sysPrompt }, ...messages];
+
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${llm.apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: targetModel,
+            temperature: 0.4,
+            max_tokens: 3500,
+            messages: openAiMsgs
+          })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          if (res.status === 429) return { ok: false, status: 429, error: "RATE_LIMITED", message: `AI 服務達到速率限制 (429) [${targetModel}]` };
+          return { ok: false, status: res.status, error: "PROVIDER_ERROR", message: `AI 服務錯誤 (${res.status}) [${targetModel}]: ${errText.slice(0, 200)}` };
+        }
+
+        const data = await res.json();
+        const choice = data.choices && data.choices[0];
+        const replyText = ((choice && choice.message && choice.message.content) || "").trim();
+
+        if (!replyText && choice) {
+          if (choice.finish_reason === "length" || (choice.message && choice.message.reasoning && !choice.message.content)) {
+            return {
+              ok: false,
+              status: 400,
+              error: "REASONING_TOKEN_LIMIT",
+              message: `模型 (${targetModel}) 思考迴圈過長超出 Token 上限，未能產出內容`
+            };
+          }
+          return {
+            ok: false,
+            status: 500,
+            error: "EMPTY_REPLY",
+            message: `模型 (${targetModel}) 未產生回覆內容`
+          };
+        }
+        if (!replyText) {
+          return { ok: false, status: 500, error: "EMPTY_REPLY", message: `模型 (${targetModel}) 回傳空字串` };
+        }
+        if (isDegeneratedRepetition(replyText)) {
+          return {
+            ok: false,
+            status: 500,
+            error: "REPETITION_DEGENERATION",
+            message: `模型 (${targetModel}) 陷入重複迴圈退化`
+          };
+        }
+        return { ok: true, replyText, model: targetModel };
+      }
+    } catch (err) {
+      console.error(`AI chat error for ${targetModel}:`, err);
+      return { ok: false, status: 500, error: "NETWORK_ERROR", message: `連線失敗 [${targetModel}]: ${err && err.message ? err.message : String(err)}` };
+    }
+  }
+
+  const primaryModel = llm.model || (llm.provider === "groq" ? "qwen/qwen3.8-27b" : "gpt-4o");
+  const fallbackModel = (llm.fallbackModel || "").trim();
+
+  let primaryRes = await callModel(primaryModel);
+
+  if (primaryRes.ok) {
+    return {
+      ok: true,
+      reply: primaryRes.replyText,
+      provider: llm.provider,
+      model: primaryModel,
+      fallbackUsed: false
+    };
+  }
+
+  // Primary model failed. Check if fallback model is configured and different from primary
+  if (fallbackModel && fallbackModel !== primaryModel) {
+    console.warn(`[dispatchAiChat] Primary model '${primaryModel}' failed (${primaryRes.error}: ${primaryRes.message}). Attempting automatic fallback to '${fallbackModel}'...`);
+    const fallbackRes = await callModel(fallbackModel);
+    if (fallbackRes.ok) {
+      console.log(`[dispatchAiChat] Successfully recovered via fallback model '${fallbackModel}'`);
+      return {
+        ok: true,
+        reply: fallbackRes.replyText,
+        provider: llm.provider,
+        model: fallbackModel,
+        primaryModel: primaryModel,
+        fallbackUsed: true
+      };
+    }
+    // Both failed
+    console.error(`[dispatchAiChat] Fallback model '${fallbackModel}' also failed (${fallbackRes.error}: ${fallbackRes.message})`);
+    return {
+      ok: false,
+      status: fallbackRes.status || primaryRes.status || 500,
+      error: fallbackRes.error || primaryRes.error || "ALL_MODELS_FAILED",
+      message: `主要模型 (${primaryModel}) 與備援模型 (${fallbackModel}) 均呼叫失敗：${primaryRes.message}；備援原因：${fallbackRes.message}`
+    };
+  }
+
+  // No fallback model available, return primary failure
   return {
-    ok: true,
-    reply: replyText,
-    provider: llm.provider,
-    model: llm.model
+    ok: false,
+    status: primaryRes.status || 500,
+    error: primaryRes.error || "PROVIDER_ERROR",
+    message: primaryRes.message || "連線 AI 服務失敗"
   };
 }
 
@@ -1985,59 +2068,70 @@ async function extractSegments(env, emailText, deliberate) {
 
   const userPrompt = "Here is the email content to parse:\n\n" + emailText.slice(0, 8000);
 
-  let rawContent = "";
-  try {
-    if (llm.provider === "anthropic" || (!llm.baseUrl && llm.apiKey.startsWith("sk-ant-"))) {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": llm.apiKey,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json"
-        },
-        body: JSON.stringify({
-          model: llm.model || "claude-haiku-4-5",
-          max_tokens: 1000,
-          messages: [{ role: "user", content: sysInstruction + "\n\n" + userPrompt }]
-        })
-      });
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "");
-        console.error(`LLM Anthropic error (${res.status}):`, errText);
-        return undefined;
+  const primaryModel = llm.model || (llm.provider === "anthropic" ? "claude-haiku-4-5" : (llm.provider === "groq" ? "qwen/qwen3.8-27b" : "gpt-4o"));
+  const fallbackModel = (llm.fallbackModel || "").trim();
+
+  async function requestExtraction(targetModel) {
+    if (!targetModel) return undefined;
+    try {
+      if (llm.provider === "anthropic" || (!llm.baseUrl && llm.apiKey.startsWith("sk-ant-"))) {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "x-api-key": llm.apiKey,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json"
+          },
+          body: JSON.stringify({
+            model: targetModel,
+            max_tokens: 1000,
+            messages: [{ role: "user", content: sysInstruction + "\n\n" + userPrompt }]
+          })
+        });
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          console.error(`LLM Anthropic error (${res.status}) [${targetModel}]:`, errText);
+          return undefined;
+        }
+        const data = await res.json();
+        return (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
+      } else {
+        // OpenAI-compatible (Gemini via OpenAI-compat URL, Groq, OpenAI, DeepSeek, LocalAI, Ollama, etc.)
+        const baseUrl = (llm.baseUrl || "https://api.openai.com/v1").replace(/\/+$/, "");
+        const endpoint = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${llm.apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: targetModel,
+            temperature: 0.1,
+            messages: [
+              { role: "system", content: sysInstruction },
+              { role: "user", content: userPrompt }
+            ]
+          })
+        });
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          console.error(`LLM OpenAI-compat error (${res.status}) [${targetModel}]:`, errText);
+          return undefined;
+        }
+        const data = await res.json();
+        return ((data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "").trim();
       }
-      const data = await res.json();
-      rawContent = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
-    } else {
-      // OpenAI-compatible (Gemini via OpenAI-compat URL, Groq, OpenAI, DeepSeek, LocalAI, Ollama, etc.)
-      const baseUrl = (llm.baseUrl || "https://api.openai.com/v1").replace(/\/+$/, "");
-      const endpoint = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${llm.apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: llm.model || "gpt-4o",
-          temperature: 0.1,
-          messages: [
-            { role: "system", content: sysInstruction },
-            { role: "user", content: userPrompt }
-          ]
-        })
-      });
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "");
-        console.error(`LLM OpenAI-compat error (${res.status}):`, errText);
-        return undefined;
-      }
-      const data = await res.json();
-      rawContent = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+    } catch (e) {
+      console.error(`LLM execution error [${targetModel}]:`, e);
+      return undefined;
     }
-  } catch (e) {
-    console.error("LLM execution error:", e);
-    return undefined;
+  }
+
+  let rawContent = await requestExtraction(primaryModel);
+  if ((rawContent === undefined || !rawContent) && fallbackModel && fallbackModel !== primaryModel) {
+    console.warn(`[extractSegments] Primary model '${primaryModel}' failed or returned empty. Trying fallback model '${fallbackModel}'...`);
+    rawContent = await requestExtraction(fallbackModel);
   }
 
   if (!rawContent) return [];

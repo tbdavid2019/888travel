@@ -650,6 +650,8 @@
   html[lang*="zh"] .field textarea,
   html[lang*="zh"] #s_llm_model_select,
   html[lang*="zh"] #s_llm_model,
+  html[lang*="zh"] #s_llm_fallback_select,
+  html[lang*="zh"] #s_llm_fallback,
   html[lang*="zh"] #s_agent_key_disp {
     font-size: 16px !important;
     line-height: 1.5 !important;
@@ -2700,6 +2702,21 @@
             '<input id="s_llm_model" aria-label="'+(isZH()?"模型 ID 輸入框":"Model ID input")+'" type="text" placeholder="'+(isZH()?"選取上方下拉選單，或在此自訂模型 ID (例如 gpt-4o, llama-3.3-70b-versatile)":"Select from dropdown above or enter custom Model ID")+'" style="flex:1;font-family:var(--mono);font-size:14px">'+
           '</div>'+
         '</div>'+
+        '<div class="field" style="margin-top:12px">'+
+          '<label style="display:flex;justify-content:space-between;align-items:center">'+
+            '<span><span style="color:var(--coral);font-weight:700">🔄</span> '+(isZH()?"自動備援模型 (Fallback Model)":"Auto Fallback Model")+'</span>'+
+            '<span id="llm_fallback_badge" style="font-size:12px;font-weight:normal;color:var(--muted)"></span>'+
+          '</label>'+
+          '<div style="display:flex;gap:8px;align-items:center">'+
+            '<select id="s_llm_fallback_select" aria-label="'+(isZH()?"選擇備援模型下拉選單":"Select fallback model dropdown")+'" style="flex:1;cursor:pointer;font-family:var(--mono);font-size:14px">'+
+              '<option value="">'+(isZH()?"-- 未指定（依提供者預設） --":"-- Default fallback --")+'</option>'+
+            '</select>'+
+          '</div>'+
+          '<div style="margin-top:8px;display:flex;align-items:center;gap:8px">'+
+            '<input id="s_llm_fallback" aria-label="'+(isZH()?"備援模型 ID 輸入框":"Fallback Model ID input")+'" type="text" placeholder="'+(isZH()?"選取上方下拉選單，或在此自訂備援模型 ID (例如 openai/gpt-oss-120b)":"Select from dropdown or enter custom fallback Model ID")+'" style="flex:1;font-family:var(--mono);font-size:14px">'+
+          '</div>'+
+          '<div class="hint" style="margin-top:5px;font-size:12.5px">'+(isZH()?"🛡️ 當主要模型遭遇速率限制 (429)、思考長度超出或無回應時，系統將自動無縫切換至此備援模型，確保對話與行程規劃不中斷。":"🛡️ When the primary model hits rate limits (429), context limits, or fails, the system automatically falls back to this model.")+'</div>'+
+        '</div>'+
         field(isZH()?"API 金鑰 (API Key)":"API Key","s_llm_key","password","",isZH()?"僅儲存於你的 Worker":"stored on your worker only",isZH()?"僅存於 Worker 端":"stored on your worker only")+
         '<div class="hint">'+(isZH()?"支援 Google Gemini、OpenAI、Groq、DeepSeek、Anthropic 及任何相容 OpenAI 的 API 端點。切換提供者將填入預設端點，點擊「🔍 取得可用模型清單」可連線即時取得你的帳號真正支援的有效模型。":"Supports Google Gemini, OpenAI, Groq, DeepSeek, Anthropic, or any OpenAI-compatible API base URL. Switching provider sets base URL; click \"Fetch Models\" to retrieve the live active models from your account.")+'</div>'+
         '<div class="modal-actions act-row"><button class="btn" id="llmSave">'+(isZH()?"儲存 LLM 設定":"Save LLM Config")+'</button></div>'+
@@ -2867,20 +2884,29 @@
         if(gi&&!gi.value&&d.googleClientId)gi.value=d.googleClientId;
 
         // Populate and display LLM status
-        var lp=document.getElementById("s_llm_provider"), lb=document.getElementById("s_llm_base"), lm=document.getElementById("s_llm_model"), ls=document.getElementById("llmStatus");
+        var lp=document.getElementById("s_llm_provider"), lb=document.getElementById("s_llm_base"), lm=document.getElementById("s_llm_model"), lfb=document.getElementById("s_llm_fallback"), ls=document.getElementById("llmStatus");
         if(lp && d.llmProvider) lp.value = d.llmProvider;
         if(lb && d.llmBaseUrl !== undefined && !lb.value) lb.value = d.llmBaseUrl;
         if(lm && d.llmModel && !lm.value) lm.value = d.llmModel;
         var curP = (lp ? lp.value : "") || "openai";
         var curM = (lm ? lm.value : "") || "";
+        var curFb = d.llmFallbackModel !== undefined ? d.llmFallbackModel : (curP === "groq" ? "openai/gpt-oss-120b" : "");
+        if(lfb && !lfb.value && curFb) lfb.value = curFb;
+
         var mSelInit = document.getElementById("s_llm_model_select");
         if(mSelInit){
           mSelInit.innerHTML = renderModelOptions(curP, null, curM);
           if(curM) mSelInit.value = curM;
         }
+        var fbSelInit = document.getElementById("s_llm_fallback_select");
+        if(fbSelInit){
+          fbSelInit.innerHTML = renderFallbackOptions(curP, null, curFb);
+          if(curFb) fbSelInit.value = curFb;
+        }
         if(ls){
+          var fbNote = curFb ? (' ➔ ' + (isZH() ? '備援: ' : 'fallback: ') + curFb) : '';
           ls.innerHTML = (d.llmConfigured || d.anthropicKeySet)
-            ? ('<span style="color:var(--green)">● '+(isZH()?'已啟用智慧解析':'Smart parsing active')+'</span> <span class="opt">('+(d.llmProvider||"provider")+' · '+(d.llmModel||"model")+(d.llmSource==="secret"?' · secret':'')+')</span>')
+            ? ('<span style="color:var(--green)">● '+(isZH()?'已啟用智慧解析':'Smart parsing active')+'</span> <span class="opt">('+(d.llmProvider||"provider")+' · '+(d.llmModel||"model")+fbNote+(d.llmSource==="secret"?' · secret':'')+')</span>')
             : ('<span style="color:var(--amber)">◐ '+(isZH()?'尚未設定金鑰 — 郵件智慧解析未啟用':'Key not configured — parsing OFF')+'</span>');
         }
 
@@ -2930,6 +2956,14 @@
       anthropic: ["claude-3-7-sonnet-latest", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
       custom: []
     };
+    var LLM_RECOMMENDED_FALLBACKS = {
+      groq: ["openai/gpt-oss-120b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "qwen/qwen3.6-27b"],
+      gemini: ["gemini-2.0-flash", "gemini-1.5-flash"],
+      openai: ["gpt-4o-mini", "gpt-4o"],
+      deepseek: ["deepseek-chat"],
+      anthropic: ["claude-3-5-haiku-latest"],
+      custom: []
+    };
 
     function renderModelOptions(p, modelsList, activeVal){
       var list = (modelsList && modelsList.length) ? modelsList : (LLM_RECOMMENDED_MODELS[p] || []);
@@ -2943,6 +2977,21 @@
         html += '<option value="' + esc(activeVal) + '" selected>' + esc(activeVal) + (isZH() ? ' (目前設定)' : ' (current)') + '</option>';
       }
       html += '<option value="__custom__">' + (isZH() ? '✏️ 手動自訂輸入…' : '✏️ Custom model ID…') + '</option>';
+      return html;
+    }
+
+    function renderFallbackOptions(p, modelsList, activeVal){
+      var list = (modelsList && modelsList.length) ? modelsList : (LLM_RECOMMENDED_FALLBACKS[p] || []);
+      var html = '<option value="">' + (isZH() ? '-- 未指定（依提供者預設） --' : '-- Default fallback --') + '</option>';
+      var hasActive = false;
+      list.forEach(function(m){
+        if(m === activeVal) hasActive = true;
+        html += '<option value="' + esc(m) + '"' + (m === activeVal ? ' selected' : '') + '>' + esc(m) + '</option>';
+      });
+      if(activeVal && !hasActive && activeVal !== "__custom__"){
+        html += '<option value="' + esc(activeVal) + '" selected>' + esc(activeVal) + (isZH() ? ' (目前設定)' : ' (current)') + '</option>';
+      }
+      html += '<option value="__custom__">' + (isZH() ? '✏️ 手動自訂輸入…' : '✏️ Custom fallback ID…') + '</option>';
       return html;
     }
 
@@ -2981,6 +3030,41 @@
       };
     }
 
+    var fbSel = document.getElementById("s_llm_fallback_select");
+    var fbInput = document.getElementById("s_llm_fallback");
+    if(fbSel){
+      fbSel.onchange = function(){
+        if(this.value === "__custom__"){
+          if(fbInput){ fbInput.focus(); fbInput.select(); }
+        } else {
+          if(fbInput) fbInput.value = this.value;
+        }
+      };
+    }
+    if(fbInput){
+      fbInput.oninput = function(){
+        var v = this.value.trim();
+        if(fbSel){
+          var found = false;
+          for(var i = 0; i < fbSel.options.length; i++){
+            if(fbSel.options[i].value === v){
+              fbSel.selectedIndex = i;
+              found = true;
+              break;
+            }
+          }
+          if(!found){
+            for(var i = 0; i < fbSel.options.length; i++){
+              if(fbSel.options[i].value === "__custom__"){
+                fbSel.selectedIndex = i;
+                break;
+              }
+            }
+          }
+        }
+      };
+    }
+
     var provSelect = document.getElementById("s_llm_provider");
     if(provSelect){
       provSelect.onchange = function(){
@@ -2993,6 +3077,12 @@
         var defaultM = rec[0] || "";
         if(mSel) mSel.innerHTML = renderModelOptions(p, null, defaultM);
         if(mInput) mInput.value = defaultM;
+
+        var recFb = LLM_RECOMMENDED_FALLBACKS[p] || [];
+        var defaultFb = recFb[0] || "";
+        if(fbSel) fbSel.innerHTML = renderFallbackOptions(p, null, defaultFb);
+        if(fbInput) fbInput.value = defaultFb;
+
         var badge = document.getElementById("llm_models_badge");
         if(badge) badge.innerHTML = "";
       };
@@ -3033,6 +3123,12 @@
             mSel.innerHTML = renderModelOptions(p, models, chosen);
             mSel.value = chosen;
           }
+          if(fbSel){
+            var curFbVal = fbInput ? fbInput.value.trim() : "";
+            var fbChosen = curFbVal && models.includes(curFbVal) ? curFbVal : (p === "groq" ? "openai/gpt-oss-120b" : "");
+            fbSel.innerHTML = renderFallbackOptions(p, models, fbChosen);
+            if(fbChosen) fbSel.value = fbChosen;
+          }
           var badge = document.getElementById("llm_models_badge");
           if(badge){
             badge.innerHTML = '<span style="color:var(--green)">● ' + (isZH() ? ('已載入 ' + models.length + ' 個可用模型') : (models.length + ' models ready')) + '</span>';
@@ -3048,9 +3144,9 @@
     }
 
     document.getElementById("llmSave").onclick=async function(){
-      var p=val("s_llm_provider")||"openai", b=val("s_llm_base"), m=val("s_llm_model"), k=val("s_llm_key");
+      var p=val("s_llm_provider")||"openai", b=val("s_llm_base"), m=val("s_llm_model"), fb=val("s_llm_fallback"), k=val("s_llm_key");
       try{
-        var r=await fetch(apiBase()+"/settings/llm",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({provider:p,baseUrl:b,model:m,apiKey:k})});
+        var r=await fetch(apiBase()+"/settings/llm",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({provider:p,baseUrl:b,model:m,fallbackModel:fb,apiKey:k})});
         var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存 LLM 設定":"Could not save LLM config"));return;}
         document.getElementById("s_llm_key").value="";
         toast(isZH()?"LLM 設定已儲存 ✓":"LLM config saved ✓");
@@ -3949,12 +4045,22 @@
           }
         });
       }
+
+      var fallbackBadge = '';
+      if(msg.fallbackUsed){
+        fallbackBadge = '<div class="copilot-fallback-badge" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--coral);background:rgba(255,90,53,.09);border:1px solid rgba(255,90,53,.25);padding:3px 9px;border-radius:6px;margin-bottom:10px">' +
+          lucideIcon('refresh-cw', 12) +
+          '<span>' + (isZH() ? ('已自動啟用備援模型: <b>' + esc(msg.fallbackModel || 'gpt-oss-120b') + '</b>') : ('Auto fallback activated: <b>' + esc(msg.fallbackModel || 'gpt-oss-120b') + '</b>')) + '</span>' +
+        '</div>';
+      }
+
       if(!formattedText.trim() && (!msg.proposals || !msg.proposals.length)){
         div.innerHTML = '<div class="copilot-bubble" style="border-color:rgba(255,90,53,.3);background:rgba(255,90,53,.06);color:var(--coral)">' +
+          fallbackBadge +
           '<div>⚠️ ' + (isZH() ? "AI 特助未傳回文字內容（可能因模型思考迴圈過長達到 Token 上限）。建議至「設定」更換模型為 Qwen 3.8 27B 或重新提問。" : "Empty response from assistant. Please switch model or retry.") + '</div>' +
         '</div>';
       } else {
-        div.innerHTML = '<div class="copilot-bubble">' + formattedText + '</div>';
+        div.innerHTML = '<div class="copilot-bubble">' + fallbackBadge + formattedText + '</div>';
       }
     }
 
@@ -4040,7 +4146,10 @@
       var asstMsg = {
         role: "assistant",
         content: extracted.cleanText,
-        proposals: extracted.proposals
+        proposals: extracted.proposals,
+        fallbackUsed: Boolean(data.fallbackUsed),
+        fallbackModel: data.model || "",
+        primaryModel: data.primaryModel || ""
       };
       extracted.proposals.forEach(function(p){
         copilotProposals[p.id] = p;
