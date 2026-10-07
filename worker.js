@@ -511,7 +511,7 @@ export default {
         return cors(json({
           ok: true,
           service: "888travel",
-          version: "2.6.5",
+          version: "2.6.6",
           instance: url.origin,
           serverTime: new Date().toISOString(),
           totalTrips: trips.length,
@@ -1785,14 +1785,23 @@ async function dispatchAiChat(env, rawMessages, currentTripId = "") {
 
   if (tripId && store.trips[tripId]) {
     activeTrip = store.trips[tripId];
+
+    // Clean and slim notes so giant URL dumps do not consume thousands of tokens
+    let rawNotes = activeTrip.notes || "";
+    let cleanNotes = rawNotes.replace(/https?:\/\/\S+/g, "").replace(/資料來源[：:]/g, "").replace(/\n{2,}/g, "\n").trim();
+    if (cleanNotes.length > 350) {
+      cleanNotes = cleanNotes.slice(0, 350) + "… (後續略)";
+    }
+
     const segSummary = (activeTrip.segments || [])
       .slice()
       .sort((a, b) => ((a.start || "") < (b.start || "") ? -1 : 1))
+      .slice(0, 20)
       .map((s) => {
         let line = `[${s.start || "未定時間"}] ${s.type || "other"}: ${s.name || "未命名"}`;
-        if (s.address) line += ` [地點: ${s.address}]`;
-        if (s.note) line += ` (${s.note})`;
-        if (s.fallback && s.fallback.name) line += ` [備案: ${s.fallback.name}${s.fallback.address ? " @ " + s.fallback.address : ""}]`;
+        if (s.address) line += ` [地點: ${s.address.slice(0, 30)}]`;
+        if (s.note) line += ` (${s.note.slice(0, 40)})`;
+        if (s.fallback && s.fallback.name) line += ` [備案: ${s.fallback.name}]`;
         return line;
       })
       .join("\n");
@@ -1803,7 +1812,7 @@ async function dispatchAiChat(env, rawMessages, currentTripId = "") {
 - 目的地: ${activeTrip.to} (出發地: ${activeTrip.from || "未指定"})
 - 日期區間: ${activeTrip.start} 至 ${activeTrip.end}
 - 時區: ${activeTrip.timezone || "未設定"}
-- 備註: ${activeTrip.notes || "無"}
+- 概述/備註: ${cleanNotes || "無"}
 - 目前已安排細項 (${(activeTrip.segments || []).length} 項):
 ${segSummary || "（目前尚無細項安排）"}`;
   } else {
@@ -1910,6 +1919,7 @@ ${tripContext}
         body: JSON.stringify({
           model: llm.model || "gpt-4o",
           temperature: 0.4,
+          max_tokens: 3000,
           messages: openAiMsgs
         })
       });
@@ -1921,7 +1931,25 @@ ${tripContext}
       }
 
       const data = await res.json();
-      replyText = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+      const choice = data.choices && data.choices[0];
+      replyText = (choice && choice.message && choice.message.content) || "";
+
+      if (!replyText && choice) {
+        if (choice.finish_reason === "length" || (choice.message && choice.message.reasoning && !choice.message.content)) {
+          return {
+            ok: false,
+            status: 400,
+            error: "REASONING_TOKEN_LIMIT",
+            message: "此 AI 模型的思考迴圈過長（已達到 Token 長度上限），未能產出回覆內容。建議在「設定 ⚙️」中將模型切換為 Qwen 3.8 27B 或加大 Token 額度。"
+          };
+        }
+        return {
+          ok: false,
+          status: 500,
+          error: "EMPTY_REPLY",
+          message: "AI 模型未產生任何回覆內容，請嘗試更換模型或重新提問。"
+        };
+      }
     }
   } catch (err) {
     console.error("AI chat error:", err);

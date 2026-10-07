@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.6.6] - 2026-10-07
+
+### Enhanced & Fixed / 旅程備註 Markdown 排版與 AI 特助思考對話強化 (Markdown Notes & AI Copilot Resilience)
+- **全面支援旅程備註 Markdown 排版與超連結 (Full Markdown & Linkification for Trip Notes)**：
+  - **結構化排版 (Structured Markdown)**：原備註直接以純文字輸出，重構後全面支援標題（`#`、`##`、`###`）、粗體（`**`）、斜體（`*`）、無序與有序清單、引言、程式碼區塊及 Markdown 表格。
+  - **自動超連結解析 (Auto Linkification)**：文字中所有 `https://...` 網址自動轉化為高雅且具備外連提示箭頭的跳轉連結（`md-link`），解決長串外部資料來源網址無法點擊的問題。
+  - **智慧長篇備註摺疊 (Collapsible Notes Container)**：超過 280 字元的詳細規劃說明自動收納於具備底部柔和漸層的優雅容器中，並提供「📖 展開完整備註說明 / ▲ 收合」切換按鈕，兼顧首頁簡潔俐落與完整資訊查閱。
+- **徹底修復 AI 特助講不出話（空白氣泡）問題 (Fix Empty Bubble & Infinite Reasoning Loop)**：
+  - **根因修復**：先前使用者選擇之 Groq 實驗性模型 `openai/gpt-oss-20b` 具備深度思考機制，且未經修剪的龐大旅程備註與細項造成 Prompt 高達 6,000+ Tokens，導致該模型在 8k 上下文限制下耗盡所有 Token 陷入思考迴圈，未產出任何 `content`（字數為 0）便遭中斷，前端因而渲染出空白對話泡泡。
+  - **上下文智能修剪 (Context Slimming)**：於後端 `dispatchAiChat` 智慧過濾 `t.notes` 中重複的網址清單並精煉文字，將 Context 消耗由 6,000+ Tokens 大幅降至 ~500 Tokens，釋放出超過 7,500+ Tokens 充裕回覆空間。
+  - **後端空白防禦 (Empty Reply Guard)**：後端偵測到 `finish_reason === "length"` 且文字為空時，主動攔截並返回明確指引，前端亦全面杜絕空白氣泡渲染。
+  - **Groq 推薦模型升級 (Optimized Groq Presets)**：優先配置極速、高品質繁體中文的 `qwen/qwen3.8-27b`（Qwen 27B），特助對話延遲縮短至 1~2 秒且不再卡住。
+  - **同步升級特助對話 Markdown 表格渲染**：AI 特助產出之雨天備案表格與建議景點全面套用結構化 HTML 表格與清單樣式。
+
 ## [2.6.5] - 2026-10-07
 
 ### Fixed / 徹底修復細項行程 ISO 日期時間解析與排版 (Fix ISO Datetime Parsing & Eliminate `NaN日` Bug)

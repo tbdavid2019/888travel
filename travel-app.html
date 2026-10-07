@@ -122,8 +122,33 @@
   .mini{font-family:var(--body);font-weight:600;font-size:14.5px;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:8px 16px;border-radius:999px;cursor:pointer;min-height:38px;display:inline-flex;align-items:center;gap:6px}
   .mini:hover{background:var(--soft)}
   .mini.del{color:var(--coral);border-color:rgba(255,90,53,.3)}
-  .mini.del:hover{background:rgba(255,90,53,.08)}
-  .tripnote{margin:14px 26px 0;font-size:14.5px;line-height:1.6;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--line-strong);border-radius:0 10px 10px 0;padding:11px 14px;white-space:pre-wrap}
+  .tripnote-container{margin:14px 26px 0;position:relative;background:var(--soft);border:1px solid var(--line);border-left:3.5px solid var(--cobalt);border-radius:0 12px 12px 0;overflow:hidden}
+  .tripnote{font-size:14.5px;line-height:1.68;color:var(--ink);padding:14px 18px;transition:max-height .25s ease}
+  .tripnote.clamped{max-height:140px;overflow:hidden}
+  .tripnote-fade{display:none}
+  .tripnote.clamped + .tripnote-fade{display:block;position:absolute;bottom:35px;left:0;right:0;height:65px;background:linear-gradient(to bottom,rgba(248,245,238,0),var(--soft));pointer-events:none}
+  .tripnote-toggle{width:100%;padding:9px 14px;background:rgba(22,19,12,.03);border:none;border-top:1px dashed var(--line);font-family:var(--body);font-size:13.5px;font-weight:600;color:var(--cobalt);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s ease}
+  .tripnote-toggle:hover{background:rgba(22,19,12,.06);color:var(--coral)}
+
+  /* Markdown styles across trip notes and AI copilot */
+  .tripnote .md-p,.copilot-bubble .md-p{margin:0 0 10px}
+  .tripnote .md-p:last-child,.copilot-bubble .md-p:last-child{margin-bottom:0}
+  .tripnote .md-h2,.tripnote .md-h3,.tripnote .md-h4,.copilot-bubble .md-h2,.copilot-bubble .md-h3,.copilot-bubble .md-h4{font-family:var(--display);font-weight:700;color:var(--ink);margin:14px 0 6px;line-height:1.35}
+  .tripnote .md-h4,.copilot-bubble .md-h4{font-size:15px}
+  .tripnote .md-h3,.copilot-bubble .md-h3{font-size:16px}
+  .tripnote .md-h2,.copilot-bubble .md-h2{font-size:17.5px}
+  .tripnote .md-ul,.tripnote .md-ol,.copilot-bubble .md-ul,.copilot-bubble .md-ol{margin:6px 0 10px 20px;padding:0}
+  .tripnote .md-ul li,.tripnote .md-ol li,.copilot-bubble .md-ul li,.copilot-bubble .md-ol li{margin-bottom:4px}
+  .md-link{color:var(--cobalt);text-decoration:underline;text-underline-offset:2.5px;word-break:break-all;font-weight:500;transition:color .15s ease}
+  .md-link:hover{color:var(--coral)}
+  .md-code{font-family:var(--mono);font-size:13px;background:rgba(22,19,12,.06);padding:2px 5px;border-radius:4px;color:var(--ink)}
+  .md-pre{background:rgba(22,19,12,.05);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow-x:auto;font-family:var(--mono);font-size:13px;margin:10px 0}
+  .md-table-wrap{width:100%;overflow-x:auto;margin:10px 0;border:1px solid var(--line);border-radius:8px}
+  .md-table{width:100%;border-collapse:collapse;font-size:13.5px;text-align:left}
+  .md-table th{background:rgba(22,19,12,.05);padding:8px 10px;border-bottom:1px solid var(--line);font-weight:700;color:var(--ink);white-space:nowrap}
+  .md-table td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--ink)}
+  .md-table tr:last-child td{border-bottom:none}
+  .md-quote{margin:8px 0;padding:8px 12px;border-left:3px solid var(--amber);background:rgba(217,119,6,.06);border-radius:0 6px 6px 0;color:var(--ink);font-style:italic}
 
   /* toggle + timeline */
   .toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 26px;background:#F8F5EE;border:none;border-top:1px solid var(--line);cursor:pointer;margin-top:16px}
@@ -730,6 +755,7 @@
     .set-tab-btn{padding:10px 14px;font-size:15px;min-height:42px;display:inline-flex;align-items:center;gap:6px}
     .app-footer{margin-top:40px;flex-direction:column;align-items:flex-start;gap:12px}
     .two{grid-template-columns:1fr}
+    .tripnote-container{margin:12px 14px 0}
     .copilot-drawer{top:auto;bottom:0;left:0;right:0;width:100%;height:86dvh;max-height:86dvh;border-radius:24px 24px 0 0;border-left:none;border-top:1px solid var(--line);transform:translateY(100%);box-shadow:0 -12px 40px rgba(22,19,12,.25);padding-bottom:env(safe-area-inset-bottom);overscroll-behavior:contain}
     .copilot-scrim.show .copilot-drawer{transform:translateY(0)}
 
@@ -945,7 +971,7 @@
   }catch(e){console.error("save",e);}}
 
   var trips=[], wishes=[], home=(isZH()?"TPE":"OPO"), homeTz="", settings={workerUrl:""}, syncState="local", authToken="";
-  var tab="upcoming", openSet={}, calMonths=6;
+  var tab="upcoming", openSet={}, openNotesSet={}, calMonths=6;
 
   /* ===================== timezone helpers ===================== */
   function getHomeTz(){
@@ -1130,6 +1156,131 @@
   function tripSig(t){return[t.from,t.to,t.start,t.end].join("|").toLowerCase();}
   function byStart(a,b){return a.start<b.start?-1:1;}
   function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove("show");},1900);}
+
+  /* Markdown & Rich Link Renderer (Zero-dependency, safe XSS) */
+  function renderMarkdown(text){
+    if(!text) return "";
+    var raw = String(text).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+    var codeBlocks = [];
+    raw = raw.replace(/```([\s\S]*?)```/g, function(m, p1){
+      var idx = codeBlocks.length;
+      codeBlocks.push(p1);
+      return "___CODE_BLOCK_" + idx + "___";
+    });
+
+    var inlineCodes = [];
+    raw = raw.replace(/`([^`\n]+)`/g, function(m, p1){
+      var idx = inlineCodes.length;
+      inlineCodes.push(p1);
+      return "___INLINE_CODE_" + idx + "___";
+    });
+
+    var escaped = esc(raw);
+
+    escaped = escaped.replace(/___INLINE_CODE_(\d+)___/g, function(m, idx){
+      return '<code class="md-code">' + esc(inlineCodes[+idx]) + '</code>';
+    });
+
+    escaped = escaped.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, function(m, label, url){
+      return '<a class="md-link" href="' + url + '" target="_blank" rel="noopener">' + label + ' ↗</a>';
+    });
+
+    escaped = escaped.replace(/(^|[^"'>])(https?:\/\/[^\s<]+)/g, function(m, prefix, url){
+      var endPunct = "";
+      var pMatch = url.match(/[,.\uFF0C\u3002\uFF1B;\uFF09\)]+$/);
+      if(pMatch){
+        endPunct = pMatch[0];
+        url = url.slice(0, -endPunct.length);
+      }
+      return prefix + '<a class="md-link" href="' + url + '" target="_blank" rel="noopener">' + url + ' ↗</a>' + endPunct;
+    });
+
+    escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    escaped = escaped.replace(/(^|[^\*])\*([^\*\n]+)\*([^\*]|$)/g, '$1<em>$2</em>$3');
+
+    var blocks = escaped.split(/\n{2,}/);
+    var html = blocks.map(function(b){
+      b = b.trim();
+      if(!b) return "";
+
+      if(b.indexOf("___CODE_BLOCK_") !== -1){
+        return b.replace(/___CODE_BLOCK_(\d+)___/g, function(m, idx){
+          return '<pre class="md-pre"><code>' + esc(codeBlocks[+idx].trim()) + '</code></pre>';
+        });
+      }
+
+      var lines = b.split(/\n/);
+      var isTable = lines.length >= 2 && lines.every(function(l){ return /^\s*\|.*\|\s*$/.test(l); });
+      if(isTable){
+        var tRows = lines.filter(function(l){ return !/^\s*\|(?:\s*:?-+:?\s*\|)+\s*$/.test(l); });
+        var tableHtml = '<div class="md-table-wrap"><table class="md-table">';
+        tRows.forEach(function(row, rIdx){
+          var cells = row.trim().replace(/^\|/, "").replace(/\|$/, "").split("|");
+          var tag = rIdx === 0 ? "th" : "td";
+          tableHtml += '<tr>' + cells.map(function(c){ return '<' + tag + '>' + c.trim() + '</' + tag + '>'; }).join("") + '</tr>';
+        });
+        tableHtml += '</table></div>';
+        return tableHtml;
+      }
+
+      if(/^###\s+/.test(b)){
+        return '<h4 class="md-h4">' + b.replace(/^###\s+/, "") + '</h4>';
+      }
+      if(/^##\s+/.test(b)){
+        return '<h3 class="md-h3">' + b.replace(/^##\s+/, "") + '</h3>';
+      }
+      if(/^#\s+/.test(b)){
+        return '<h2 class="md-h2">' + b.replace(/^#\s+/, "") + '</h2>';
+      }
+
+      if(/^>\s+/.test(b)){
+        return '<blockquote class="md-quote">' + b.replace(/^>\s+/gm, "").replace(/\n/g, "<br>") + '</blockquote>';
+      }
+
+      if(/^[-*•]\s+/m.test(b)){
+        var ulItems = b.split(/\n/).map(function(l){
+          var clean = l.replace(/^[-*•]\s+/, "").trim();
+          return clean ? '<li>' + clean + '</li>' : '';
+        }).join("");
+        return '<ul class="md-ul">' + ulItems + '</ul>';
+      }
+
+      if(/^\d+\.\s+/m.test(b)){
+        var olItems = b.split(/\n/).map(function(l){
+          var clean = l.replace(/^\d+\.\s+/, "").trim();
+          return clean ? '<li>' + clean + '</li>' : '';
+        }).join("");
+        return '<ol class="md-ol">' + olItems + '</ol>';
+      }
+
+      return '<p class="md-p">' + b.replace(/\n/g, '<br>') + '</p>';
+    }).join("");
+
+    return html;
+  }
+
+  function renderTripNotes(t){
+    if(!t.notes) return "";
+    var isExpanded = !!openNotesSet[t.id];
+    var isLong = t.notes.length > 280;
+    var contentHtml = renderMarkdown(t.notes);
+
+    var wrapClass = "tripnote" + (isLong && !isExpanded ? " clamped" : "");
+    var toggleBtn = isLong ? (
+      '<div class="tripnote-fade"></div>' +
+      '<button class="tripnote-toggle" data-togglenote="' + t.id + '">' +
+        '<span>' + (isExpanded ? (isZH() ? "▲ 收合備註說明" : "▲ Collapse notes") : (isZH() ? "📖 展開完整備註說明 (" + t.notes.length + " 字)" : "📖 Show full notes (" + t.notes.length + " chars)")) + '</span>' +
+      '</button>'
+    ) : "";
+
+    return '<div class="tripnote-container">' +
+      '<div class="' + wrapClass + '" id="tnote_' + t.id + '">' +
+        contentHtml +
+      '</div>' +
+      toggleBtn +
+    '</div>';
+  }
 
   var PLANE='<svg width="ICON" height="ICON" viewBox="0 0 24 24" fill="none" style="STYLE"><path d="M2 11.5 21.5 3l-8.2 18.5-2.2-7.6-9.1-2.4Z" fill="currentColor"/></svg>';
   function plane(size,style){return PLANE.replace(/ICON/g,size).replace("STYLE",style||"");}
@@ -1557,7 +1708,7 @@
           '<div class="destinfo" data-dest="'+t.id+'"></div>'+
         '</div><div class="card-acts"><button class="mini ai" data-ai="'+t.id+'" title="'+(isZH()?"AI 智慧規劃此旅程":"AI Planning")+'">✨ '+(isZH()?"AI 規劃":"AI Plan")+'</button><button class="mini" data-edit="'+t.id+'">'+(isZH()?"編輯":"Edit")+'</button><button class="mini del" data-del="'+t.id+'">'+(isZH()?"刪除":"Delete")+'</button></div></div></div>'+
       '</div>'+
-      (t.notes?'<div class="tripnote">'+esc(t.notes)+'</div>':'')+
+      (t.notes?renderTripNotes(t):'')+
       '<button class="toggle" data-toggle="'+t.id+'"><span class="lbl"><span class="sq" style="background:var(--cobalt)"></span><span class="sq" style="background:var(--green)"></span><span class="sq" style="background:var(--purple)"></span>'+(isZH()?"行程規劃":"ITINERARY")+'</span>'+
         '<span class="rgt">'+(openSet[t.id]?(isZH()?"收合行程":"Hide plans"):(isZH()?"展開行程":"Show plans"))+' <span class="caret">'+(openSet[t.id]?"▲":"▼")+'</span></span></button>'+
       itinerary(t)+
@@ -2319,7 +2470,7 @@
     document.getElementById("p_save").onclick=async function(){t.photo=inp.value.trim();t.updatedAt=Date.now();await persistTrip(t);closeModal();render();toast(t.photo?(isZH()?"相片已更新":"Photo updated"):(isZH()?"已套用預設相片":"Using automatic photo"));};
   }
   document.getElementById("list").addEventListener("click",function(e){
-    var t=e.target.closest("[data-edit],[data-del],[data-editw],[data-delw],[data-toggle],[data-addseg],[data-editseg],[data-delseg],[data-ics],[data-photo],[data-plan],[data-sharetrip],[data-ai]");
+    var t=e.target.closest("[data-edit],[data-del],[data-editw],[data-delw],[data-toggle],[data-togglenote],[data-addseg],[data-editseg],[data-delseg],[data-ics],[data-photo],[data-plan],[data-sharetrip],[data-ai]");
     if(!t)return;
     if(t.dataset.ai){openCopilot(t.dataset.ai);}
     else if(t.dataset.del){if(confirm(isZH()?"確定要刪除這趟旅程嗎？":"Delete this trip?")){var did=t.dataset.del;trips=trips.filter(function(x){return x.id!==did;});save("trips",trips);render();toast(isZH()?"旅程已刪除":"Trip deleted");
@@ -2335,6 +2486,7 @@
     else if(t.dataset.photo){changePhoto(t.dataset.photo);}
     else if(t.dataset.plan){var pp=t.dataset.plan.split("|");openPlan(pp[0],pp[1]);}
     else if(t.dataset.toggle){var id=t.dataset.toggle;openSet[id]=!openSet[id];render();}
+    else if(t.dataset.togglenote){var nid=t.dataset.togglenote;openNotesSet[nid]=!openNotesSet[nid];render();}
   });
 
   /* ===================== share / instagram overlay (new) ===================== */
@@ -2773,7 +2925,7 @@
     var LLM_RECOMMENDED_MODELS = {
       gemini: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"],
       openai: ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "o3-mini"],
-      groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"],
+      groq: ["qwen/qwen3.8-27b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "qwen/qwen3.6-27b", "openai/gpt-oss-120b"],
       deepseek: ["deepseek-chat", "deepseek-reasoner"],
       anthropic: ["claude-3-7-sonnet-latest", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
       custom: []
@@ -3688,24 +3840,7 @@
 
   function formatReplyText(text){
     if(!text) return "";
-    var escaped = esc(text);
-    // Convert markdown bold **text** to <b>text</b>
-    escaped = escaped.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-    var blocks = escaped.split(/\n{2,}/);
-    var html = blocks.map(function(b){
-      b = b.trim();
-      if(!b) return "";
-      if(/^[-*•]\s+/m.test(b)){
-        var lines = b.split(/\n/);
-        var listItems = lines.map(function(line){
-          var cleanLine = line.replace(/^[-*•]\s+/, "").trim();
-          return cleanLine ? "<li>" + cleanLine + "</li>" : "";
-        }).join("");
-        return "<ul>" + listItems + "</ul>";
-      }
-      return "<p>" + b.replace(/\n/g, "<br>") + "</p>";
-    }).join("");
-    return html;
+    return renderMarkdown(text);
   }
 
   function extractProposals(text){
@@ -3804,15 +3939,23 @@
         msg.proposals.forEach(function(p){
           var cardHtml = renderProposalCard(p);
           var marker = '__COPILOT_PROP_' + p.id + '__';
-          var pMarker = '<p>' + marker + '</p>';
+          var pMarker = '<p class="md-p">' + marker + '</p>';
           if(formattedText.indexOf(pMarker) !== -1){
             formattedText = formattedText.replace(pMarker, cardHtml);
+          } else if(formattedText.indexOf('<p>' + marker + '</p>') !== -1){
+            formattedText = formattedText.replace('<p>' + marker + '</p>', cardHtml);
           } else {
             formattedText = formattedText.replace(marker, cardHtml);
           }
         });
       }
-      div.innerHTML = '<div class="copilot-bubble">' + formattedText + '</div>';
+      if(!formattedText.trim() && (!msg.proposals || !msg.proposals.length)){
+        div.innerHTML = '<div class="copilot-bubble" style="border-color:rgba(255,90,53,.3);background:rgba(255,90,53,.06);color:var(--coral)">' +
+          '<div>⚠️ ' + (isZH() ? "AI 特助未傳回文字內容（可能因模型思考迴圈過長達到 Token 上限）。建議至「設定」更換模型為 Qwen 3.8 27B 或重新提問。" : "Empty response from assistant. Please switch model or retry.") + '</div>' +
+        '</div>';
+      } else {
+        div.innerHTML = '<div class="copilot-bubble">' + formattedText + '</div>';
+      }
     }
 
     copilotStream.appendChild(div);
