@@ -12,6 +12,8 @@
 ![Runs on Cloudflare Workers](https://img.shields.io/badge/runs%20on-Cloudflare%20Workers-F38020.svg)
 ![i18n](https://img.shields.io/badge/i18n-繁體中文%20%7C%20English-blueviolet.svg)
 ![LLM Supported](https://img.shields.io/badge/LLM-Gemini%20%7C%20OpenAI%20%7C%20Groq%20%7C%20Claude-blue.svg)
+![AI Copilot](https://img.shields.io/badge/AI%20Copilot-Dual--Track%20Fallback-FF5A35.svg)
+![Agent API](https://img.shields.io/badge/Agent%20API-RESTful%20%7C%20skill.md-1E40FF.svg)
 ![Resend OTP](https://img.shields.io/badge/Email%20Auth-Resend%20OTP-1B8A57.svg)
 ![PWA Ready](https://img.shields.io/badge/PWA-installable-success.svg)
 ![Vanilla JS](https://img.shields.io/badge/stack-Vanilla%20JS%20(No%20Build)-yellow.svg)
@@ -38,6 +40,23 @@
 - **繁體中文 & English 一鍵無縫切換**：在頂部導覽列或「設定」視窗中隨時切換，全站文案即時更新，並自動於本地記憶偏好（`localStorage`）。
 - **極致 CJK 字型排版工藝 (Impeccable Craft)**：全面針對繁體中文讀者優化字型備援與排版間距，徹底修正英文字型寬鬆字距（`.22em`）在方塊中文字上散亂的問題；為複雜筆劃漢字（如體、鑑、鐵、鬱）提供清晰的最小字級（12px~13px）與舒適行高（1.6~1.7）。
 - **在地化日期與名詞**：符合台灣與繁體中文閱讀習慣的日期區間（如 `2026年 9月15日 – 9月18日`）、行程分類（航班、飯店住宿、租車、機場接駁、鐵路列車、餐廳活動）。
+
+### 💬 內建 AI 旅程特助 (In-App AI Copilot)
+- **右下角常駐抽屜式對話**：點擊右下角懸浮按鈕即可展開沉浸式 AI 對話抽屜。特助具備當前旅程完整時空脈絡（日期、起訖點、住宿飯店與交通時程），隨時為您規劃每日亮點、推薦在地私房美食或提供雨天備案。
+- **自動雙軌容錯備援 (Automatic Multi-Model Failover)**：在「設定 ➔ 🤖 AI 模型」中可配置「主要模型」與「🔄 自動備援模型」（支援 Groq `qwen/qwen3.8-27b` / `openai/gpt-oss-120b`、Gemini `gemini-2.0-flash`、OpenAI `gpt-4o-mini`、Claude 等）。當主要模型遭遇 API 速率限制 (HTTP 429) 或思考長度溢出時，後端自動無感切換至備援模型繼續回答，並以珊瑚橘徽章即時提示，確保行程規劃永不中斷。
+- **智慧上下文修剪與 Markdown 結構化排版**：自動修剪龐大旅程備註避免耗盡 Token，並原生支援 Markdown 表格、無序清單、強調粗體與外連跳轉連結解析。
+
+### ⚡ 外部 AI Agent 深度調用與專屬 Skill (LLM Agent API & Discovery)
+- **專屬 Agent API Token (`tr_...`)**：在「設定 ➔ ⚡ Agent API」中一鍵產生具備獨立權限的 Bearer Token，遵從業界最高標準的**單次顯示安全架構**，讓外部 AI 工具能在安全授權下調用。
+- **完整 RESTful 19 大端點全光譜覆蓋 (`/api/v1/*`)**：
+  - **旅程與細項排程**：多日旅程完整 CRUD、7 大類別細項行程批次增刪改、主備案一鍵互換 (`swap-fallback`)。
+  - **真實地點探勘**：串接 Google Places API 搜尋真實餐廳景點、查詢營業時間與 Google Maps 直連導航。
+  - **願望清單與背景同步**：機票與心願雷達管理、日曆與 Gmail 背景同步手動觸發、雲端快照備份查詢。
+  - **外部 Copilot 對話端點**：外部 AI 亦可直接呼叫 `POST /api/v1/copilot/chat` 與內建特助互動。
+- **機器可讀標準與動態規格 (Agent Skill & LLMs Discovery)**：
+  - **`/skill.md`**：符合 Agentic 標準格式的完整 Skill 規範與工具呼叫指令，可直接供 Claude Code、Cursor、Windsurf、OpenSpec 或 Antigravity 載入。
+  - **`/llms.txt` & `/llms-full.txt`**：符合 LLM 網路發現協議的規格索引，內建 UTF-8 防亂碼保護與動態網域代換。
+  - **一鍵複製動態 Agent System Prompt**：在設定面板中點擊「📋 複製動態 Prompt」，系統會自動填入您當前實例的網址與有效 Bearer Token，直接貼給 ChatGPT、Claude 或任何大模型，它就能瞬間學會操作 888travel 為您規劃與寫入行程！
 
 ### 🔐 雙重認證守門：密碼登入與信箱 OTP 驗證碼 (Password & Email OTP)
 - **密碼保護**：初次架設一鍵建立管理員信箱與密碼，產生 256 位元安全 Session。
