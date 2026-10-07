@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.6.2] - 2026-10-07
+
+### Enhanced / 介面與架構重大升級
+- **模組化分頁式設定面板 (Modular Tabbed Settings Modal)**：
+  - **徹底告別無限制向下捲動 (Endless Scroll Eliminated)**：將原本冗長混雜的單一設定清單，重構為頂部切換之 5 大聚焦分頁：
+    1. **`👤 一般偏好 (General)`**：語言切換、預設出發基地、常駐基地時區、度量單位、Worker 雲端同步網址、工作階段登出。
+    2. **`🤖 AI 模型 (AI Model)`**：內建 Copilot 對話助理與郵件智慧解析之 LLM 提供者、Base URL、模型選擇（即時抓取有效清單）、API 金鑰。
+    3. **`⚡ Agent API`**：專屬外部 AI Agent（Claude Code、Antigravity、Cursor、ChatGPT 等）規劃之 RESTful API 控制台。
+    4. **`🔄 同步服務 (Sync & Services)`**：Google Calendar & Gmail OAuth 連線整合、Google Places API 查詢設定、Resend OTP 郵件發送服務。
+    5. **`💾 備份與資料 (Backup & Data)`**：JSON 旅程匯出/匯入、日曆訂閱網址 (ICS)、雲端自動快照 (Snapshots)、危險資料清除區。
+  - **行動端 RWD 深度適配**：分頁列支援平滑橫向滾動與觸控吸附，各分頁內容高度適中，大幅提升手機與各螢幕尺寸操作舒適度。
+- **高標準 API 金鑰單次顯示安全架構 (Strict One-Time Key Display Architecture)**：
+  - **金鑰明文只顯示一次**：遵從現代安全標準（如同 OpenAI、Stripe、GitHub），在使用者點擊「產生 / 重新產生金鑰」時，系統即時彈出醒目高對比之專屬保存面板（提示「僅顯示這一次」並提供「📋 一鍵複製金鑰」與「✓ 我已妥善保存」）。
+  - **後端唯讀永久遮罩保護**：`GET /settings/agent-key` 端點不再回傳明文金鑰，改為唯讀遮罩（如 `rr_agent_...****`），前端徹底移除「👁️ 顯示」按鈕。若金鑰忘記或遺失，必須主動「重新產生金鑰」。
+- **獨立動態規格網址與頁尾常駐入口 (Standalone Canonical URLs & Footer Integration)**：
+  - **獨立 URL 端點**：外部 AI Agent 規範（`/llms.txt`、`/skill.md`、`/llms-full.txt`）完全獨立運作，後端動態綁定伺服器實際網域，隨未來 API 擴充與演進實時更新，免去手動貼附靜態大檔案的落後作法。
+  - **App 與官網頁尾常駐導覽 (Footer Integration)**：
+    - 主應用程式底部新增質感頁尾（`.app-footer`），常駐提供 `🤖 llms.txt` · `📄 skill.md` · `📚 Agent API` 獨立外連。
+    - 官網 Landing Page (`website/index.html`) 頁尾同步追加機器可讀規範索引與 Agent API 入口。
+  - **動態系統提示詞同步更新**：一鍵複製的 Agent 系統提示詞改為直接引導 AI Agent 動態讀取 live standalone URLs，確保外部 Agent 永遠獲取最新端點與呼叫協議。
+
+---
+
 ## [2.6.1] - 2026-10-07
 
 ### Enhanced / 介面與字體全面升級

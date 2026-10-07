@@ -233,6 +233,24 @@
   .modal{width:100%;max-width:min(94vw,720px);background:var(--card);border-radius:26px;padding:32px 34px;box-shadow:0 40px 90px -30px rgba(0,0,0,.6);animation:sheetIn .28s cubic-bezier(.2,.8,.2,1) both;max-height:92vh;overflow:auto}
   .modal h3{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);margin:0 0 24px}
   .modal h4{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:22px 0 12px}
+  /* settings modal tabs */
+  .set-tab-nav{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:14px 0 20px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:1px}
+  .set-tab-nav::-webkit-scrollbar{display:none}
+  .set-tab-btn{border:none;background:transparent;padding:9px 13px;border-radius:10px 10px 0 0;font-family:var(--body);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;min-height:38px;transition:all .15s ease;border-bottom:2px solid transparent}
+  .set-tab-btn:hover{color:var(--ink);background:rgba(22,19,12,.03)}
+  .set-tab-btn.active{color:var(--coral);background:rgba(255,90,53,.07);border-bottom-color:var(--coral);font-weight:700}
+  .set-tab-pane{display:none}
+  .set-tab-pane.active{display:block;animation:fadeIn .2s ease both}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+
+  /* app footer */
+  .app-footer{margin-top:64px;padding:24px 0 36px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+  .foot-brand{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
+  .foot-ver{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .foot-links{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px}
+  .foot-link{color:var(--muted);text-decoration:none;transition:color .15s ease}
+  .foot-link:hover{color:var(--coral);text-decoration:underline}
+  .foot-sep{color:var(--line)}
   .field{margin-bottom:18px}
   .field label{display:block;font-weight:600;font-size:13.5px;color:var(--muted);margin-bottom:7px}
   .field label .opt{color:var(--faint);font-weight:400}
@@ -656,6 +674,9 @@
     .ig-card{width:min(92vw,432px);height:auto}
     .ig-side{width:min(92vw,432px)}
     .modal{padding:24px 20px}
+    .set-tab-nav{margin:10px -10px 16px;padding:0 10px 4px;gap:4px}
+    .set-tab-btn{padding:8px 10px;font-size:13px;min-height:36px}
+    .app-footer{margin-top:40px;flex-direction:column;align-items:flex-start;gap:12px}
     .two{grid-template-columns:1fr}
     .copilot-drawer{top:auto;bottom:0;left:0;right:0;width:100%;height:86dvh;max-height:86dvh;border-radius:24px 24px 0 0;border-left:none;border-top:1px solid var(--line);transform:translateY(100%);box-shadow:0 -12px 40px rgba(22,19,12,.25);padding-bottom:env(safe-area-inset-bottom);overscroll-behavior:contain}
     .copilot-scrim.show .copilot-drawer{transform:translateY(0)}
@@ -707,6 +728,21 @@
     </div>
     <div id="list"></div>
   </section>
+
+  <footer class="app-footer">
+    <div class="foot-brand">
+      <span style="font-size:16px">✈️</span>
+      <span id="footBrandText">888漫步旅遊 · RoamRadar</span>
+      <span class="foot-ver">v2.6.2</span>
+    </div>
+    <div class="foot-links">
+      <a href="/llms.txt" target="_blank" rel="noopener" class="foot-link" title="LLM 探索規範索引 (llms.txt)">🤖 llms.txt</a>
+      <span class="foot-sep">·</span>
+      <a href="/skill.md" target="_blank" rel="noopener" class="foot-link" title="Autonomous AI Agent 技能定義 (skill.md)">📄 skill.md</a>
+      <span class="foot-sep">·</span>
+      <a href="/llms-full.txt" target="_blank" rel="noopener" class="foot-link" title="RESTful Agent API 完整規格文件">📚 Agent API</a>
+    </div>
+  </footer>
 </div>
 
 <div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
@@ -744,7 +780,7 @@
 <script>
 (function(){
   "use strict";
-  var BUILD="2026-07-10.38";
+  var BUILD="2026-07-10.39";
 
   /* ===================== i18n infrastructure ===================== */
   var LANG = (function(){
@@ -1174,6 +1210,8 @@
     if(tc) tc.textContent = isZH() ? "行事曆" : "Calendar";
     var tm = document.getElementById("tabMap");
     if(tm) tm.textContent = isZH() ? "足跡地圖" : "Map";
+    var fb = document.getElementById("footBrandText");
+    if(fb) fb.textContent = isZH() ? "888漫步旅遊 · RoamRadar" : "888RoamTravel · RoamRadar";
   }
 
   /* ===================== hero (new) ===================== */
@@ -2202,106 +2240,210 @@
     var gHint=isZH()
       ?('前往 <b>console.cloud.google.com</b> 完成一次性設定：建立專案，啟用 <b>Google Calendar API</b> 與 <b>Gmail API</b>，並在憑證中建立 <b>OAuth 用戶端 ID（網頁應用程式）</b>：<br>· 已授權的 JavaScript 來源：<b>'+gOrigin+'</b><br>· 已授權的重新導向 URI：<b>'+gRedirect+'</b><br>接著在 <b>OAuth 同意畫面</b> 點擊 <b>發布應用程式</b>。<br>將用戶端編號與密鑰貼於此處儲存，再點擊「連結 Google」同意存取授權。<br><b>秘訣：</b>轉發任何確認信給自己，並在 @ 前加上 <b>+trip</b>（例如：you<b>+trip</b>@yourdomain.com），下次同步即可自動歸檔！')
       :('One-time setup at <b>console.cloud.google.com</b>: create a project, enable the <b>Google Calendar API</b> and <b>Gmail API</b>, then under Credentials create an <b>OAuth client ID (Web application)</b> with:<br>· Authorised JavaScript origin: <b>'+gOrigin+'</b><br>· Authorised redirect URI: <b>'+gRedirect+'</b><br>Then in <b>Audience</b> (OAuth consent screen) hit <b>Publish app</b> — in Testing mode Google cuts the connection after 7 days.<br>Paste the client ID and secret here, Save, then hit Connect Google and approve access.<br><b>Tip:</b> forward any confirmation email to yourself with <b>+trip</b> added before the @ (e.g. you<b>+trip</b>@yourdomain.com) and the next sync files it — whatever the sender.');
-    openModal('<h3>'+(isZH()?"設定":"Settings")+'</h3>'+
-      '<div class="field"><label>'+(isZH()?"語言 (Language)":"Language")+'</label><select id="s_lang"><option value="zh-TW"'+(isZH()?" selected":"")+'>繁體中文 (Traditional Chinese)</option><option value="en"'+(!isZH()?" selected":"")+'>English</option></select></div>'+
-      field(isZH()?"預設出發基地 (Default starting location)":"Default starting location","s_home","text",home,isZH()?"TPE":"OPO")+
-      '<div class="field"><label>'+(isZH()?"本人出發地時區 (Home Base Timezone)":"Home Base Timezone")+' <span class="opt">'+(isZH()?"(計算目的地時差基準)":"(time diff reference)")+'</span></label>'+
-      '<select id="s_home_tz">'+renderTimezoneOptions(getHomeTz())+'</select></div>'+
-      '<div class="hint">'+(isZH()?"你的常駐時區（已依瀏覽器自動偵測）。所有旅程卡片將以此為基準計算目的地時差與當地時鐘。":"Your home timezone (auto-detected). Destination time differences and clocks are calculated from this.")+'</div>'+
-      '<div class="field"><label>'+(isZH()?"度量單位 (Units)":"Units")+'</label><select id="s_units"><option value="metric"'+(settings.units==="imperial"?"":" selected")+'>'+(isZH()?"公制 — 公里 (km) 與 攝氏 (°C)":"Metric — km &amp; °C")+'</option><option value="imperial"'+(settings.units==="imperial"?" selected":"")+'>'+(isZH()?"美制 — 英哩 (mi) 與 華氏 (°F)":"US — miles &amp; °F")+'</option></select></div>'+
-      '<div class="hint">'+(isZH()?"用於計算各旅程的飛行距離以及目的地的預測氣溫。":"Used for the trip distance and destination weather on each card.")+'</div>'+
-      field(isZH()?"Worker 雲端同步網址 (Worker URL)":"Worker URL","s_worker","text",settings.workerUrl,"https://travel-sync.you.workers.dev",isZH()?"(留空 = 僅保存在本機)":"(blank = local only)")+
-      '<div class="hint">'+(isZH()?"設定後，旅程資料將與你的 Worker 雲端同步。留空則僅保存在此裝置本機。":"When set, trips load from your worker and new trips post to it. Blank keeps everything on this device.")+' <span class="status local" id="status" style="vertical-align:middle;margin-left:4px"><span class="dot"></span>Local</span></div>'+
-      '<h4 style="margin-top:20px">'+(isZH()?"連結 Google 行事曆與 Gmail":"Connect Google Calendar &amp; Gmail")+'</h4>'+
-      field(isZH()?"Google 用戶端編號 (Client ID)":"Google client ID","s_gid","text","","1234….apps.googleusercontent.com")+
-      field(isZH()?"Google 用戶端密鑰 (Client Secret)":"Google client secret","s_gsecret","password","",isZH()?"僅加密儲存於你的 Worker":"GOCSPX-…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
-      '<div class="hint">'+gHint+'</div>'+
-      '<div class="modal-actions act-row"><button class="btn" id="gSave">'+(isZH()?"儲存":"Save")+'</button><button class="btn solid" id="gConnect">'+(isZH()?"連結 Google":"Connect Google")+'</button><button class="btn" id="gTest">'+(isZH()?"測試連線":"Test connection")+'</button><button class="btn" id="gRescan">'+(isZH()?"重新掃描信箱":"Re-scan inbox")+'</button><button class="btn" id="gReset">'+(isZH()?"全新重新匯入":"Clean re-import")+'</button><button class="btn" id="gTrace">'+(isZH()?"郵件診斷":"Trace email")+'</button><button class="btn" id="gClear" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"解除綁定":"Disconnect")+'</button></div>'+
-      '<div id="gStatus" class="hint" style="font-size:14px;line-height:1.55;margin-top:10px">'+(isZH()?"檢查連線狀態中…":"Checking connection…")+'</div>'+
-      '<h4 style="margin-top:24px">'+(isZH()?"郵件智慧解析（LLM 模型設定）":"Smart Email Parsing (LLM Settings)")+'</h4>'+
-      '<div class="field"><label>'+(isZH()?"LLM 服務提供者 (LLM Provider)":"LLM Provider")+'</label><select id="s_llm_provider">'+
-        '<option value="gemini">Google Gemini</option>'+
-        '<option value="openai">OpenAI</option>'+
-        '<option value="groq">Groq</option>'+
-        '<option value="deepseek">DeepSeek</option>'+
-        '<option value="anthropic">Anthropic Claude</option>'+
-        '<option value="custom">'+(isZH()?"自訂 OpenAI 相容服務 (Custom)":"Custom OpenAI-Compatible")+'</option>'+
-      '</select></div>'+
-      field(isZH()?"API 端點網址 (Base URL)":"API Base URL","s_llm_base","text","","https://generativelanguage.googleapis.com/v1beta/openai",isZH()?"(Anthropic 留空即可)":"(blank for Anthropic)")+
-      '<div class="field">'+
-        '<label style="display:flex;justify-content:space-between;align-items:center">'+
-          '<span>'+(isZH()?"模型選擇 (Model Selection)":"Model Selection")+'</span>'+
-          '<span id="llm_models_badge" style="font-size:12px;font-weight:normal;color:var(--muted)"></span>'+
-        '</label>'+
-        '<div style="display:flex;gap:8px;align-items:center">'+
-          '<select id="s_llm_model_select" aria-label="'+(isZH()?"選擇模型下拉選單":"Select model dropdown")+'" style="flex:1;cursor:pointer;font-family:var(--mono);font-size:14px">'+
-            '<option value="">'+(isZH()?"-- 請點擊右側取得可用模型 --":"-- Click Fetch Models to load --")+'</option>'+
-          '</select>'+
-          '<button class="btn" id="llmFetchModels" type="button" style="white-space:nowrap;padding:0 14px;font-size:13.5px;display:flex;align-items:center;gap:6px">'+
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'+
-            '<span>'+(isZH()?"取得可用模型清單":"Fetch Models")+'</span>'+
-          '</button>'+
-        '</div>'+
-        '<div style="margin-top:8px;display:flex;align-items:center;gap:8px">'+
-          '<input id="s_llm_model" aria-label="'+(isZH()?"模型 ID 輸入框":"Model ID input")+'" type="text" placeholder="'+(isZH()?"選取上方下拉選單，或在此自訂模型 ID (例如 gpt-4o, llama-3.3-70b-versatile)":"Select from dropdown above or enter custom Model ID")+'" style="flex:1;font-family:var(--mono);font-size:14px">'+
-        '</div>'+
+    openModal('<h3>'+(isZH()?"系統設定":"Settings")+'</h3>'+
+      '<div class="set-tab-nav" id="setTabNav">'+
+        '<button class="set-tab-btn active" type="button" data-pane="general">👤 '+(isZH()?"一般偏好":"General")+'</button>'+
+        '<button class="set-tab-btn" type="button" data-pane="llm">🤖 '+(isZH()?"AI 模型":"AI Model")+'</button>'+
+        '<button class="set-tab-btn" type="button" data-pane="agent">⚡ '+(isZH()?"Agent API":"Agent API")+'</button>'+
+        '<button class="set-tab-btn" type="button" data-pane="sync">🔄 '+(isZH()?"同步服務":"Sync &amp; Services")+'</button>'+
+        '<button class="set-tab-btn" type="button" data-pane="backup">💾 '+(isZH()?"備份與資料":"Backup &amp; Data")+'</button>'+
       '</div>'+
-      field(isZH()?"API 金鑰 (API Key)":"API Key","s_llm_key","password","",isZH()?"僅儲存於你的 Worker":"stored on your worker only",isZH()?"僅存於 Worker 端":"stored on your worker only")+
-      '<div class="hint">'+(isZH()?"支援 Google Gemini、OpenAI、Groq、DeepSeek、Anthropic 及任何相容 OpenAI 的 API 端點。切換提供者將填入預設端點，點擊「🔍 取得可用模型清單」可連線即時取得你的帳號真正支援的有效模型。":"Supports Google Gemini, OpenAI, Groq, DeepSeek, Anthropic, or any OpenAI-compatible API base URL. Switching provider sets base URL; click \"Fetch Models\" to retrieve the live active models from your account.")+'</div>'+
-      '<div class="modal-actions act-row"><button class="btn" id="llmSave">'+(isZH()?"儲存 LLM 設定":"Save LLM Config")+'</button></div>'+
-      '<div id="llmStatus" class="hint" style="margin-top:8px"></div>'+
 
-      '<h4 style="margin-top:24px">'+(isZH()?"Resend 郵件寄送服務（OTP 登入與通知）":"Resend Email Delivery (OTP &amp; Alerts)")+'</h4>'+
-      field(isZH()?"Resend API 金鑰 (API Key)":"Resend API Key","s_resend_key","password","","re_123456…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
-      field(isZH()?"寄件者地址 (From Address)":"From Address","s_resend_from","text","","888RoamTravel <onboarding@resend.dev>",isZH()?"(需符合 Resend 驗證網域或使用預設)":"(verified domain or onboarding@resend.dev)")+
-      '<div class="hint">'+(isZH()?"用於發送 6 位數 OTP 登入驗證碼及重要行程提醒。前往 <b>resend.com/api-keys</b> 取得金鑰。若未綁定自有網域，可直接使用預設寄件地址。":"Used to send 6-digit OTP login verification codes and trip updates. Get a free key at <b>resend.com/api-keys</b>. You can use the default onboarding address if you haven't verified a custom domain.")+'</div>'+
-      '<div class="modal-actions act-row"><button class="btn" id="resendSave">'+(isZH()?"儲存 Resend 設定":"Save Resend Config")+'</button><button class="btn" id="resendTest">'+(isZH()?"發送測試郵件":"Send Test Email")+'</button></div>'+
-      '<div id="resendStatus" class="hint" style="margin-top:8px"></div>'+
-
-      '<h4 style="margin-top:24px">'+(isZH()?"Google Places API（景點與餐廳評價/營業時間）":"Google Places API (Ratings &amp; Hours)")+'</h4>'+
-      field(isZH()?"Google Places API 金鑰 (API Key)":"Google Places API Key","s_places_key","password","",isZH()?"AIzaSy…（留空清除）":"AIzaSy… (blank to clear)",isZH()?"可填於此或設於 Cloudflare":"stored in Worker KV or Cloudflare secret")+
-      '<div class="hint">'+(isZH()?"啟用後，在規劃細項（如餐廳、景點）時將顯示「📍 Google 查詢景點/餐廳評價與營業時間」。<b>若未設定，該功能將自動完全隱藏</b>。支援在 Cloudflare 填入 <code>GOOGLE_PLACES_API_KEY</code> 或直接在上方儲存於 KV。":"When configured, unlocks \"Search Google Places\" in plan forms. <b>If unconfigured, the search feature remains completely hidden</b>. Set in Cloudflare as GOOGLE_PLACES_API_KEY or save in KV above.")+'</div>'+
-      '<div class="modal-actions act-row"><button class="btn" id="placesSave">'+(isZH()?"儲存 Places 設定":"Save Places Key")+'</button><button class="btn" id="placesTest">'+(isZH()?"測試 Places 查詢":"Test Places API")+'</button></div>'+
-      '<div id="placesStatus" class="hint" style="margin-top:8px"></div>'+
-
-      '<h4 style="margin-top:24px">'+(isZH()?"🤖 AI Agent 開發與整合 (AI Agent Integration)":"🤖 AI Agent Integration")+'</h4>'+
-      '<div class="hint">'+(isZH()?"產生個人的 Agent API Key，提供給 Claude Code、Antigravity、Cursor、ChatGPT 等 AI Agent 工具，即可讓 LLM 直接連線為您自動化規劃、新增、修改與刪除旅程及細項。":"Generate a personal Agent API Key for Claude Code, Antigravity, Cursor, or ChatGPT to autonomously plan, create, edit, and organize trips and itinerary items.")+'</div>'+
-      '<div class="field" style="margin-top:10px">'+
-        '<label style="display:flex;justify-content:space-between;align-items:center">'+
-          '<span>'+(isZH()?"Agent API 金鑰 (Bearer Token)":"Agent API Key")+'</span>'+
-          '<span id="agent_key_badge" style="font-size:12px;font-weight:normal;color:var(--muted)"></span>'+
-        '</label>'+
-        '<div style="display:flex;gap:8px;align-items:center">'+
-          '<input id="s_agent_key_disp" type="password" readonly class="mono" style="flex:1;background:var(--bg-card);font-size:14px;letter-spacing:1px" placeholder="'+(isZH()?"尚未產生金鑰，請點擊下方按鈕產生":"Not generated yet")+'">'+
-          '<button class="btn" id="agentKeyToggleMask" type="button" style="white-space:nowrap;padding:0 14px;font-size:13px">👁️ '+(isZH()?"顯示":"Show")+'</button>'+
-          '<button class="btn" id="agentKeyCopy" type="button" style="white-space:nowrap;padding:0 14px;font-size:13px">📋 '+(isZH()?"複製":"Copy")+'</button>'+
+      '<!-- Pane 1: General -->'+
+      '<div class="set-tab-pane active" id="pane_general">'+
+        '<div class="field"><label>'+(isZH()?"語言 (Language)":"Language")+'</label><select id="s_lang"><option value="zh-TW"'+(isZH()?" selected":"")+'>繁體中文 (Traditional Chinese)</option><option value="en"'+(!isZH()?" selected":"")+'>English</option></select></div>'+
+        field(isZH()?"預設出發基地 (Default starting location)":"Default starting location","s_home","text",home,isZH()?"TPE":"OPO")+
+        '<div class="field"><label>'+(isZH()?"本人出發地時區 (Home Base Timezone)":"Home Base Timezone")+' <span class="opt">'+(isZH()?"(計算目的地時差基準)":"(time diff reference)")+'</span></label>'+
+        '<select id="s_home_tz">'+renderTimezoneOptions(getHomeTz())+'</select></div>'+
+        '<div class="hint">'+(isZH()?"你的常駐時區（已依瀏覽器自動偵測）。所有旅程卡片將以此為基準計算目的地時差與當地時鐘。":"Your home timezone (auto-detected). Destination time differences and clocks are calculated from this.")+'</div>'+
+        '<div class="field"><label>'+(isZH()?"度量單位 (Units)":"Units")+'</label><select id="s_units"><option value="metric"'+(settings.units==="imperial"?"":" selected")+'>'+(isZH()?"公制 — 公里 (km) 與 攝氏 (°C)":"Metric — km &amp; °C")+'</option><option value="imperial"'+(settings.units==="imperial"?" selected":"")+'>'+(isZH()?"美制 — 英哩 (mi) 與 華氏 (°F)":"US — miles &amp; °F")+'</option></select></div>'+
+        '<div class="hint">'+(isZH()?"用於計算各旅程的飛行距離以及目的地的預測氣溫。":"Used for the trip distance and destination weather on each card.")+'</div>'+
+        field(isZH()?"Worker 雲端同步網址 (Worker URL)":"Worker URL","s_worker","text",settings.workerUrl,"https://travel-sync.you.workers.dev",isZH()?"(留空 = 僅保存在本機)":"(blank = local only)")+
+        '<div class="hint">'+(isZH()?"設定後，旅程資料將與你的 Worker 雲端同步。留空則僅保存在此裝置本機。":"When set, trips load from your worker and new trips post to it. Blank keeps everything on this device.")+' <span class="status local" id="status" style="vertical-align:middle;margin-left:4px"><span class="dot"></span>Local</span></div>'+
+        '<div style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px">'+
+          '<button class="btn" id="logoutBtn" type="button">'+(isZH()?"在此裝置登出":"Log out on this device")+'</button>'+
+          '<div class="hint" style="margin-top:8px">'+(isZH()?"結束此裝置的工作階段——下次開啟時需重新登入。在公共或借用裝置上特別實用。":"Ends your session here — you’ll sign in again next time. Handy on a shared or borrowed device.")+'</div>'+
         '</div>'+
       '</div>'+
-      '<div class="modal-actions act-row" style="margin-top:8px">'+
-        '<button class="btn solid" id="agentKeyGen">'+(isZH()?"🔑 產生 / 重新產生金鑰":"🔑 Generate Key")+'</button>'+
-        '<button class="btn" id="agentKeyRevoke" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"撤銷金鑰":"Revoke")+'</button>'+
+
+      '<!-- Pane 2: LLM Settings -->'+
+      '<div class="set-tab-pane" id="pane_llm">'+
+        '<div class="hint" style="margin-bottom:16px">'+(isZH()?"設定內建「✨ AI 行程特助」對話助理及背景郵件確認信自動解析之大語言模型金鑰。":"Configure language model keys for the built-in AI Copilot and booking email parsing.")+'</div>'+
+        '<div class="field"><label>'+(isZH()?"LLM 服務提供者 (LLM Provider)":"LLM Provider")+'</label><select id="s_llm_provider">'+
+          '<option value="gemini">Google Gemini</option>'+
+          '<option value="openai">OpenAI</option>'+
+          '<option value="groq">Groq</option>'+
+          '<option value="deepseek">DeepSeek</option>'+
+          '<option value="anthropic">Anthropic Claude</option>'+
+          '<option value="custom">'+(isZH()?"自訂 OpenAI 相容服務 (Custom)":"Custom OpenAI-Compatible")+'</option>'+
+        '</select></div>'+
+        field(isZH()?"API 端點網址 (Base URL)":"API Base URL","s_llm_base","text","","https://generativelanguage.googleapis.com/v1beta/openai",isZH()?"(Anthropic 留空即可)":"(blank for Anthropic)")+
+        '<div class="field">'+
+          '<label style="display:flex;justify-content:space-between;align-items:center">'+
+            '<span>'+(isZH()?"模型選擇 (Model Selection)":"Model Selection")+'</span>'+
+            '<span id="llm_models_badge" style="font-size:12px;font-weight:normal;color:var(--muted)"></span>'+
+          '</label>'+
+          '<div style="display:flex;gap:8px;align-items:center">'+
+            '<select id="s_llm_model_select" aria-label="'+(isZH()?"選擇模型下拉選單":"Select model dropdown")+'" style="flex:1;cursor:pointer;font-family:var(--mono);font-size:14px">'+
+              '<option value="">'+(isZH()?"-- 請點擊右側取得可用模型 --":"-- Click Fetch Models to load --")+'</option>'+
+            '</select>'+
+            '<button class="btn" id="llmFetchModels" type="button" style="white-space:nowrap;padding:0 14px;font-size:13.5px;display:flex;align-items:center;gap:6px">'+
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'+
+              '<span>'+(isZH()?"取得可用模型清單":"Fetch Models")+'</span>'+
+            '</button>'+
+          '</div>'+
+          '<div style="margin-top:8px;display:flex;align-items:center;gap:8px">'+
+            '<input id="s_llm_model" aria-label="'+(isZH()?"模型 ID 輸入框":"Model ID input")+'" type="text" placeholder="'+(isZH()?"選取上方下拉選單，或在此自訂模型 ID (例如 gpt-4o, llama-3.3-70b-versatile)":"Select from dropdown above or enter custom Model ID")+'" style="flex:1;font-family:var(--mono);font-size:14px">'+
+          '</div>'+
+        '</div>'+
+        field(isZH()?"API 金鑰 (API Key)":"API Key","s_llm_key","password","",isZH()?"僅儲存於你的 Worker":"stored on your worker only",isZH()?"僅存於 Worker 端":"stored on your worker only")+
+        '<div class="hint">'+(isZH()?"支援 Google Gemini、OpenAI、Groq、DeepSeek、Anthropic 及任何相容 OpenAI 的 API 端點。切換提供者將填入預設端點，點擊「🔍 取得可用模型清單」可連線即時取得你的帳號真正支援的有效模型。":"Supports Google Gemini, OpenAI, Groq, DeepSeek, Anthropic, or any OpenAI-compatible API base URL. Switching provider sets base URL; click \"Fetch Models\" to retrieve the live active models from your account.")+'</div>'+
+        '<div class="modal-actions act-row"><button class="btn" id="llmSave">'+(isZH()?"儲存 LLM 設定":"Save LLM Config")+'</button></div>'+
+        '<div id="llmStatus" class="hint" style="margin-top:8px"></div>'+
       '</div>'+
-      '<div id="agentKeyStatus" class="hint" style="margin-top:6px"></div>'+
-      '<div style="background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:14px">'+
-        '<div style="font-weight:700;font-size:14px;color:var(--ink);margin-bottom:6px">⚡ '+(isZH()?"快速串接與指令文件 (Quick Integration)":"Quick Integration & Docs")+'</div>'+
-        '<div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px">'+(isZH()?"一鍵複製已填妥當前站台網址與 API Key 的完整提示詞，或下載標準 SKILL.md 直接導入你的 Agent 環境。":"One-click copy of the complete System Prompt pre-filled with this instance URL and active Bearer token, or export standard SKILL.md.")+'</div>'+
-        '<div class="modal-actions act-row" style="margin-top:0">'+
-          '<button class="btn" id="copyAgentPrompt" style="display:inline-flex;align-items:center;gap:6px">📋 '+(isZH()?"複製 Agent 系統提示詞":"Copy Agent System Prompt")+'</button>'+
-          '<button class="btn" id="copySkillMd" style="display:inline-flex;align-items:center;gap:6px">📄 '+(isZH()?"複製 SKILL.md":"Copy SKILL.md")+'</button>'+
-          '<button class="btn" id="dlSkillMd" style="display:inline-flex;align-items:center;gap:6px">📥 '+(isZH()?"下載 SKILL.md":"Download SKILL.md")+'</button>'+
-          '<a class="btn" href="'+gOrigin+'/llms.txt" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">🌐 llms.txt</a>'+
+
+      '<!-- Pane 3: Agent API -->'+
+      '<div class="set-tab-pane" id="pane_agent">'+
+        '<div class="hint" style="margin-bottom:14px">'+(isZH()?"產生專屬的 Agent API Key，提供給外部 AI Agent 工具（Claude Code、Antigravity、Cursor、ChatGPT 等）直接透過 RESTful API 為您全自動化規劃行程、新增細項與查詢資料。":"Generate a dedicated Agent API Key for external AI agents (Claude Code, Antigravity, Cursor, ChatGPT) to autonomously manage trips and itineraries via RESTful API.")+'</div>'+
+
+        '<!-- One-Time Generated Key Notification Box -->'+
+        '<div id="keyOneTimeBox" style="display:none;background:rgba(255,90,53,.07);border:1.5px solid rgba(255,90,53,.35);border-radius:14px;padding:16px;margin-bottom:18px">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'+
+            '<div style="font-weight:700;font-size:14.5px;color:var(--coral);display:flex;align-items:center;gap:6px">'+
+              '<span>🔐</span> <span>'+(isZH()?"請立即複製並保存您的 API 金鑰":"Save Your Agent API Key Now")+'</span>'+
+            '</div>'+
+            '<span style="font-family:var(--mono);font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(255,90,53,.15);color:var(--coral)">'+(isZH()?"僅顯示一次":"Shown Once")+'</span>'+
+          '</div>'+
+          '<p style="font-size:13px;line-height:1.55;color:var(--ink);margin:6px 0 10px">'+
+            (isZH()?"⚠️ <b>基於安全原則，此金鑰只會完整顯示這一次！</b>關閉此提示後系統將永久遮罩，不再顯示明文。若您遺失金鑰，必須點擊「重新產生金鑰」。":"⚠️ <b>For security, this key is only displayed in full this once!</b> It will be permanently masked afterwards. If lost, you must regenerate it.")+
+          '</p>'+
+          '<div style="display:flex;gap:8px;align-items:center">'+
+            '<input type="text" readonly id="keyOneTimeInput" class="mono" style="flex:1;background:var(--card);font-size:14px;font-weight:700;color:var(--coral);letter-spacing:.5px;padding:9px 12px;border:1px solid rgba(255,90,53,.4);border-radius:10px">'+
+            '<button class="btn solid" id="keyOneTimeCopy" type="button" style="white-space:nowrap;padding:0 14px;font-size:13.5px">📋 '+(isZH()?"複製金鑰":"Copy Key")+'</button>'+
+          '</div>'+
+          '<div style="margin-top:10px;text-align:right">'+
+            '<button class="btn" id="keyOneTimeDone" type="button" style="font-size:13px;padding:6px 14px">✓ '+(isZH()?"我已妥善保存，關閉此提示":"I have saved it, close")+'</button>'+
+          '</div>'+
+        '</div>'+
+
+        '<!-- Persistent Key Status -->'+
+        '<div class="field" style="margin-top:4px">'+
+          '<label style="display:flex;justify-content:space-between;align-items:center">'+
+            '<span>'+(isZH()?"Agent API 金鑰 (Bearer Token)":"Agent API Key")+'</span>'+
+            '<span id="agent_key_badge" style="font-size:12px;font-weight:normal;color:var(--muted)"></span>'+
+          '</label>'+
+          '<div style="display:flex;gap:8px;align-items:center">'+
+            '<input id="s_agent_key_disp" type="text" readonly class="mono" style="flex:1;background:var(--bg-card);font-size:14px;letter-spacing:1px" placeholder="'+(isZH()?"尚未產生金鑰":"Not generated yet")+'">'+
+          '</div>'+
+        '</div>'+
+        '<div class="modal-actions act-row" style="margin-top:8px">'+
+          '<button class="btn solid" id="agentKeyGen" type="button">🔑 '+(isZH()?"產生 / 重新產生金鑰":"Generate / Regenerate Key")+'</button>'+
+          '<button class="btn" id="agentKeyRevoke" type="button" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"撤銷金鑰":"Revoke")+'</button>'+
+        '</div>'+
+        '<div id="agentKeyStatus" class="hint" style="margin-top:8px"></div>'+
+
+        '<!-- Independent Canonical URLs -->'+
+        '<div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:16px">'+
+          '<div style="font-weight:700;font-size:14px;color:var(--ink);margin-bottom:4px">🌐 '+(isZH()?"獨立規範與 API 文件網址 (Canonical URLs)":"Independent Specification &amp; API URLs")+'</div>'+
+          '<div style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:10px">'+
+            (isZH()?"隨著功能持續演進與新增 API，外部 Agent 可直接訪問以下獨立端點取得最新規範：":"As features and API methods evolve, external agents can directly query these live standalone URLs:")+
+          '</div>'+
+          '<div style="display:flex;flex-direction:column;gap:8px">'+
+            '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:9px 12px;border-radius:8px;border:1px solid var(--line);gap:8px">'+
+              '<div style="min-width:0;flex:1">'+
+                '<div style="font-weight:600;font-size:13px;color:var(--ink)">🤖 llms.txt <span style="font-size:12px;color:var(--muted);font-weight:normal">('+(isZH()?"機器可讀規格索引":"Machine-readable index")+')</span></div>'+
+                '<div class="mono" style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+gOrigin+'/llms.txt</div>'+
+              '</div>'+
+              '<div style="display:flex;gap:6px;flex-shrink:0">'+
+                '<a class="btn" href="'+gOrigin+'/llms.txt" target="_blank" rel="noopener" style="font-size:12.5px;padding:4px 10px;text-decoration:none">'+(isZH()?"開啟":"Open")+'</a>'+
+                '<button class="btn" type="button" id="copyUrlLlms" style="font-size:12.5px;padding:4px 10px">'+(isZH()?"複製網址":"Copy URL")+'</button>'+
+              '</div>'+
+            '</div>'+
+            '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:9px 12px;border-radius:8px;border:1px solid var(--line);gap:8px">'+
+              '<div style="min-width:0;flex:1">'+
+                '<div style="font-weight:600;font-size:13px;color:var(--ink)">📄 skill.md <span style="font-size:12px;color:var(--muted);font-weight:normal">('+(isZH()?"標準 Agent Skill 規範":"Agent Skill spec")+')</span></div>'+
+                '<div class="mono" style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+gOrigin+'/skill.md</div>'+
+              '</div>'+
+              '<div style="display:flex;gap:6px;flex-shrink:0">'+
+                '<a class="btn" href="'+gOrigin+'/skill.md" target="_blank" rel="noopener" style="font-size:12.5px;padding:4px 10px;text-decoration:none">'+(isZH()?"開啟":"Open")+'</a>'+
+                '<button class="btn" type="button" id="copyUrlSkill" style="font-size:12.5px;padding:4px 10px">'+(isZH()?"複製網址":"Copy URL")+'</button>'+
+              '</div>'+
+            '</div>'+
+            '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:9px 12px;border-radius:8px;border:1px solid var(--line);gap:8px">'+
+              '<div style="min-width:0;flex:1">'+
+                '<div style="font-weight:600;font-size:13px;color:var(--ink)">📚 llms-full.txt <span style="font-size:12px;color:var(--muted);font-weight:normal">('+(isZH()?"完整 API 規格手冊與 Schema":"Full API Docs &amp; Schemas")+')</span></div>'+
+                '<div class="mono" style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+gOrigin+'/llms-full.txt</div>'+
+              '</div>'+
+              '<div style="display:flex;gap:6px;flex-shrink:0">'+
+                '<a class="btn" href="'+gOrigin+'/llms-full.txt" target="_blank" rel="noopener" style="font-size:12.5px;padding:4px 10px;text-decoration:none">'+(isZH()?"開啟":"Open")+'</a>'+
+                '<button class="btn" type="button" id="copyUrlFull" style="font-size:12.5px;padding:4px 10px">'+(isZH()?"複製網址":"Copy URL")+'</button>'+
+              '</div>'+
+            '</div>'+
+          '</div>'+
+          '<div style="margin-top:14px">'+
+            '<button class="btn" id="copyAgentPrompt" type="button" style="width:100%;justify-content:center;font-size:13.5px;padding:9px 16px;display:flex;align-items:center;gap:6px">'+
+              '📋 '+(isZH()?"一鍵複製動態 Agent 系統提示詞 (System Prompt)":"Copy Dynamic Agent System Prompt")+
+            '</button>'+
+          '</div>'+
         '</div>'+
       '</div>'+
-      '<h4>'+(isZH()?"備份與匯入":"Backup &amp; import")+'</h4>'+
-      '<div class="field"><textarea id="exp" readonly class="mono" style="min-height:90px">'+esc(snap)+'</textarea></div>'+
-      '<div class="modal-actions" style="margin-top:0"><button class="btn" id="copyJson">'+(isZH()?"複製 JSON 資料":"Copy data")+'</button><button class="btn" id="dlJson">'+(isZH()?"下載檔案":"Download")+'</button><button class="btn" id="icsFeed">'+(isZH()?"複製日曆訂閱網址":"Copy calendar feed link")+'</button></div>'+
-      '<div class="hint">'+(isZH()?"日曆訂閱網址可用於任何日曆 App——在 Apple 行事曆、Google 日曆或 Outlook 貼入「透過 URL 訂閱」，旅程即自動保持同步。":"The feed link works in ANY calendar app — paste it under “Subscribe by URL” / “From internet” in Apple, Google or Outlook and your trips appear and stay updated. No Google connection needed.")+'</div>'+
-      '<div class="hint" id="snapList" style="margin-top:12px">'+(isZH()?"載入雲端自動快照中…":"Loading snapshots…")+'</div>'+
-      '<div class="field" style="margin-top:18px"><label>'+(isZH()?"貼上 JSON 旅程以進行合併匯入":"Paste trips to merge in")+'</label><textarea id="imp" class="mono" placeholder=\'[{"from":"TPE","to":"NRT","start":"2026-10-02","end":"2026-10-12","label":"Tokyo"}]\' style="min-height:80px"></textarea><div class="err" id="imperr"></div></div>'+
-      '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:16px"><button class="btn" id="logoutBtn">'+(isZH()?"在此裝置登出":"Log out on this device")+'</button><div class="hint" style="margin-top:8px">'+(isZH()?"結束此裝置的工作階段——下次開啟時需重新登入。在公共或借用裝置上特別實用。":"Ends your session here — you’ll sign in again next time. Handy on a shared or borrowed device.")+'</div></div>'+
-      '<div style="margin-top:14px"><button class="btn" id="clearBtn" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"清除所有資料":"Clear all data")+'</button></div>'+
-      '<div class="modal-actions"><button class="btn" id="cancelBtn">'+(isZH()?"關閉":"Close")+'</button><button class="btn solid" id="saveSet">'+(isZH()?"儲存":"Save")+'</button></div>'+
-      '<div class="hint" style="margin-top:14px;text-align:right">build '+BUILD+'</div>');
+
+      '<!-- Pane 4: Sync & Services -->'+
+      '<div class="set-tab-pane" id="pane_sync">'+
+        '<h4>'+(isZH()?"連結 Google 行事曆與 Gmail":"Connect Google Calendar &amp; Gmail")+'</h4>'+
+        field(isZH()?"Google 用戶端編號 (Client ID)":"Google client ID","s_gid","text","","1234….apps.googleusercontent.com")+
+        field(isZH()?"Google 用戶端密鑰 (Client Secret)":"Google client secret","s_gsecret","password","",isZH()?"僅加密儲存於你的 Worker":"GOCSPX-…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
+        '<div class="hint">'+gHint+'</div>'+
+        '<div class="modal-actions act-row"><button class="btn" id="gSave">'+(isZH()?"儲存":"Save")+'</button><button class="btn solid" id="gConnect">'+(isZH()?"連結 Google":"Connect Google")+'</button><button class="btn" id="gTest">'+(isZH()?"測試連線":"Test connection")+'</button><button class="btn" id="gRescan">'+(isZH()?"重新掃描信箱":"Re-scan inbox")+'</button><button class="btn" id="gReset">'+(isZH()?"全新重新匯入":"Clean re-import")+'</button><button class="btn" id="gTrace">'+(isZH()?"郵件診斷":"Trace email")+'</button><button class="btn" id="gClear" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"解除綁定":"Disconnect")+'</button></div>'+
+        '<div id="gStatus" class="hint" style="font-size:14px;line-height:1.55;margin-top:10px">'+(isZH()?"檢查連線狀態中…":"Checking connection…")+'</div>'+
+
+        '<h4 style="margin-top:24px">'+(isZH()?"Google Places API（景點與餐廳評價/營業時間）":"Google Places API (Ratings &amp; Hours)")+'</h4>'+
+        field(isZH()?"Google Places API 金鑰 (API Key)":"Google Places API Key","s_places_key","password","",isZH()?"AIzaSy…（留空清除）":"AIzaSy… (blank to clear)",isZH()?"可填於此或設於 Cloudflare":"stored in Worker KV or Cloudflare secret")+
+        '<div class="hint">'+(isZH()?"啟用後，在規劃細項（如餐廳、景點）時將解鎖「📍 Google 查詢評價與營業時間」。<b>若未設定，相關按鈕將完全自動隱藏</b>。支援在 Cloudflare 填入 <code>GOOGLE_PLACES_API_KEY</code> 或直接在上方儲存於 KV。":"When configured, unlocks \"Search Google Places\" in plan forms. <b>If unconfigured, the search feature remains completely hidden</b>.")+'</div>'+
+        '<div class="modal-actions act-row"><button class="btn" id="placesSave">'+(isZH()?"儲存 Places 設定":"Save Places Key")+'</button><button class="btn" id="placesTest">'+(isZH()?"測試 Places 查詢":"Test Places API")+'</button></div>'+
+        '<div id="placesStatus" class="hint" style="margin-top:8px"></div>'+
+
+        '<h4 style="margin-top:24px">'+(isZH()?"Resend 郵件寄送服務（OTP 登入與通知）":"Resend Email Delivery (OTP &amp; Alerts)")+'</h4>'+
+        field(isZH()?"Resend API 金鑰 (API Key)":"Resend API Key","s_resend_key","password","","re_123456…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
+        field(isZH()?"寄件者地址 (From Address)":"From Address","s_resend_from","text","","888RoamTravel <onboarding@resend.dev>",isZH()?"(需符合 Resend 驗證網域或使用預設)":"(verified domain or onboarding@resend.dev)")+
+        '<div class="hint">'+(isZH()?"用於發送 6 位數 OTP 登入驗證碼及重要行程提醒。前往 <b>resend.com/api-keys</b> 取得金鑰。若未綁定自有網域，可直接使用預設寄件地址。":"Used to send 6-digit OTP login verification codes and trip updates. Get a free key at <b>resend.com/api-keys</b>. You can use the default onboarding address if you haven't verified a custom domain.")+'</div>'+
+        '<div class="modal-actions act-row"><button class="btn" id="resendSave">'+(isZH()?"儲存 Resend 設定":"Save Resend Config")+'</button><button class="btn" id="resendTest">'+(isZH()?"發送測試郵件":"Send Test Email")+'</button></div>'+
+        '<div id="resendStatus" class="hint" style="margin-top:8px"></div>'+
+      '</div>'+
+
+      '<!-- Pane 5: Backup & Data -->'+
+      '<div class="set-tab-pane" id="pane_backup">'+
+        '<h4>'+(isZH()?"匯出 JSON 旅程資料":"Export Trips JSON")+'</h4>'+
+        '<div class="field"><textarea id="exp" readonly class="mono" style="min-height:90px">'+esc(snap)+'</textarea></div>'+
+        '<div class="modal-actions act-row" style="margin-top:0"><button class="btn" id="copyJson">'+(isZH()?"複製 JSON 資料":"Copy data")+'</button><button class="btn" id="dlJson">'+(isZH()?"下載檔案":"Download")+'</button><button class="btn" id="icsFeed">'+(isZH()?"複製日曆訂閱網址 (ICS)":"Copy calendar feed link")+'</button></div>'+
+        '<div class="hint">'+(isZH()?"日曆訂閱網址可用於 Apple 行事曆、Google 日曆或 Outlook 貼入「透過 URL 訂閱」，旅程即自動保持同步。":"The feed link works in ANY calendar app — paste it under “Subscribe by URL” in Apple, Google or Outlook and your trips stay updated.")+'</div>'+
+
+        '<h4 style="margin-top:24px">'+(isZH()?"雲端自動快照 (Weekly Snapshots)":"Cloud Snapshots (Weekly)")+'</h4>'+
+        '<div class="hint" id="snapList" style="margin-top:4px">'+(isZH()?"載入雲端自動快照中…":"Loading snapshots…")+'</div>'+
+
+        '<h4 style="margin-top:24px">'+(isZH()?"合併匯入 JSON 旅程":"Merge Import JSON")+'</h4>'+
+        '<div class="field"><textarea id="imp" class="mono" placeholder=\'[{"from":"TPE","to":"NRT","start":"2026-10-02","end":"2026-10-12","label":"Tokyo"}]\' style="min-height:80px"></textarea><div class="err" id="imperr"></div></div>'+
+
+        '<h4 style="margin-top:24px;color:var(--coral)">'+(isZH()?"危險區域 (Danger Zone)":"Danger Zone")+'</h4>'+
+        '<div style="margin-top:8px"><button class="btn" id="clearBtn" style="border-color:rgba(255,90,53,.4);color:var(--coral)">'+(isZH()?"清除此裝置所有資料":"Clear all data on this device")+'</button></div>'+
+      '</div>'+
+
+      '<!-- Modal Bottom Actions -->'+
+      '<div class="modal-actions" style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">'+
+        '<button class="btn" id="cancelBtn">'+(isZH()?"關閉":"Close")+'</button>'+
+        '<button class="btn solid" id="saveSet">'+(isZH()?"儲存偏好":"Save")+'</button>'+
+      '</div>'+
+      '<div class="hint" style="margin-top:12px;text-align:right">build '+BUILD+'</div>');
+    var tabNav = document.getElementById("setTabNav");
+    if(tabNav){
+      tabNav.onclick = function(e){
+        var btn = e.target.closest(".set-tab-btn");
+        if(!btn) return;
+        var paneId = btn.dataset.pane;
+        document.querySelectorAll(".set-tab-btn").forEach(function(b){ b.classList.toggle("active", b === btn); });
+        document.querySelectorAll(".set-tab-pane").forEach(function(p){ p.classList.toggle("active", p.id === "pane_" + paneId); });
+      };
+    }
     document.getElementById("cancelBtn").onclick=closeModal;
     document.getElementById("copyJson").onclick=function(){copyText(JSON.stringify({version:2,home:home,trips:trips,wishes:wishes}),"Data copied");};
     document.getElementById("dlJson").onclick=function(){var b=new Blob([JSON.stringify({version:2,home:home,trips:trips,wishes:wishes},null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="travel.json";document.body.appendChild(a);a.click();document.body.removeChild(a);toast("Downloaded");};
@@ -2563,17 +2705,18 @@
     async function loadAgentKeyStatus() {
       try {
         var r = await fetch(apiBase() + "/settings/agent-key", { headers: authHeaders() });
-        var akd = document.getElementById("s_agent_key_disp"), akb = document.getElementById("agent_key_badge"), aks = document.getElementById("agentKeyStatus");
+        var akd = document.getElementById("s_agent_key_disp"),
+            akb = document.getElementById("agent_key_badge"),
+            aks = document.getElementById("agentKeyStatus");
         if (!r.ok) {
           if (aks) aks.innerHTML = '<span style="color:var(--coral)">' + (isZH() ? "無法讀取 Agent Key 狀態" : "Could not fetch Agent Key") + '</span>';
           return;
         }
         var d = await r.json();
-        if (d.configured && d.key) {
-          currentAgentKey = d.key;
-          if (akd) akd.value = d.key;
+        if (d.configured && d.keyMask) {
+          if (akd) akd.value = d.keyMask;
           if (akb) akb.innerHTML = '<span style="color:var(--green)">● ' + (isZH() ? "已就緒" : "Active") + '</span>';
-          if (aks) aks.innerHTML = '<span style="color:var(--green)">● ' + (isZH() ? "金鑰已配置，外部 AI Agent 可直接透過 Bearer Token 存取 /api/v1。" : "Key active, ready for external AI Agents via Bearer Token.") + '</span>';
+          if (aks) aks.innerHTML = '<span style="color:var(--green)">● ' + (isZH() ? "金鑰已受保護配置。基於安全考量，明文僅於產生時顯示一次。若忘記請點擊重新產生。" : "Key active and masked. Plaintext is only shown once at generation. Regenerate if lost.") + '</span>';
         } else {
           currentAgentKey = "";
           if (akd) akd.value = "";
@@ -2586,33 +2729,13 @@
       }
     }
 
-    var toggleBtn = document.getElementById("agentKeyToggleMask");
-    if (toggleBtn) {
-      toggleBtn.onclick = function() {
-        var inp = document.getElementById("s_agent_key_disp");
-        if (!inp) return;
-        var isPass = inp.type === "password";
-        inp.type = isPass ? "text" : "password";
-        toggleBtn.textContent = isPass ? (isZH() ? "🙈 隱藏" : "🙈 Hide") : (isZH() ? "👁️ 顯示" : "👁️ Show");
-      };
-    }
-
-    var copyKeyBtn = document.getElementById("agentKeyCopy");
-    if (copyKeyBtn) {
-      copyKeyBtn.onclick = function() {
-        if (!currentAgentKey) {
-          toast(isZH() ? "尚未產生 Agent API Key，請先點擊產生！" : "No key generated yet! Please generate one first.");
-          return;
-        }
-        copyText(currentAgentKey, isZH() ? "已複製 Agent API Key 至剪貼簿 ✓" : "Agent API Key copied to clipboard ✓");
-      };
-    }
-
     var genKeyBtn = document.getElementById("agentKeyGen");
     if (genKeyBtn) {
       genKeyBtn.onclick = async function() {
-        if (currentAgentKey) {
-          if (!confirm(isZH() ? "確定要重新產生 Agent API Key 嗎？先前產生的金鑰將立即失效！" : "Regenerate Agent API Key? The previous key will stop working immediately!")) return;
+        var akd = document.getElementById("s_agent_key_disp");
+        var hasExisting = akd && Boolean(akd.value);
+        if (hasExisting) {
+          if (!confirm(isZH() ? "確定要重新產生 Agent API Key 嗎？先前的金鑰將立即失效！" : "Regenerate Agent API Key? The previous key will stop working immediately!")) return;
         }
         try {
           var r = await fetch(apiBase() + "/settings/agent-key", {
@@ -2625,21 +2748,51 @@
             toast(d.error || (isZH() ? "產生金鑰失敗" : "Failed to generate key"));
             return;
           }
-          currentAgentKey = d.key;
-          var inp = document.getElementById("s_agent_key_disp");
-          if (inp) inp.value = d.key;
+          currentAgentKey = d.key; // One-time plain key in memory
+          var box = document.getElementById("keyOneTimeBox");
+          var inp = document.getElementById("keyOneTimeInput");
+          if (box && inp) {
+            inp.value = d.key;
+            box.style.display = "block";
+            box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
           await loadAgentKeyStatus();
-          toast(isZH() ? "✅ 已成功產生新的 Agent API Key！" : "✅ New Agent API Key generated!");
+          toast(isZH() ? "✅ 已成功產生新的 Agent API Key！請立即複製保存" : "✅ New Agent API Key generated! Copy and save it now.");
         } catch (e) {
           toast(isZH() ? "連線至 Worker 失敗" : "Failed to connect to Worker");
         }
       };
     }
 
+    var copyOneTimeBtn = document.getElementById("keyOneTimeCopy");
+    if (copyOneTimeBtn) {
+      copyOneTimeBtn.onclick = function() {
+        var inp = document.getElementById("keyOneTimeInput");
+        if (!inp || !inp.value) return;
+        copyText(inp.value, isZH() ? "已複製 Agent API Key 至剪貼簿 ✓" : "Agent API Key copied to clipboard ✓");
+        copyOneTimeBtn.textContent = isZH() ? "✓ 已複製！" : "✓ Copied!";
+        setTimeout(function() {
+          if (copyOneTimeBtn) copyOneTimeBtn.textContent = isZH() ? "📋 複製金鑰" : "📋 Copy Key";
+        }, 2000);
+      };
+    }
+
+    var doneOneTimeBtn = document.getElementById("keyOneTimeDone");
+    if (doneOneTimeBtn) {
+      doneOneTimeBtn.onclick = function() {
+        var box = document.getElementById("keyOneTimeBox");
+        if (box) box.style.display = "none";
+        var inp = document.getElementById("keyOneTimeInput");
+        if (inp) inp.value = "";
+        toast(isZH() ? "已隱藏明文金鑰，系統將維持安全遮罩" : "Key masked for security");
+      };
+    }
+
     var revokeKeyBtn = document.getElementById("agentKeyRevoke");
     if (revokeKeyBtn) {
       revokeKeyBtn.onclick = async function() {
-        if (!currentAgentKey) {
+        var akd = document.getElementById("s_agent_key_disp");
+        if (!akd || !akd.value) {
           toast(isZH() ? "目前沒有啟用的金鑰可撤銷。" : "No active key to revoke.");
           return;
         }
@@ -2656,8 +2809,8 @@
             return;
           }
           currentAgentKey = "";
-          var inp = document.getElementById("s_agent_key_disp");
-          if (inp) inp.value = "";
+          var box = document.getElementById("keyOneTimeBox");
+          if (box) box.style.display = "none";
           await loadAgentKeyStatus();
           toast(isZH() ? "已成功撤銷 Agent API Key" : "Agent API Key revoked");
         } catch (e) {
@@ -2666,12 +2819,16 @@
       };
     }
 
+    var btnLlms = document.getElementById("copyUrlLlms");
+    if (btnLlms) btnLlms.onclick = function() { copyText(gOrigin + "/llms.txt", isZH() ? "已複製 llms.txt 網址 ✓" : "llms.txt URL copied ✓"); };
+    var btnSkill = document.getElementById("copyUrlSkill");
+    if (btnSkill) btnSkill.onclick = function() { copyText(gOrigin + "/skill.md", isZH() ? "已複製 skill.md 網址 ✓" : "skill.md URL copied ✓"); };
+    var btnFull = document.getElementById("copyUrlFull");
+    if (btnFull) btnFull.onclick = function() { copyText(gOrigin + "/llms-full.txt", isZH() ? "已複製 llms-full.txt 網址 ✓" : "llms-full.txt URL copied ✓"); };
+
     var copyPromptBtn = document.getElementById("copyAgentPrompt");
     if (copyPromptBtn) {
       copyPromptBtn.onclick = function() {
-        if (!currentAgentKey) {
-          if (!confirm(isZH() ? "您尚未產生 Agent API Key。是否仍要複製（提示詞中金鑰將標記為需手動填入）？" : "No Agent API Key generated yet. Copy prompt with placeholder key?")) return;
-        }
         var origin = apiBase();
         var bearer = currentAgentKey || "<YOUR_AGENT_API_KEY>";
         var promptText = "# RoamRadar (888RoamTravel) AI Agent Instructions\n\n" +
@@ -2680,7 +2837,12 @@
           "- Base URL: " + origin + "/api/v1\n" +
           "- Authorization Header: Authorization: Bearer " + bearer + "\n" +
           "- Content-Type: application/json\n\n" +
-          "## Core Capabilities\n" +
+          "## Live Documentation & Skills\n" +
+          "Always fetch the latest API specification and skill definitions directly from the following canonical endpoints:\n" +
+          "- Agent Skill Specification: " + origin + "/skill.md\n" +
+          "- Comprehensive API Reference & Schemas: " + origin + "/llms-full.txt\n" +
+          "- Machine-Readable Index: " + origin + "/llms.txt\n\n" +
+          "## Key Capabilities & Endpoints Overview\n" +
           "You have full CRUD access to the user's travel itineraries:\n" +
           "1. List trips: GET " + origin + "/api/v1/trips\n" +
           "2. Create a trip: POST " + origin + "/api/v1/trips\n" +
@@ -2705,46 +2867,11 @@
           "## Batch Operations\n" +
           "When adding multiple items for an itinerary, always pass a JSON array to POST " + origin + "/api/v1/trips/:id/segments in a single HTTP request for speed and efficiency.\n\n" +
           "## Invariant Protection\n" +
-          "All items you create are stamped with source: \"manual\", protecting them against being overwritten by calendar/email background syncs.\n\n" +
-          "## Reference Documents\n" +
-          "- Full Spec: " + origin + "/llms-full.txt\n" +
-          "- Agent Skill: " + origin + "/skill.md\n";
+          "All items you create are stamped with source: \"manual\", protecting them against being overwritten by calendar/email background syncs.\n";
 
         copyText(promptText, isZH() ? "已複製完整 Agent 系統提示詞 ✓" : "Agent System Prompt copied ✓");
-      };
-    }
-
-    var copySkillBtn = document.getElementById("copySkillMd");
-    if (copySkillBtn) {
-      copySkillBtn.onclick = async function() {
-        try {
-          var r = await fetch(apiBase() + "/skill.md");
-          if (!r.ok) throw new Error("Fetch failed");
-          var text = await r.text();
-          copyText(text, isZH() ? "已複製 SKILL.md ✓" : "SKILL.md copied ✓");
-        } catch (e) {
-          toast(isZH() ? "無法取得 SKILL.md" : "Failed to load SKILL.md");
-        }
-      };
-    }
-
-    var dlSkillBtn = document.getElementById("dlSkillMd");
-    if (dlSkillBtn) {
-      dlSkillBtn.onclick = async function() {
-        try {
-          var r = await fetch(apiBase() + "/skill.md");
-          if (!r.ok) throw new Error("Fetch failed");
-          var text = await r.text();
-          var blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
-          var a = document.createElement("a");
-          a.href = URL.createObjectURL(blob);
-          a.download = "SKILL.md";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          toast(isZH() ? "已下載 SKILL.md ✓" : "SKILL.md downloaded ✓");
-        } catch (e) {
-          toast(isZH() ? "無法下載 SKILL.md" : "Failed to download SKILL.md");
+        if (!currentAgentKey) {
+          toast(isZH() ? "提示：提示詞中金鑰標記為 <YOUR_AGENT_API_KEY>，請手動填入保存的金鑰" : "Note: Key marked as <YOUR_AGENT_API_KEY> in prompt.");
         }
       };
     }

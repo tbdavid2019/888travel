@@ -220,13 +220,16 @@ export default {
 
     // --- Machine-readable Discovery (llms.txt, llms-full.txt, SKILL.md) ---
     if ((url.pathname === "/llms.txt" || url.pathname === "/api/llms.txt") && request.method === "GET") {
-      return cors(new Response(LLMS_TXT, { headers: { "Content-Type": "text/plain; charset=utf-8" } }));
+      const body = LLMS_TXT.replace(/https:\/\/travel\.david888\.com/g, url.origin);
+      return cors(new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8" } }));
     }
     if (url.pathname === "/llms-full.txt" && request.method === "GET") {
-      return cors(new Response(LLMS_FULL_TXT, { headers: { "Content-Type": "text/plain; charset=utf-8" } }));
+      const body = LLMS_FULL_TXT.replace(/https:\/\/travel\.david888\.com/g, url.origin);
+      return cors(new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8" } }));
     }
     if (url.pathname === "/skill.md" && request.method === "GET") {
-      return cors(new Response(SKILL_MD, { headers: { "Content-Type": "text/markdown; charset=utf-8" } }));
+      const body = SKILL_MD.replace(/https:\/\/travel\.david888\.com/g, url.origin);
+      return cors(new Response(body, { headers: { "Content-Type": "text/markdown; charset=utf-8" } }));
     }
 
     // --- Agent RESTful API v1 (/api/v1/*) ---
@@ -533,7 +536,8 @@ export default {
     // Agent API Key Management (In-app key generation, status, and revocation)
     if (url.pathname === "/settings/agent-key" && request.method === "GET") {
       const key = await env.TRIPS.get("agent_api_key");
-      return cors(json({ configured: !!key, key: key || null }));
+      const mask = key ? (key.slice(0, 11) + "..." + key.slice(-4)) : null;
+      return cors(json({ configured: !!key, keyMask: mask }));
     }
     if (url.pathname === "/settings/agent-key" && request.method === "POST") {
       const newKey = "rr_agent_" + randHex(24);
