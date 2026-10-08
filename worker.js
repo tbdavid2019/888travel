@@ -751,7 +751,7 @@ export default {
         return cors(json({
           ok: true,
           service: "888travel",
-          version: "2.6.7",
+          version: "2.8.0",
           instance: url.origin,
           serverTime: new Date().toISOString(),
           totalTrips: trips.length,

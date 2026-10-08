@@ -890,7 +890,6 @@
 <script>
 (function(){
   "use strict";
-  var BUILD="2026-07-10.40";
   /* ===================== Lucide Icons (Zero-dependency SVG) ===================== */
   var LUCIDE_ICONS = {
   "bot": "<path d=\"M12 8V4H8\"/><rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\"/><path d=\"M2 14h2m16 0h2m-7-1v2m-6-2v2\"/>",
@@ -2976,8 +2975,7 @@
       '<div class="modal-actions" style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">'+
         '<button class="btn" id="cancelBtn" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('x', 14)+' <span>'+(isZH()?"關閉":"Close")+'</span></button>'+
         '<button class="btn solid" id="saveSet" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存偏好":"Save")+'</span></button>'+
-      '</div>'+
-      '<div class="hint" style="margin-top:12px;text-align:right">build '+BUILD+'</div>');
+      '</div>');
     var tabNav = document.getElementById("setTabNav");
     if(tabNav){
       tabNav.onclick = function(e){
