@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.6.9] - 2026-10-08
+
+### Enhanced & Design / 官方展示首頁全新登場：AI 隨行特助與 Agent 調用 (Showcase Landing Page Upgrade)
+- **展示網頁重磅升級 (Official Showcase Landing Page Upgrade)**：
+  - 在官方首頁 [travel.david888.com](https://travel.david888.com/) 正式追加兩大核心能力展示專題：
+    1. **翡翠綠「AI 隨行特助」專題面板**：展示抽屜式對話、在地雨天備案與即時品酒推薦，醒目標示「🔄 雙軌自動容錯備援 (Dual-Track Failover)」與「⚡ 1.2s Context Slimming」，並提供一鍵排入備案展示按鈕。
+    2. **尊爵深黑 / 寶石藍「AI 代理人原生支援 (Agent-Ready)」終端展示面板**：展示 `POST /api/v1/trips` Bearer 授權調用代碼、19 大 RESTful 端點支援、主流 AI 工具支援清單（Claude Code、Cursor、ChatGPT、Antigravity），並直連 `/skill.md` 規範。
+  - **核心特色清單全面煥新 (Feature Word Ladder)**：將特色階梯全面擴充至 10 大項目，納入雙軌 AI Copilot、19 個 Agent 端點、skill.md / llms.txt、Resend OTP 驗證等亮點。
+  - **全站雙語字典同步 (Full Bilingual i18n)**：繁體中文與 English 語系全面同步新面板文案。
+
 ## [2.6.8] - 2026-10-07
 
 ### Changed & Infrastructure / 官方儲存庫正式更名為 888travel (Repository Renamed to 888travel)
