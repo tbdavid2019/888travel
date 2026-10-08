@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.0] - 2026-10-08
+
+### Enhanced & Design / 官網特色全幅視覺 Bento Grid 震撼登場 (Visual Bento Showcase Gallery)
+- **全面取代純文字清單 (Visual Bento Showcase Upgrade)**：
+  - 徹底揚棄傳統文字階梯，在 [travel.david888.com](https://travel.david888.com/) 重磅推出六大視覺 Bento 卡片矩陣，直接嵌入應用程式真實高清 UI 截圖（High-DPI Screenshots）：
+    1. 🤖 **AI 隨行特助 · 雙軌容錯 (Dual-Track AI Copilot)**：展示右側 Copilot 抽屜、自動備援徽章、即時天氣感知與一鍵排入時間軸按鈕。
+    2. ⚡ **19 個 Agent RESTful 端點 (Agent-Ready API)**：展示 Agent 設定彈窗、一次性 Bearer Token 生成及標準 `skill.md` / `llms.txt`。
+    3. ✈️ **旅程情報卡 · 主備案互換 (Trip Detail & Fallback Swap)**：展示航班、飯店憑證、即時天氣警示與 Plan B 備案方案一鍵互換。
+    4. 📅 **365 天年度行事曆與離家統計 (365-Day Calendar & ICS Feed)**：展示全年視覺化日曆區塊、2026 離家天數統計與私有加密 ICS 訂閱串流。
+    5. 🌍 **足跡世界地圖 (Been There Map & Flight Arcs)**：展示全球互動地圖、自動起降航線弧線與終生里程統計。
+    6. 🔐 **100% 個人雲端私有託管 (Cloudflare KV & Resend OTP Gate)**：展示雙重身分守門、Resend 信箱 OTP 動態碼與每週自動快照。
+  - **底部全功能生態導覽 (Ecosystem Parity Ribbon)**：追加 Google 日曆雙向同步、+trip 郵件自動解析、4:5 Instagram 限動分享卡、離線 PWA 本地快取與多時區時差鐘等核心能力標籤。
+  - **極致響應式體驗 (Responsive & CJK Craft)**：遵循 Impeccable 工藝標準，支援桌面 12 欄不對稱 Bento 排版與行動端全寬自適應，且繁體中文與英文雙語全面同步。
+
 ## [2.6.9] - 2026-10-08
 
 ### Enhanced & Design / 官方展示首頁全新登場：AI 隨行特助與 Agent 調用 (Showcase Landing Page Upgrade)

@@ -69,9 +69,115 @@
     .tw-dash-top { flex-wrap: wrap !important; }
     .tw-footer-row { flex-direction: column !important; align-items: flex-start !important; gap: 28px !important; }
     .tw-plan-date { display: none !important; }
+    .tw-bento-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
+    .tw-bento-card { grid-column: span 1 !important; padding: 20px 16px !important; }
+    .tw-bento-media-tall { max-height: 260px !important; }
+    .tw-bento-media-mid { max-height: 230px !important; }
   }
 
   .tw-h1:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(22,19,12,.2); color: #F4EFE4; }
+  .tw-h2:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(22,19,12,.25); color: #F4EFE4; }
+  .tw-h3:hover { transform: translateY(-4px); box-shadow: 0 60px 110px -40px rgba(30,64,255,.9); }
+  .tw-h4:hover { color: #FF5A35; }
+
+  /* ===================== Bento Showcase Grid ===================== */
+  .tw-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+  }
+  .tw-bento-card {
+    background: #1C1812;
+    border: 1px solid rgba(244,239,228,.14);
+    border-radius: 24px;
+    padding: clamp(22px, 3vw, 30px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+    box-shadow: 0 24px 60px -25px rgba(0,0,0,.65);
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    overflow: hidden;
+  }
+  .tw-bento-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,90,53,.35);
+    box-shadow: 0 32px 75px -25px rgba(0,0,0,.8), 0 0 24px -8px rgba(255,90,53,.22);
+  }
+  .tw-bento-media {
+    background: #110E0A;
+    border-radius: 16px;
+    border: 1px solid rgba(244,239,228,.1);
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .tw-bento-media-tall {
+    max-height: 310px;
+    overflow: hidden;
+    position: relative;
+  }
+  .tw-bento-media-tall::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 70px;
+    background: linear-gradient(to bottom, transparent, #110E0A);
+    pointer-events: none;
+  }
+  .tw-bento-media-mid {
+    max-height: 280px;
+    overflow: hidden;
+    position: relative;
+  }
+  .tw-bento-media-mid::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 50px;
+    background: linear-gradient(to bottom, transparent, #110E0A);
+    pointer-events: none;
+  }
+  .tw-bento-window-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(244,239,228,.04);
+    border-bottom: 1px solid rgba(244,239,228,.08);
+  }
+  .tw-bento-dots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tw-bento-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .tw-bento-media img {
+    width: 100%;
+    display: block;
+    transition: transform .4s ease;
+  }
+  .tw-bento-card:hover .tw-bento-media img {
+    transform: scale(1.02);
+  }
+  .tw-bento-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: rgba(244,239,228,.75);
+    background: rgba(244,239,228,.07);
+    border: 1px solid rgba(244,239,228,.1);
+    padding: 4px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
   .tw-h2:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(22,19,12,.25); color: #F4EFE4; }
   .tw-h3:hover { transform: translateY(-4px); box-shadow: 0 60px 110px -40px rgba(30,64,255,.9); }
   .tw-h4:hover { color: #FF5A35; }
@@ -549,22 +655,213 @@
       </div>
     </div>
 
-    <!-- ============ FEATURE WORD LIST ============ -->
-    <div style="max-width: 880px; margin: 110px auto 0;">
-      <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.2;" data-i18n="featHeader">Everything<br><span style="color: #FF5A35;">a traveler needs</span></div>
-      <div style="margin-top: 34px; display: flex; flex-direction: column; gap: 6px;">
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08;" data-i18n="feat1">Dual-track AI Copilot</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .88;" data-i18n="feat2">19 RESTful Agent API endpoints</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .78;" data-i18n="feat3">skill.md &amp; llms.txt ready</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .68;" data-i18n="feat4">Trip countdowns</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .58;" data-i18n="feat5">Plan timelines &amp; fallback swaps</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .48;" data-i18n="feat6">Calendar &amp; +trip email sync</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .38;" data-i18n="feat7">Resend OTP email authentication</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .28;" data-i18n="feat8">Past-trip archive &amp; Been There</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .2;" data-i18n="feat9">Instagram-ready 4:5 logs</div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.03em; line-height: 1.08; opacity: .14;" data-i18n="feat10">100% Self-hosted &amp; private</div>
+    <!-- ============ VISUAL BENTO SHOWCASE ============ -->
+    <div class="tw-bento-section" style="max-width: 1080px; margin: 120px auto 0; padding: 0 clamp(18px, 4vw, 32px);">
+      
+      <!-- Section Header -->
+      <div style="text-align: center; max-width: 760px; margin: 0 auto 56px;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,90,53,.14); border: 1px solid rgba(255,90,53,.32); padding: 6px 14px; border-radius: 999px;">
+          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #FF5A35; box-shadow: 0 0 10px #FF5A35;"></span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #FF5A35;" data-i18n="featBadge">FEATURE SHOWCASE</span>
+        </div>
+        <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 5.2vw, 54px); line-height: 1.05; letter-spacing: -.03em; margin: 18px 0 0;" data-i18n="featHeader">Everything<br><span style="color: #FF5A35;">a traveler needs</span></h2>
+        <p style="font-size: 15.5px; line-height: 1.6; color: rgba(244,239,228,.7); margin: 16px auto 0; text-wrap: pretty;" data-i18n="featSub">不再只是冰冷的預訂紀錄。888travel 整合雙軌 AI 容錯、外部 Agent 自動派工、足跡地圖與年度日曆，為現代旅人提供極致優雅的自託管體驗。</p>
       </div>
-      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(244,239,228,.45); margin-top: 26px;" data-i18n="featFooter">The itinerary goes on...</div>
+
+      <!-- Bento Grid (12 Columns) -->
+      <div class="tw-bento-grid">
+
+        <!-- Card 1: AI Copilot (Span 7) -->
+        <div class="tw-bento-card" style="grid-column: span 7;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #1B8A57;" data-i18n="bento1Badge">01 / INTELLIGENCE</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #1B8A57; background: rgba(27,138,87,.14); border: 1px solid rgba(27,138,87,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento1Pill">FAILOVER READY</span>
+            </div>
+            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento1Title">AI 隨行特助 · 雙軌自動容錯備援</h3>
+            <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento1Desc">針對當前旅程時間軸量身打造。若主要 LLM 超載或逾時，自動在秒級內無縫切換備援模型（如 Gemini / OpenAI / Groq / Ollama），問天氣、推薦雨天備案，一鍵將景點直接加入行程。</p>
+          </div>
+          <div class="tw-bento-media">
+            <div class="tw-bento-window-bar">
+              <div class="tw-bento-dots">
+                <span style="background: #FF5A35;"></span>
+                <span style="background: #E89A2B;"></span>
+                <span style="background: #1B8A57;"></span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">888travel // ai-copilot-drawer</span>
+              </div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #1B8A57;">● ONLINE</span>
+            </div>
+            <img src="screenshots/copilot-drawer.png" alt="888travel AI Copilot Drawer with fallback failover" loading="lazy">
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px;">
+            <span class="tw-bento-pill" data-i18n="bento1Tag1">雙軌自動容錯</span>
+            <span class="tw-bento-pill" data-i18n="bento1Tag2">零逾時切換</span>
+            <span class="tw-bento-pill" data-i18n="bento1Tag3">一鍵排入時間軸</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Agent API (Span 5) -->
+        <div class="tw-bento-card" style="grid-column: span 5;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #1E40FF;" data-i18n="bento2Badge">02 / AGENT DISPATCH</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #60A5FA; background: rgba(96,165,250,.14); border: 1px solid rgba(96,165,250,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento2Pill">19 ENDPOINTS</span>
+            </div>
+            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento2Title">19 個 Agent RESTful 端點 · 原生支援 skill.md</h3>
+            <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento2Desc">讓 Claude Code、Cursor、ChatGPT、Antigravity 自動為你規劃旅程。內建標準 llms.txt 與動態 skill.md，一鍵生成一次性 Bearer Token，完全免登入後台即可由 AI Agent 全自動排程。</p>
+          </div>
+          <div class="tw-bento-media">
+            <div class="tw-bento-window-bar">
+              <div class="tw-bento-dots">
+                <span style="background: #FF5A35;"></span>
+                <span style="background: #E89A2B;"></span>
+                <span style="background: #1B8A57;"></span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">agent // api/v1/trips</span>
+              </div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #60A5FA;">BEARER AUTH</span>
+            </div>
+            <img src="screenshots/agent-settings.png" alt="888travel Agent API Settings & Bearer Token" loading="lazy">
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px;">
+            <span class="tw-bento-pill" data-i18n="bento2Tag1">19 RESTful 端點</span>
+            <span class="tw-bento-pill" data-i18n="bento2Tag2">動態 skill.md</span>
+            <span class="tw-bento-pill" data-i18n="bento2Tag3">一次性 Bearer 金鑰</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Trip Details & Plan B (Span 5) -->
+        <div class="tw-bento-card" style="grid-column: span 5;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #FF5A35;" data-i18n="bento3Badge">03 / TIMELINE ENGINE</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #FF5A35; background: rgba(255,90,53,.14); border: 1px solid rgba(255,90,53,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento3Pill">PLAN B READY</span>
+            </div>
+            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento3Title">旅程情報卡 · 航程細項與主備案互換</h3>
+            <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento3Desc">所有機票代碼、飯店確認號、乘車點與地圖指引集中收納。遇到天候變化或突發狀況？一鍵將預備好的 Plan B 備案方案切換為正式行程，時間軸即時更新。</p>
+          </div>
+          <div class="tw-bento-media tw-bento-media-tall">
+            <div class="tw-bento-window-bar">
+              <div class="tw-bento-dots">
+                <span style="background: #FF5A35;"></span>
+                <span style="background: #E89A2B;"></span>
+                <span style="background: #1B8A57;"></span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">trip // funchal-plan-b</span>
+              </div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #FF5A35;">LIVE WEATHER</span>
+            </div>
+            <img src="screenshots/tripcard.png" alt="888travel Trip Intelligence Card and Plan B alternative" loading="lazy">
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px;">
+            <span class="tw-bento-pill" data-i18n="bento3Tag1">主備案即時切換</span>
+            <span class="tw-bento-pill" data-i18n="bento3Tag2">登機證與確認碼</span>
+            <span class="tw-bento-pill" data-i18n="bento3Tag3">即時天氣感知</span>
+          </div>
+        </div>
+
+        <!-- Card 4: 365-Day Calendar (Span 7) -->
+        <div class="tw-bento-card" style="grid-column: span 7;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #E89A2B;" data-i18n="bento4Badge">04 / ANNUAL CALENDAR</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #FCD34D; background: rgba(252,211,77,.14); border: 1px solid rgba(252,211,77,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento4Pill">365-DAY GRID</span>
+            </div>
+            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento4Title">365 天年度日曆 · 離家天數與私有 ICS</h3>
+            <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento4Desc">俯瞰全年所有旅程與空檔，動態彩條清楚標示行程區間，即時統計 2026 離家在途天數與衝堂警示；提供專屬私密 ICS 訂閱網址，完美同步 Apple Calendar 與 Google 日曆。</p>
+          </div>
+          <div class="tw-bento-media tw-bento-media-tall">
+            <div class="tw-bento-window-bar">
+              <div class="tw-bento-dots">
+                <span style="background: #FF5A35;"></span>
+                <span style="background: #E89A2B;"></span>
+                <span style="background: #1B8A57;"></span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">calendar // year-2026-grid</span>
+              </div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #FCD34D;">ICS STREAM</span>
+            </div>
+            <img src="screenshots/calendar.png" alt="888travel 365-Day Annual Calendar & Days Away Counter" loading="lazy">
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px;">
+            <span class="tw-bento-pill" data-i18n="bento4Tag1">365 天視覺日曆</span>
+            <span class="tw-bento-pill" data-i18n="bento4Tag2">離家天數統計</span>
+            <span class="tw-bento-pill" data-i18n="bento4Tag3">私有 ICS 訂閱串流</span>
+          </div>
+        </div>
+
+        <!-- Card 5: Been There Map (Span 6) -->
+        <div class="tw-bento-card" style="grid-column: span 6;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #1E40FF;" data-i18n="bento5Badge">05 / FOOTPRINT MAP</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #93C5FD; background: rgba(147,197,253,.14); border: 1px solid rgba(147,197,253,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento5Pill">BEEN THERE</span>
+            </div>
+            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento5Title">足跡世界地圖 · 飛行軌跡與里程統計</h3>
+            <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento5Desc">點亮你曾經造訪過的每一座城市與國家。根據時間軸自動繪製優雅的起降弧線，累積個人旅行里程與歷史回憶，告別死板的表格清單。</p>
+          </div>
+          <div class="tw-bento-media tw-bento-media-mid">
+            <div class="tw-bento-window-bar">
+              <div class="tw-bento-dots">
+                <span style="background: #FF5A35;"></span>
+                <span style="background: #E89A2B;"></span>
+                <span style="background: #1B8A57;"></span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">globe // flight-arcs-tracker</span>
+              </div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #93C5FD;">GLOBAL</span>
+            </div>
+            <img src="screenshots/map.png" alt="888travel Footprint World Map and Flight Arcs" loading="lazy">
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px;">
+            <span class="tw-bento-pill" data-i18n="bento5Tag1">世界足跡地圖</span>
+            <span class="tw-bento-pill" data-i18n="bento5Tag2">動態飛行弧線</span>
+            <span class="tw-bento-pill" data-i18n="bento5Tag3">終生里程統計</span>
+          </div>
+        </div>
+
+        <!-- Card 6: Privacy & Settings (Span 6) -->
+        <div class="tw-bento-card" style="grid-column: span 6;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #7C4DFF;" data-i18n="bento6Badge">06 / PRIVACY &amp; SECURITY</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #C4B5FD; background: rgba(196,181,253,.14); border: 1px solid rgba(196,181,253,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento6Pill">100% PRIVATE</span>
+            </div>
+            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento6Title">100% 個人雲端私有託管 · 雙重守門驗證</h3>
+            <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento6Desc">託管於你自己的 Cloudflare Worker 與 KV 資料庫，零商業追蹤。支援自訂密碼關卡與 Resend Magic Code / OTP 電子信箱動態驗證，每週自動生成雲端快照備份。</p>
+          </div>
+          <div class="tw-bento-media tw-bento-media-mid">
+            <div class="tw-bento-window-bar">
+              <div class="tw-bento-dots">
+                <span style="background: #FF5A35;"></span>
+                <span style="background: #E89A2B;"></span>
+                <span style="background: #1B8A57;"></span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">security // kv-resend-otp-vault</span>
+              </div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #C4B5FD;">AES SECURED</span>
+            </div>
+            <img src="screenshots/llm-settings.png" alt="888travel Cloudflare KV & LLM Configuration" loading="lazy">
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px;">
+            <span class="tw-bento-pill" data-i18n="bento6Tag1">Cloudflare KV 私託管</span>
+            <span class="tw-bento-pill" data-i18n="bento6Tag2">Resend OTP 免密碼</span>
+            <span class="tw-bento-pill" data-i18n="bento6Tag3">每週自動雲端快照</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Ecosystem Parity Ribbon -->
+      <div style="margin-top: 36px; padding: 22px 26px; background: rgba(244,239,228,.04); border: 1px solid rgba(244,239,228,.08); border-radius: 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="color: #FF5A35; font-size: 18px;">✦</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .12em; color: rgba(244,239,228,.6);" data-i18n="bentoMoreHeader">FULL ECOSYSTEM PARITY</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <span class="tw-bento-pill" data-i18n="bentoPill1">Google 日曆雙向同步</span>
+          <span class="tw-bento-pill" data-i18n="bentoPill2">+trip 郵件自動轉發解析</span>
+          <span class="tw-bento-pill" data-i18n="bentoPill3">4:5 Instagram 限動分享卡</span>
+          <span class="tw-bento-pill" data-i18n="bentoPill4">離線 PWA 本地快取</span>
+          <span class="tw-bento-pill" data-i18n="bentoPill5">多時區即時時差鐘</span>
+        </div>
+      </div>
+
     </div>
 
     <!-- ============ GIANT CTA ============ -->
@@ -671,18 +968,57 @@
       p5SideDesc: "A 4:5 recap of every trip. Screenshot the card or grab the caption - then drop both into Instagram.",
       p5Copy: "Copy caption",
       p5Close: "Close",
+      featBadge: "FEATURE SHOWCASE",
       featHeader: 'Everything<br><span style="color: #FF5A35;">a traveler needs</span>',
-      feat1: "Dual-track AI Copilot",
-      feat2: "19 RESTful Agent API endpoints",
-      feat3: "skill.md &amp; llms.txt ready",
-      feat4: "Trip countdowns",
-      feat5: "Plan timelines &amp; fallback swaps",
-      feat6: "Calendar &amp; +trip email sync",
-      feat7: "Resend OTP email authentication",
-      feat8: "Past-trip archive &amp; Been There",
-      feat9: "Instagram-ready 4:5 logs",
-      feat10: "100% Self-hosted &amp; private",
-      featFooter: "The itinerary goes on...",
+      featSub: "Far beyond a static itinerary. 888travel integrates dual-track AI failover, autonomous agent dispatch, footprint world mapping, and 365-day calendar feeds into an elegant self-hosted travel hub.",
+      bento1Badge: "01 / INTELLIGENCE",
+      bento1Pill: "FAILOVER READY",
+      bento1Title: "Dual-Track AI Copilot with Instant Failover",
+      bento1Desc: "Lives right inside your living timeline. If your primary LLM rate-limits or times out, it automatically fails over to your secondary model within seconds. Ask for rainy-day alternatives or wine tastings and slot them directly into your itinerary with one tap.",
+      bento1Tag1: "Dual Failover",
+      bento1Tag2: "Zero Timeout",
+      bento1Tag3: "1-Tap Itinerary",
+      bento2Badge: "02 / AGENT DISPATCH",
+      bento2Pill: "19 ENDPOINTS",
+      bento2Title: "19 RESTful Endpoints &amp; Native skill.md",
+      bento2Desc: "Empower Claude Code, Cursor, ChatGPT, and Antigravity to build and manage your trips autonomously. Includes machine-readable llms.txt and skill.md specs with one-click Bearer token generation.",
+      bento2Tag1: "19 RESTful APIs",
+      bento2Tag2: "Dynamic skill.md",
+      bento2Tag3: "Bearer Token Auth",
+      bento3Badge: "03 / TIMELINE ENGINE",
+      bento3Pill: "PLAN B READY",
+      bento3Title: "Trip Intel Cards &amp; 1-Click Fallback Swapping",
+      bento3Desc: "Keep boarding passes, hotel confirmations, rail transfers, and walking routes at your fingertips. Weather shift or train delay? Swap to your saved Plan B alternative in a single tap.",
+      bento3Tag1: "Plan B Fallback",
+      bento3Tag2: "Boarding &amp; Conf IDs",
+      bento3Tag3: "Weather Aware",
+      bento4Badge: "04 / ANNUAL CALENDAR",
+      bento4Pill: "365-DAY GRID",
+      bento4Title: "365-Day Calendar &amp; Private ICS Feed",
+      bento4Desc: "A high-altitude visual overview of your entire travel year. Spot open weekends, track total days away, catch scheduling conflicts, and subscribe via a private encrypted ICS feed directly in Apple or Google Calendar.",
+      bento4Tag1: "365-Day Year Grid",
+      bento4Tag2: "Days Away Counter",
+      bento4Tag3: "Private ICS Stream",
+      bento5Badge: "05 / FOOTPRINT MAP",
+      bento5Pill: "BEEN THERE",
+      bento5Title: "Been There Map &amp; Flight Arc Visualizer",
+      bento5Desc: "Watch visited countries light up across an interactive world canvas. Automatically plots departure-to-arrival flight arcs and tallies your lifetime journeys and mileage.",
+      bento5Tag1: "Interactive Globe",
+      bento5Tag2: "Flight Arcs",
+      bento5Tag3: "Lifetime Mileage",
+      bento6Badge: "06 / PRIVACY &amp; SECURITY",
+      bento6Pill: "100% PRIVATE",
+      bento6Title: "100% Self-Hosted &amp; Resend OTP Gate",
+      bento6Desc: "Runs entirely on your own Cloudflare Worker &amp; KV database with zero third-party telemetry. Secured by password lock and Resend email OTP magic codes, backed by automated weekly snapshots.",
+      bento6Tag1: "Self-Hosted KV",
+      bento6Tag2: "Resend OTP Auth",
+      bento6Tag3: "Weekly Cloud Snapshots",
+      bentoMoreHeader: "FULL ECOSYSTEM PARITY",
+      bentoPill1: "Google Calendar 2-Way Sync",
+      bentoPill2: "+trip Email Booking Parser",
+      bentoPill3: "4:5 Instagram Stories",
+      bentoPill4: "Offline PWA Support",
+      bentoPill5: "Multi-Timezone Clocks",
       ctaBtn: "Launch 888travel",
       ctaBadge: "FREE WEB APP · NO INSTALL REQUIRED · CLOUD SYNC",
       footerCredit: 'Created with <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; vertical-align: -2px;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"></path></svg> for travel, by <a href="https://david888.com" target="_blank" rel="noopener" style="color: inherit; font-weight: inherit; text-decoration: underline;" class="tw-h4">david888.com</a> (adapted from <a href="https://www.giovannibrees.com" target="_blank" rel="noopener" style="color: inherit; font-weight: inherit; text-decoration: underline;" class="tw-h4">Giovanni Brees</a>)',
@@ -751,18 +1087,57 @@
       p5SideDesc: "每趟旅程的精選回顧卡片。截圖或複製文案，直接分享至 Instagram 限時動態。",
       p5Copy: "複製貼文文案",
       p5Close: "關閉",
+      featBadge: "旗艦級功能巡禮",
       featHeader: '旅人所需的一切，<br><span style="color: #FF5A35;">全都在此</span>',
-      feat1: "AI 隨行特助與雙軌容錯",
-      feat2: "19 個 Agent RESTful 端點",
-      feat3: "標準 skill.md &amp; llms.txt 支援",
-      feat4: "出發倒數計時",
-      feat5: "動態時間軸與一鍵備案互換",
-      feat6: "Google 日曆與 +trip 郵件智慧同步",
-      feat7: "Resend OTP 信箱安全驗證登入",
-      feat8: "歷史旅程足跡歸檔與 Been There",
-      feat9: "美型 4:5 社群分享日誌",
-      feat10: "100% 個人 Cloudflare 雲端私有託管",
-      featFooter: "旅程還在繼續……",
+      featSub: "不再只是冰冷的預訂紀錄。888travel 整合雙軌 AI 容錯、外部 Agent 自動派工、足跡地圖與年度日曆，為現代旅人提供極致優雅的自託管體驗。",
+      bento1Badge: "01 / 智慧特助",
+      bento1Pill: "雙軌容錯",
+      bento1Title: "AI 隨行特助 · 雙軌自動容錯備援",
+      bento1Desc: "針對當前旅程時間軸量身打造。若主要 LLM 超載或逾時，自動在秒級內無縫切換備援模型（如 Gemini / OpenAI / Groq / Ollama），問天氣、推薦雨天備案，一鍵將景點直接加入行程。",
+      bento1Tag1: "雙軌自動容錯",
+      bento1Tag2: "零逾時切換",
+      bento1Tag3: "一鍵排入時間軸",
+      bento2Badge: "02 / 代理人排程",
+      bento2Pill: "19 個端點",
+      bento2Title: "19 個 Agent RESTful 端點 · 原生支援 skill.md",
+      bento2Desc: "讓 Claude Code、Cursor、ChatGPT、Antigravity 自動為你規劃旅程。內建標準 llms.txt 與動態 skill.md，一鍵生成一次性 Bearer Token，完全免登入後台即可由 AI Agent 全自動排程。",
+      bento2Tag1: "19 RESTful 端點",
+      bento2Tag2: "動態 skill.md",
+      bento2Tag3: "一次性 Bearer 金鑰",
+      bento3Badge: "03 / 動態時間軸",
+      bento3Pill: "主備案互換",
+      bento3Title: "旅程情報卡 · 航程細項與主備案互換",
+      bento3Desc: "所有機票代碼、飯店確認號、乘車點與地圖指引集中收納。遇到天候變化或突發狀況？一鍵將預備好的 Plan B 備案方案切換為正式行程，時間軸即時更新。",
+      bento3Tag1: "主備案即時切換",
+      bento3Tag2: "登機證與確認碼"
+      ,bento3Tag3: "即時天氣感知",
+      bento4Badge: "04 / 全年行事曆",
+      bento4Pill: "365 天總覽",
+      bento4Title: "365 天年度日曆 · 離家天數與私有 ICS",
+      bento4Desc: "俯瞰全年所有旅程與空檔，動態彩條清楚標示行程區間，即時統計 2026 離家在途天數與衝堂警示；提供專屬私密 ICS 訂閱網址，完美同步 Apple Calendar 與 Google 日曆。",
+      bento4Tag1: "365 天視覺日曆",
+      bento4Tag2: "離家天數統計",
+      bento4Tag3: "私有 ICS 訂閱串流",
+      bento5Badge: "05 / 足跡地圖",
+      bento5Pill: "足跡打卡",
+      bento5Title: "足跡世界地圖 · 飛行軌跡與里程統計",
+      bento5Desc: "點亮你曾經造訪過的每一座城市與國家。根據時間軸自動繪製優雅的起降弧線，累積個人旅行里程與歷史回憶，告別死板的表格清單。",
+      bento5Tag1: "世界足跡地圖",
+      bento5Tag2: "動態飛行弧線",
+      bento5Tag3: "終生里程統計",
+      bento6Badge: "06 / 隱私與安全",
+      bento6Pill: "100% 個人雲端",
+      bento6Title: "100% 個人雲端私有託管 · 雙重守門驗證",
+      bento6Desc: "託管於你自己的 Cloudflare Worker 與 KV 資料庫，零商業追蹤。支援自訂密碼關卡與 Resend Magic Code / OTP 電子信箱動態驗證，每週自動生成雲端快照備份。",
+      bento6Tag1: "Cloudflare KV 私託管",
+      bento6Tag2: "Resend OTP 免密碼",
+      bento6Tag3: "每週自動雲端快照",
+      bentoMoreHeader: "全方位原生整合生態",
+      bentoPill1: "Google 日曆雙向同步",
+      bentoPill2: "+trip 郵件自動轉發解析",
+      bentoPill3: "4:5 Instagram 限動分享卡",
+      bentoPill4: "離線 PWA 本地快取",
+      bentoPill5: "多時區即時時差鐘",
       ctaBtn: "直接開啟 888漫步旅遊",
       ctaBadge: "免安裝網頁版 · 雲端同步 · 即開即用",
       footerCredit: 'Created with <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; vertical-align: -2px;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"></path></svg> for travel, by <a href="https://david888.com" target="_blank" rel="noopener" style="color: inherit; font-weight: inherit; text-decoration: underline;" class="tw-h4">david888.com</a>（修改於 <a href="https://www.giovannibrees.com" target="_blank" rel="noopener" style="color: inherit; font-weight: inherit; text-decoration: underline;" class="tw-h4">Giovanni Brees</a>）',
