@@ -24,6 +24,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **雙軌認證介面與 OTP 速率防護 (Tabbed Auth Modal & Resend Rate Limiting)**：
   - 認證彈窗全新改版為頁籤切換之「登入」與「註冊」雙軌介面，支援密碼與 Resend OTP 雙軌認證。
   - 寄送 OTP 導入 60 秒冷卻倒數與每小時次數上限速率限制，並支援 Cloudflare Turnstile 機器人驗證。
+- **Codex Code Review 安全加固與邊界隔離 (Codex Review Hardening & Isolation)**：
+  - **租戶專屬 Agent API Key**：租戶與管理員的 Agent Bearer Token 全面拆分獨立命名空間 (`user:<uid>:agent_key` 與 `agent_token:<token>`)，外部 Agent 調用嚴格限定在該租戶分區。
+  - **管理員專屬端點權限收斂**：`/sync`、`/api/v1/sync`、`/backups`、`/settings/google`、`/settings/resend`、`/settings/places` 等全域與 Google/Gmail 同步操作嚴格限縮最高管理員 (`usr_admin`)，租戶無法越權觸發全域同步。
+  - **設定面板非管理員空指針防護**：全數按鈕事件綁定加上 `isAdmin` 與元素存在防護，徹底排除非管理員開啟設定時的 DOM null 異常。
 
 ## [2.7.0] - 2026-10-08
 
