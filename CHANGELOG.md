@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.8.1] - 2026-10-08
+
+### Enhanced & Typography / 全站字型升級：JetBrains Mono 與 Google Fonts Noto Sans TC (Unified Typography with JetBrains Mono & Noto Sans TC)
+- **核心字型全面統一 (Unified Typography System)**：
+  - 英文、數字、程式碼、時間軸與標題全面切換為工程美學極致的 **JetBrains Mono**。
+  - 繁體中文全站引入 Google Fonts 原生託管之 **Noto Sans TC (思源黑體)**，徹底擺脫系統本機字型差異，確保跨平台（macOS、iOS、Windows、Android）漢字渲染精準、筆畫飽滿一致。
+  - 完整更新 [travel-app.html](file:///Users/david/Documents/git/tbdavid2019/travel-roamradar/travel-app.html)、[website/index.html](file:///Users/david/Documents/git/tbdavid2019/travel-roamradar/website/index.html)、[favicon.svg](file:///Users/david/Documents/git/tbdavid2019/travel-roamradar/favicon.svg) 以及 [public/](file:///Users/david/Documents/git/tbdavid2019/travel-roamradar/public/) 下所有鏡像發行檔案。
+  - 嚴格遵守 Canonical Mirror Rule，通過語法編譯與字節校驗測試。
+
 ## [2.8.0] - 2026-10-08
 
 ### Added & Architecture / 多租戶架構與可配置自主註冊開關 (Multi-Tenant Architecture & Configurable Registration)

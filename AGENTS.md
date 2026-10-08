@@ -93,9 +93,9 @@ interface Segment {
 - **Supported Languages**: `zh-TW` (繁體中文, default) and `en` (English).
 - **Persistence**: User preference is saved in `localStorage.getItem("travel:lang")`.
 - **Typography & Font Stack**:
-  Must adhere to the CJK font-stack fallback:
+  Primary Latin and Monospace: `JetBrains Mono`; Traditional Chinese: `Noto Sans TC` (Google Fonts), followed by CJK system font-stack fallback:
   ```css
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+  font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", monospace, sans-serif;
   ```
 - **Terminology Consistency**:
   - `Upcoming` ➡️ `即將啟程`

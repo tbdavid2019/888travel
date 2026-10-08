@@ -11,7 +11,7 @@
   </defs>
   <rect width="512" height="512" rx="116" fill="url(#orangeGrad)"/>
   <g text-anchor="middle" filter="url(#subtleShadow)">
-    <text x="256" y="270" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Bricolage Grotesque', 'Arial Black', sans-serif" font-size="185" font-weight="900" letter-spacing="-1" fill="#FFFFFF">888</text>
-    <text x="256" y="388" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Archivo', 'Arial', sans-serif" font-size="90" font-weight="800" letter-spacing="3" fill="#FFFFFF">Travel</text>
+    <text x="256" y="270" font-family="'JetBrains Mono', -apple-system, BlinkMacSystemFont, 'SF Pro Display', monospace, sans-serif" font-size="185" font-weight="900" letter-spacing="-1" fill="#FFFFFF">888</text>
+    <text x="256" y="388" font-family="'JetBrains Mono', -apple-system, BlinkMacSystemFont, 'SF Pro Display', monospace, sans-serif" font-size="90" font-weight="800" letter-spacing="3" fill="#FFFFFF">Travel</text>
   </g>
 </svg>

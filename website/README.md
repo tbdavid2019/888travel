@@ -27,4 +27,4 @@ one Wikimedia Commons image (Funchal, CC BY-SA - needs attribution if kept).
 Fine for a preview; for a public launch, replace them with images you own or
 have licensed. They're the only external images in the file (search `img src`).
 
-Fonts load from Google Fonts (Bricolage Grotesque, Archivo, JetBrains Mono).
+Fonts load from Google Fonts (JetBrains Mono, Noto Sans TC).

@@ -49,10 +49,10 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://travel.david888.com/#app","name":"888漫步旅遊 · 888travel","url":"https://travel.david888.com/","description":"888漫步旅遊 (888travel) 是專為個人打造的開源、自託管私人旅遊中樞。將所有航班、住宿與交通接駁整合於單一動態旅程時間軸。","applicationCategory":"TravelApplication","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","author":{"@type":"Organization","name":"david888.com","url":"https://david888.com"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"sameAs":"https://github.com/tbdavid2019/888travel"},{"@type":"SoftwareSourceCode","name":"888travel","codeRepository":"https://github.com/tbdavid2019/888travel","author":{"@type":"Organization","name":"david888.com","url":"https://david888.com"},"runtimePlatform":"Cloudflare Workers","programmingLanguage":["JavaScript","HTML"],"about":"Open-source, self-hosted personal travel hub built on Cloudflare Workers"}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&amp;family=Archivo:wght@400;500;600;700&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;0,800;1,500;1,700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&amp;family=Noto+Sans+TC:wght@300..900&amp;display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: #ECE7DC; }
+  html, body { margin: 0; padding: 0; background: #ECE7DC; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", monospace, sans-serif; }
   body { -webkit-font-smoothing: antialiased; }
   a { color: #1E40FF; }
   a:hover { color: #FF5A35; }
@@ -168,7 +168,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'Noto Sans TC', monospace;
     font-size: 10.5px;
     font-weight: 600;
     color: rgba(244,239,228,.75);
@@ -184,7 +184,7 @@
 
   /* ===================== CJK Typography Enhancements ===================== */
   html[lang*="zh"] {
-    font-family: 'Archivo', -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+    font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", monospace, sans-serif;
   }
   html[lang*="zh"] [data-i18n="heroEyebrow"],
   html[lang*="zh"] [data-i18n="dashEyebrow"] {
@@ -217,13 +217,13 @@
      per-image author + license). Funchal, Barcelona, Amsterdam, Lisbon, Paris,
      New York, Athens. CC licenses vary; keep this credit or replace with your
      own images to drop the attribution requirement. -->
-<div style="min-height: 100vh; background: #ECE7DC; color: #16130C; font-family: 'Archivo', -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Heiti TC", "Microsoft JhengHei", sans-serif; overflow-x: hidden;">
+<div style="min-height: 100vh; background: #ECE7DC; color: #16130C; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", monospace, sans-serif; overflow-x: hidden;">
 
   <!-- ============ NAV ============ -->
   <nav style="max-width: 1200px; margin: 0 auto; padding: 22px clamp(20px, 4vw, 40px); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
     <div style="display: flex; align-items: center; gap: 9px;">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
-      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -.02em;" id="navBrand" data-i18n="brandTitle">888漫步旅遊</span>
+      <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -.02em;" id="navBrand" data-i18n="brandTitle">888漫步旅遊</span>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
       <a href="https://travel.david888.com/app" style="font-family: inherit; font-weight: 700; font-size: 13px; color: #16130C; background: #FFFFFF; border: 1px solid rgba(22,19,12,.15); text-decoration: none; padding: 9px 18px; border-radius: 999px; transition: transform .15s ease, box-shadow .15s ease;" class="tw-h1" id="navOpenApp" data-i18n="navOpenApp">開啟應用程式</a>
@@ -234,8 +234,8 @@
 
   <!-- ============ HERO ============ -->
   <header style="max-width: 1060px; margin: 0 auto; padding: 46px clamp(20px, 4vw, 40px) 90px; text-align: center;">
-    <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; letter-spacing: .32em; color: #1E40FF; animation: riseIn .6s ease both;" data-i18n="heroEyebrow">DEPARTURES &amp; MEMORIES</div>
-    <h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(52px, 8.6vw, 100px); line-height: .96; letter-spacing: -.035em; margin: 18px 0 0; animation: riseIn .6s ease .06s both;">
+    <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 700; font-size: 12px; letter-spacing: .32em; color: #1E40FF; animation: riseIn .6s ease both;" data-i18n="heroEyebrow">DEPARTURES &amp; MEMORIES</div>
+    <h1 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: clamp(52px, 8.6vw, 100px); line-height: .96; letter-spacing: -.035em; margin: 18px 0 0; animation: riseIn .6s ease .06s both;">
       <span data-i18n="heroH1">Home to<br>all your <span style="display: inline-block; width: .72em; height: .72em; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: .18em; box-shadow: 0 10px 24px -12px rgba(22,19,12,.4); vertical-align: -.02em; margin: 0 .05em;"><span style="display: flex; width: 100%; height: 100%; align-items: center; justify-content: center;"><svg width="62%" height="62%" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg></span></span> <span style="color: #FF5A35;">trips</span></span>
     </h1>
     <div style="display: inline-flex; gap: 6px; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 999px; padding: 6px; margin-top: 30px; animation: riseIn .6s ease .12s both;">
@@ -245,9 +245,9 @@
     </div>
     <p style="font-size: 17px; line-height: 1.5; color: #756D5E; max-width: 520px; margin: 22px auto 0; text-wrap: pretty; animation: riseIn .6s ease .18s both;" data-i18n="heroDesc">888漫步旅遊 · 888travel 將你的所有航班、住宿與交通接駁收納在同一條動態時間軸——從預訂、登機，到留下回憶。</p>
     <div style="margin-top: 26px; animation: riseIn .6s ease .24s both;">
-      <a href="https://travel.david888.com/app" style="display: inline-block; font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Noto Sans TC', sans-serif; font-weight: 700; font-size: 16px; color: #F4EFE4; background: #16130C; text-decoration: none; padding: 15px 30px; border-radius: 999px; transition: transform .15s ease, box-shadow .15s ease;" class="tw-h2" data-i18n="heroCta">立即開啟 888漫步旅遊</a>
+      <a href="https://travel.david888.com/app" style="display: inline-block; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'PingFang TC', sans-serif; font-weight: 700; font-size: 16px; color: #F4EFE4; background: #16130C; text-decoration: none; padding: 15px 30px; border-radius: 999px; transition: transform .15s ease, box-shadow .15s ease;" class="tw-h2" data-i18n="heroCta">立即開啟 888漫步旅遊</a>
       
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .2em; color: #A39A89; margin-top: 14px;" data-i18n="heroBadge">免安裝網頁版 · 雲端同步 · 即開即用</div>
+        <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; letter-spacing: .2em; color: #A39A89; margin-top: 14px;" data-i18n="heroBadge">免安裝網頁版 · 雲端同步 · 即開即用</div>
       
     </div>
 
@@ -258,11 +258,11 @@
       <div style="max-width: 800px; margin: 0 auto; background: #F6F3EC; border: 1px solid rgba(22,19,12,.12); border-radius: 26px; padding: clamp(20px, 4vw, 34px); box-shadow: 0 40px 80px -40px rgba(22,19,12,.5); text-align: left; position: relative; z-index: 1;">
         <div class="tw-dash-top" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
           <div>
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .3em; color: #1E40FF;" data-i18n="dashEyebrow">DEPARTURES &amp; MEMORIES</div>
-            <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 30px; letter-spacing: .16em; margin-top: 6px;" data-i18n="dashTravel">TRAVEL</div>
+            <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .3em; color: #1E40FF;" data-i18n="dashEyebrow">DEPARTURES &amp; MEMORIES</div>
+            <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 30px; letter-spacing: .16em; margin-top: 6px;" data-i18n="dashTravel">TRAVEL</div>
           </div>
           <div style="display: flex; gap: 8px;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: .14em; color: #756D5E; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 8px 13px; border-radius: 999px;" data-i18n="dashLocal">LOCAL</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: .14em; color: #756D5E; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 8px 13px; border-radius: 999px;" data-i18n="dashLocal">LOCAL</span>
             <span style="font-weight: 600; font-size: 13px; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 8px 15px; border-radius: 999px;" data-i18n="dashShare">Share</span>
             <span style="font-weight: 600; font-size: 13px; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 8px 15px; border-radius: 999px;" data-i18n="dashSet">Settings</span>
           </div>
@@ -271,44 +271,44 @@
 
         <div class="tw-dash-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 18px;">
           <div style="background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 16px; padding: 16px 18px;">
-            <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 28px; line-height: .9;">12</div>
+            <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 28px; line-height: .9;">12</div>
             <div style="font-size: 12.5px; color: #756D5E; margin-top: 7px;" data-i18n="dashTripsLogged">trips logged</div>
           </div>
           <div style="background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 16px; padding: 16px 18px;">
-            <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 28px; line-height: .9;">8</div>
+            <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 28px; line-height: .9;">8</div>
             <div style="font-size: 12.5px; color: #756D5E; margin-top: 7px;" data-i18n="dashUpcoming">upcoming</div>
           </div>
           <div style="background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 16px; padding: 16px 18px;">
-            <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 28px; line-height: .9;">78</div>
+            <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 28px; line-height: .9;">78</div>
             <div style="font-size: 12.5px; color: #756D5E; margin-top: 7px;" data-i18n="dashDaysAway">days away in 2026</div>
           </div>
           <div style="background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 16px; padding: 16px 18px;">
-            <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 17px; line-height: 1.4; letter-spacing: .02em;">FNC · in 80d</div>
+            <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 700; font-size: 17px; line-height: 1.4; letter-spacing: .02em;">FNC · in 80d</div>
             <div style="font-size: 12.5px; color: #756D5E; margin-top: 4px;" data-i18n="dashNextTrip">next trip</div>
           </div>
         </div>
 
         <div style="display: inline-flex; gap: 4px; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 999px; padding: 5px; margin-top: 16px;">
-          <span style="font-weight: 600; font-size: 13px; color: #F4EFE4; background: #16130C; padding: 8px 16px; border-radius: 999px;">Upcoming <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; opacity: .55;">1</span></span>
-          <span style="font-weight: 600; font-size: 13px; color: #756D5E; padding: 8px 16px; border-radius: 999px;">Past <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; opacity: .55;">0</span></span>
-          <span style="font-weight: 600; font-size: 13px; color: #756D5E; padding: 8px 16px; border-radius: 999px;">Wishlist <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; opacity: .55;">1</span></span>
+          <span style="font-weight: 600; font-size: 13px; color: #F4EFE4; background: #16130C; padding: 8px 16px; border-radius: 999px;">Upcoming <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; opacity: .55;">1</span></span>
+          <span style="font-weight: 600; font-size: 13px; color: #756D5E; padding: 8px 16px; border-radius: 999px;">Past <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; opacity: .55;">0</span></span>
+          <span style="font-weight: 600; font-size: 13px; color: #756D5E; padding: 8px 16px; border-radius: 999px;">Wishlist <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; opacity: .55;">1</span></span>
         </div>
 
         <!-- trip card (cropped) -->
         <div style="background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); border-radius: 18px; margin-top: 16px; padding: 20px 22px 0; height: 128px; overflow: hidden;">
           <div style="display: flex; align-items: center; gap: 14px;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 20px;">OPO</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 20px;">OPO</span>
             <span style="flex: 1; height: 2px; background-image: linear-gradient(90deg, rgba(22,19,12,.3) 50%, transparent 50%); background-size: 8px 2px;"></span>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="color: #16130C; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
-            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 20px;">FNC</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 20px;">FNC</span>
             <span style="flex: 2;"></span>
             <span style="font-weight: 600; font-size: 13px; border: 1px solid rgba(22,19,12,.12); padding: 7px 14px; border-radius: 999px;" data-i18n="dashEdit">Edit</span>
           </div>
-          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 18px; margin-top: 12px;">Build Days - Madeira</div>
+          <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: 18px; margin-top: 12px;">Build Days - Madeira</div>
           <div style="display: flex; align-items: center; gap: 8px; margin-top: 9px;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #756D5E;">15-18 Sep 2026</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: #F4F0E7; border: 1px solid rgba(22,19,12,.12); padding: 4px 10px; border-radius: 999px;" data-i18n="dashDays">4 days</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #1E40FF; background: rgba(30,64,255,.08); padding: 4px 10px; border-radius: 999px;" data-i18n="dashInDays">in 80 days</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 12px; color: #756D5E;">15-18 Sep 2026</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; background: #F4F0E7; border: 1px solid rgba(22,19,12,.12); padding: 4px 10px; border-radius: 999px;" data-i18n="dashDays">4 days</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; color: #1E40FF; background: rgba(30,64,255,.08); padding: 4px 10px; border-radius: 999px;" data-i18n="dashInDays">in 80 days</span>
           </div>
         </div>
       </div>
@@ -318,54 +318,54 @@
   <!-- ============ PANEL 1 · TIMELINE ============ -->
   <section class="tw-split" style="display: grid; grid-template-columns: 1fr 1fr;">
     <div class="tw-split-left" style="background: #E7EBFC; display: flex; align-items: center; justify-content: center; padding: 80px 40px; min-height: 560px;">
-      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p1Left"><span style="color: #1E40FF;">Flights, stays</span> &amp; everything in between.</h2>
+      <h2 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p1Left"><span style="color: #1E40FF;">Flights, stays</span> &amp; everything in between.</h2>
     </div>
     <div class="tw-split-right" style="background: #1E40FF; display: flex; align-items: center; justify-content: center; padding: 64px 32px; min-height: 560px; position: relative;">
       <div style="width: min(460px, 100%); display: flex; flex-direction: column; gap: 20px; align-items: center;">
         
-          <span style="align-self: flex-end; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #F4EFE4; background: #16130C; padding: 8px 14px; border-radius: 999px; transform: rotate(2deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.5);" data-i18n="p1Badge">4 PLANS · ZERO TABS</span>
+          <span style="align-self: flex-end; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #F4EFE4; background: #16130C; padding: 8px 14px; border-radius: 999px; transform: rotate(2deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.5);" data-i18n="p1Badge">4 PLANS · ZERO TABS</span>
         
       <div style="width: 100%; background: #FFFFFF; border-radius: 20px; padding: 22px 24px; box-shadow: 0 34px 70px -30px rgba(10,16,60,.7);">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 19px;">OPO</span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 19px;">OPO</span>
           <span style="flex: 1; height: 2px; background-image: linear-gradient(90deg, rgba(22,19,12,.3) 50%, transparent 50%); background-size: 8px 2px;"></span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color: #16130C; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
-          <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 19px;">FNC</span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 19px;">FNC</span>
         </div>
-        <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 17px; margin-top: 10px;">Build Days - Madeira</div>
+        <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: 17px; margin-top: 10px;">Build Days - Madeira</div>
 
         <div style="display: grid; gap: 0; margin-top: 8px;">
           <div style="display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(22,19,12,.08);">
             <span style="width: 42px; height: 42px; border-radius: 12px; background: #F1F1EC; display: flex; align-items: center; justify-content: center;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="color: #1E40FF; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg></span>
             <span style="min-width: 0;">
-              <span style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 700; font-size: 14.5px;">TAP TP1693 OPO to FNC</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #1E40FF;">FLIGHT</span></span>
+              <span style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 700; font-size: 14.5px;">TAP TP1693 OPO to FNC</span><span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #1E40FF;">FLIGHT</span></span>
               <span style="display: block; font-size: 12.5px; color: #756D5E; margin-top: 3px;">Porto to Funchal</span>
             </span>
-            <span class="tw-plan-date" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: nowrap;">15 Sep</span>
+            <span class="tw-plan-date" style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 12px; white-space: nowrap;">15 Sep</span>
           </div>
           <div style="display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(22,19,12,.08);">
             <span style="width: 42px; height: 42px; border-radius: 12px; background: #F1F1EC; display: flex; align-items: center; justify-content: center;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="color: #1B8A57;"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path><path d="M2 17h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></span>
             <span style="min-width: 0;">
-              <span style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 700; font-size: 14.5px;">Castanheiro Boutique Hotel</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #1B8A57;">HOTEL</span></span>
+              <span style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 700; font-size: 14.5px;">Castanheiro Boutique Hotel</span><span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #1B8A57;">HOTEL</span></span>
               <span style="display: block; font-size: 12.5px; color: #756D5E; margin-top: 3px;">Rua do Castanheiro 31, Funchal</span>
             </span>
-            <span class="tw-plan-date" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: nowrap;">15 - 18 Sep</span>
+            <span class="tw-plan-date" style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 12px; white-space: nowrap;">15 - 18 Sep</span>
           </div>
           <div style="display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(22,19,12,.08);">
             <span style="width: 42px; height: 42px; border-radius: 12px; background: #F1F1EC; display: flex; align-items: center; justify-content: center;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="color: #7C4DFF;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" stroke="currentColor" stroke-width="2"></path><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"></circle></svg></span>
             <span style="min-width: 0;">
-              <span style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 700; font-size: 14.5px;">Airport pickup</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #7C4DFF;">RIDE</span></span>
+              <span style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 700; font-size: 14.5px;">Airport pickup</span><span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #7C4DFF;">RIDE</span></span>
               <span style="display: block; font-size: 12.5px; color: #756D5E; margin-top: 3px;">FNC arrivals</span>
             </span>
-            <span class="tw-plan-date" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: nowrap;">15 Sep</span>
+            <span class="tw-plan-date" style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 12px; white-space: nowrap;">15 Sep</span>
           </div>
           <div style="display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; padding: 12px 0;">
             <span style="width: 42px; height: 42px; border-radius: 12px; background: #F1F1EC; display: flex; align-items: center; justify-content: center;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="color: #1E40FF; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg></span>
             <span style="min-width: 0;">
-              <span style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 700; font-size: 14.5px;">TAP TP1694 FNC to OPO</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #1E40FF;">FLIGHT</span></span>
+              <span style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 700; font-size: 14.5px;">TAP TP1694 FNC to OPO</span><span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #1E40FF;">FLIGHT</span></span>
               <span style="display: block; font-size: 12.5px; color: #756D5E; margin-top: 3px;">Funchal to Porto</span>
             </span>
-            <span class="tw-plan-date" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: nowrap;">18 Sep</span>
+            <span class="tw-plan-date" style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 12px; white-space: nowrap;">18 Sep</span>
           </div>
         </div>
         <span style="display: inline-block; font-weight: 700; font-size: 13px; color: #1E40FF; background: rgba(30,64,255,.08); padding: 9px 16px; border-radius: 999px; margin-top: 6px;" data-i18n="p1AddPlan">+ Add plan</span>
@@ -377,23 +377,23 @@
   <!-- ============ PANEL 3 · COUNTDOWN ============ -->
   <section class="tw-split" style="display: grid; grid-template-columns: 1fr 1fr;">
     <div class="tw-split-left" style="background: #FFE9E2; display: flex; align-items: center; justify-content: center; padding: 80px 40px; min-height: 560px;">
-      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p2Left"><span style="color: #FF5A35;">Counting down</span> from the day you book.</h2>
+      <h2 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p2Left"><span style="color: #FF5A35;">Counting down</span> from the day you book.</h2>
     </div>
     <div class="tw-split-right" style="background: #FF5A35; display: flex; align-items: center; justify-content: center; padding: 64px 32px; min-height: 560px;">
       <div style="width: min(440px, 100%); background: #16130C; color: #F4EFE4; border-radius: 22px; padding: 30px 32px; box-shadow: 0 40px 80px -32px rgba(80,15,0,.75);">
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
-          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: #FFFFFF; background: #FF5A35; padding: 6px 12px; border-radius: 999px;" data-i18n="p2Next">NEXT TRIP</span>
-          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(244,239,228,.6);">15-18 SEP 2026</span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: #FFFFFF; background: #FF5A35; padding: 6px 12px; border-radius: 999px;" data-i18n="p2Next">NEXT TRIP</span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 12px; color: rgba(244,239,228,.6);">15-18 SEP 2026</span>
         </div>
         <div style="display: flex; align-items: baseline; gap: 16px; margin-top: 24px;">
-          <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 104px; line-height: .8; letter-spacing: -.03em;">80</span>
-          <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.1;" data-i18n="p2DaysTo">days to<br><span style="color: #FF5A35;">Funchal</span></span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 104px; line-height: .8; letter-spacing: -.03em;">80</span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: 22px; line-height: 1.1;" data-i18n="p2DaysTo">days to<br><span style="color: #FF5A35;">Funchal</span></span>
         </div>
         <div style="display: flex; align-items: center; gap: 14px; margin-top: 28px;">
-          <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 24px;">OPO</span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 24px;">OPO</span>
           <span style="flex: 1; height: 2px; background-image: linear-gradient(90deg, rgba(244,239,228,.5) 50%, transparent 50%); background-size: 14px 2px; animation: dashFlow 1s linear infinite;"></span>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; animation: floatPlane 3s ease-in-out infinite; flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
-          <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 24px;">FNC</span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 24px;">FNC</span>
         </div>
         <span style="display: inline-block; font-weight: 700; font-size: 14px; color: #16130C; background: #F4EFE4; padding: 12px 22px; border-radius: 999px; margin-top: 26px;" data-i18n="p2Open">Open itinerary -&gt;</span>
       </div>
@@ -403,38 +403,38 @@
   <!-- ============ PANEL 4 · MEMORIES ============ -->
   <section class="tw-split" style="display: grid; grid-template-columns: 1fr 1fr;">
     <div class="tw-split-left" style="background: #F7EDDA; display: flex; align-items: center; justify-content: center; padding: 80px 40px; min-height: 560px;">
-      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p3Left"><span style="color: #C97F16;">Memories</span> that file themselves.</h2>
+      <h2 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p3Left"><span style="color: #C97F16;">Memories</span> that file themselves.</h2>
     </div>
     <div class="tw-split-right" style="background: #E89A2B; display: flex; align-items: center; justify-content: center; padding: 64px 32px; min-height: 560px;">
       <div style="width: min(430px, 100%); display: flex; flex-direction: column; gap: 20px;">
         
-          <span style="align-self: flex-start; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #16130C; background: #F4EFE4; padding: 8px 14px; border-radius: 999px; transform: rotate(-2deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.4);" data-i18n="p3Badge">ROUTES · DAY COUNTS</span>
+          <span style="align-self: flex-start; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #16130C; background: #F4EFE4; padding: 8px 14px; border-radius: 999px; transform: rotate(-2deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.4);" data-i18n="p3Badge">ROUTES · DAY COUNTS</span>
         
         <div style="background: #FFFFFF; border-radius: 20px; padding: 22px 24px; box-shadow: 0 34px 70px -30px rgba(90,50,0,.65);">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: #A39A89;" data-i18n="p3Past">PAST · 2025</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #756D5E;" data-i18n="p3Summary">2 trips · 9 days</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .2em; color: #A39A89;" data-i18n="p3Past">PAST · 2025</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; color: #756D5E;" data-i18n="p3Summary">2 trips · 9 days</span>
           </div>
           <div style="display: grid; grid-template-columns: 62px 1fr auto; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(22,19,12,.08); margin-top: 8px;">
             <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Barcelona_City_View_from_Sagrada_Fam%C3%ADlia_-_2013.07_-_panoramio.jpg?width=300" alt="Barcelona" style="width: 62px; height: 62px; object-fit: cover; border-radius: 12px;">
             <span style="min-width: 0;">
-              <span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 15px;">OPO <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> BCN</span>
+              <span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 15px;">OPO <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> BCN</span>
               <span style="display: block; font-size: 13px; color: #756D5E; margin-top: 3px;">Tapas crawl - Barcelona · 12-16 May</span>
             </span>
             <span style="text-align: right;">
-              <span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px; color: #FF5A35;">5</span>
-              <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .12em; color: #756D5E;">DAYS</span>
+              <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 22px; color: #FF5A35;">5</span>
+              <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 9px; letter-spacing: .12em; color: #756D5E;">DAYS</span>
             </span>
           </div>
           <div style="display: grid; grid-template-columns: 62px 1fr auto; gap: 14px; align-items: center; padding: 14px 0;">
             <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Alfama_lisboa.jpg?width=300" alt="Lisbon" style="width: 62px; height: 62px; object-fit: cover; border-radius: 12px;">
             <span style="min-width: 0;">
-              <span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 15px;">OPO <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> LIS</span>
+              <span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 15px;">OPO <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> LIS</span>
               <span style="display: block; font-size: 13px; color: #756D5E; margin-top: 3px;">Lisbon by rail · 3-6 Oct</span>
             </span>
             <span style="text-align: right;">
-              <span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px; color: #FF5A35;">4</span>
-              <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .12em; color: #756D5E;">DAYS</span>
+              <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 22px; color: #FF5A35;">4</span>
+              <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 9px; letter-spacing: .12em; color: #756D5E;">DAYS</span>
             </span>
           </div>
         </div>
@@ -445,21 +445,21 @@
   <!-- ============ PANEL · AI COPILOT ============ -->
   <section class="tw-split" style="display: grid; grid-template-columns: 1fr 1fr;">
     <div class="tw-split-left" style="background: #E3F5EB; display: flex; align-items: center; justify-content: center; padding: 80px 40px; min-height: 560px;">
-      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 340px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="pCopilotLeft"><span style="color: #1B8A57;">AI Copilot</span> that knows your living timeline.</h2>
+      <h2 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 340px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="pCopilotLeft"><span style="color: #1B8A57;">AI Copilot</span> that knows your living timeline.</h2>
     </div>
     <div class="tw-split-right" style="background: #1B8A57; display: flex; align-items: center; justify-content: center; padding: 64px 32px; min-height: 560px;">
       <div style="width: min(460px, 100%); display: flex; flex-direction: column; gap: 18px;">
-        <span style="align-self: flex-start; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #16130C; background: #F4EFE4; padding: 8px 14px; border-radius: 999px; transform: rotate(-1.5deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.4);" data-i18n="pCopilotBadge">DUAL-TRACK FAILOVER · ZERO TIMEOUT</span>
+        <span style="align-self: flex-start; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #16130C; background: #F4EFE4; padding: 8px 14px; border-radius: 999px; transform: rotate(-1.5deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.4);" data-i18n="pCopilotBadge">DUAL-TRACK FAILOVER · ZERO TIMEOUT</span>
         <div style="background: #FFFFFF; border-radius: 22px; padding: 24px 26px; box-shadow: 0 34px 70px -30px rgba(5,45,25,.75);">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(22,19,12,.08); padding-bottom: 14px;">
             <div style="display: flex; align-items: center; gap: 9px;">
               <span style="width: 28px; height: 28px; border-radius: 8px; background: rgba(27,138,87,.12); display: flex; align-items: center; justify-content: center;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color: #1B8A57;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle><path d="M8 12h8m-4-4v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
               </span>
-              <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 15px;" data-i18n="pCopilotCardTitle">888travel Copilot</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: 15px;" data-i18n="pCopilotCardTitle">888travel Copilot</span>
               <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #1B8A57; box-shadow: 0 0 0 3px rgba(27,138,87,.2);"></span>
             </div>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .05em; color: #FF5A35; background: #FFF0EB; border: 1px solid rgba(255,90,53,.25); padding: 4px 9px; border-radius: 999px;" data-i18n="pCopilotFailover">🔄 FALLBACK: gpt-oss-120b</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .05em; color: #FF5A35; background: #FFF0EB; border: 1px solid rgba(255,90,53,.25); padding: 4px 9px; border-radius: 999px;" data-i18n="pCopilotFailover">🔄 FALLBACK: gpt-oss-120b</span>
           </div>
 
           <div style="margin-top: 16px; background: #F6F3EC; border-radius: 14px 14px 2px 14px; padding: 12px 14px; font-size: 13.5px; line-height: 1.5; color: #16130C;" data-i18n="pCopilotQuery">
@@ -473,7 +473,7 @@
               🏰 <strong>蒙特宮室內藝廊</strong>（搭纜車直達，免淋雨）
             </div>
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(27,138,87,.15);">
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #1B8A57;">⚡ 1.2s · Context Slimming</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; color: #1B8A57;">⚡ 1.2s · Context Slimming</span>
               <span style="font-weight: 700; font-size: 12px; color: #FFFFFF; background: #1B8A57; padding: 6px 12px; border-radius: 999px;" data-i18n="pCopilotAddBtn">+ 一鍵排入備案行程</span>
             </div>
           </div>
@@ -485,36 +485,36 @@
   <!-- ============ PANEL · AGENTIC API ============ -->
   <section class="tw-split" style="display: grid; grid-template-columns: 1fr 1fr;">
     <div class="tw-split-left" style="background: #E8EEFB; display: flex; align-items: center; justify-content: center; padding: 80px 40px; min-height: 560px;">
-      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 340px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="pAgentLeft"><span style="color: #1E40FF;">Agent-Ready.</span> Let Claude or Cursor build your trip.</h2>
+      <h2 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 340px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="pAgentLeft"><span style="color: #1E40FF;">Agent-Ready.</span> Let Claude or Cursor build your trip.</h2>
     </div>
     <div class="tw-split-right" style="background: #1E40FF; display: flex; align-items: center; justify-content: center; padding: 64px 32px; min-height: 560px;">
       <div style="width: min(470px, 100%); display: flex; flex-direction: column; gap: 18px;">
-        <span style="align-self: flex-end; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #16130C; background: #F4EFE4; padding: 8px 14px; border-radius: 999px; transform: rotate(1.5deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.4);" data-i18n="pAgentBadge">19 RESTFUL ENDPOINTS · SKILL.MD</span>
+        <span style="align-self: flex-end; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #16130C; background: #F4EFE4; padding: 8px 14px; border-radius: 999px; transform: rotate(1.5deg); box-shadow: 0 12px 24px -12px rgba(0,0,0,.4);" data-i18n="pAgentBadge">19 RESTFUL ENDPOINTS · SKILL.MD</span>
         <div style="background: #16130C; color: #F4EFE4; border-radius: 22px; padding: 24px 26px; box-shadow: 0 34px 70px -30px rgba(5,15,60,.85);">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(244,239,228,.12); padding-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 7px;">
               <span style="width: 10px; height: 10px; border-radius: 50%; background: #FF5A35;"></span>
               <span style="width: 10px; height: 10px; border-radius: 50%; background: #E89A2B;"></span>
               <span style="width: 10px; height: 10px; border-radius: 50%; background: #1B8A57;"></span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(244,239,228,.6); margin-left: 6px;">agent-dispatch.sh</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; color: rgba(244,239,228,.6); margin-left: 6px;">agent-dispatch.sh</span>
             </div>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #60A5FA; background: rgba(96,165,250,.15); padding: 3px 8px; border-radius: 999px;">BEARER AUTH</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; color: #60A5FA; background: rgba(96,165,250,.15); padding: 3px 8px; border-radius: 999px;">BEARER AUTH</span>
           </div>
 
-          <pre style="margin: 16px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; line-height: 1.55; color: #E2E8F0; overflow-x: auto; background: rgba(0,0,0,.35); padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.08);"><code><span style="color: #60A5FA;">curl</span> -X POST https://travel.david888.com/api/v1/trips \
+          <pre style="margin: 16px 0 0; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11.5px; line-height: 1.55; color: #E2E8F0; overflow-x: auto; background: rgba(0,0,0,.35); padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.08);"><code><span style="color: #60A5FA;">curl</span> -X POST https://travel.david888.com/api/v1/trips \
   -H <span style="color: #34D399;">"Authorization: Bearer tr_agent_9f82..."</span> \
   -d <span style="color: #FCD34D;">'{"from":"TPE","to":"FNC","start":"2026-09-15"}'</span></code></pre>
 
           <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; background: rgba(244,239,228,.08); border: 1px solid rgba(244,239,228,.14); padding: 4px 9px; border-radius: 999px; color: rgba(244,239,228,.85);">Claude Code</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; background: rgba(244,239,228,.08); border: 1px solid rgba(244,239,228,.14); padding: 4px 9px; border-radius: 999px; color: rgba(244,239,228,.85);">Cursor</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; background: rgba(244,239,228,.08); border: 1px solid rgba(244,239,228,.14); padding: 4px 9px; border-radius: 999px; color: rgba(244,239,228,.85);">ChatGPT</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; background: rgba(244,239,228,.08); border: 1px solid rgba(244,239,228,.14); padding: 4px 9px; border-radius: 999px; color: rgba(244,239,228,.85);">Antigravity</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; background: rgba(244,239,228,.08); border: 1px solid rgba(244,239,228,.14); padding: 4px 9px; border-radius: 999px; color: rgba(244,239,228,.85);">Claude Code</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; background: rgba(244,239,228,.08); border: 1px solid rgba(244,239,228,.14); padding: 4px 9px; border-radius: 999px; color: rgba(244,239,228,.85);">Cursor</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; background: rgba(244,239,228,.08); border: 1px solid rgba(244,239,228,.14); padding: 4px 9px; border-radius: 999px; color: rgba(244,239,228,.85);">ChatGPT</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; background: rgba(244,239,228,.08); border: 1px solid rgba(244,239,228,.14); padding: 4px 9px; border-radius: 999px; color: rgba(244,239,228,.85);">Antigravity</span>
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(244,239,228,.12);">
             <div style="font-size: 12.5px; color: rgba(244,239,228,.7);" data-i18n="pAgentDocs">提供動態 skill.md 與 llms.txt</div>
-            <a href="/skill.md" target="_blank" rel="noopener" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 11px; color: #16130C; background: #F4EFE4; text-decoration: none; padding: 7px 14px; border-radius: 999px;" data-i18n="pAgentSkillBtn">開啟 skill.md -&gt;</a>
+            <a href="/skill.md" target="_blank" rel="noopener" style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 700; font-size: 11px; color: #16130C; background: #F4EFE4; text-decoration: none; padding: 7px 14px; border-radius: 999px;" data-i18n="pAgentSkillBtn">開啟 skill.md -&gt;</a>
           </div>
         </div>
       </div>
@@ -524,20 +524,20 @@
   <!-- ============ PANEL 5 · PRIVATE ============ -->
   <section class="tw-split" style="display: grid; grid-template-columns: 1fr 1fr;">
     <div class="tw-split-left" style="background: #ECE6FB; display: flex; align-items: center; justify-content: center; padding: 80px 40px; min-height: 560px;">
-      <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p4Left"><span style="color: #7C4DFF;">Private</span> until you post it.</h2>
+      <h2 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: clamp(28px, 3.2vw, 38px); line-height: 1.15; letter-spacing: -.02em; max-width: 320px; margin: 0; text-align: center; text-wrap: pretty;" data-i18n="p4Left"><span style="color: #7C4DFF;">Private</span> until you post it.</h2>
     </div>
     <div class="tw-split-right" style="background: #7C4DFF; display: flex; align-items: center; justify-content: center; padding: 64px 32px; min-height: 560px;">
       <div style="width: min(420px, 100%); display: flex; flex-direction: column; gap: 18px;">
         <div style="background: #F6F2E9; border-radius: 18px; padding: 18px 22px; box-shadow: 0 24px 50px -26px rgba(30,10,80,.7);">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 16px;">Surprise - Rome for Ana's 30th</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .12em; color: #7C4DFF; background: rgba(124,77,255,.12); padding: 4px 9px; border-radius: 999px;">WIP</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 700; font-size: 16px;">Surprise - Rome for Ana's 30th</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .12em; color: #7C4DFF; background: rgba(124,77,255,.12); padding: 4px 9px; border-radius: 999px;">WIP</span>
           </div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #756D5E; margin-top: 6px;">OPO · FCO · sometime in March</div>
+          <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11.5px; color: #756D5E; margin-top: 6px;">OPO · FCO · sometime in March</div>
         </div>
         <div style="background: #FFFFFF; border-radius: 20px; padding: 26px 28px; box-shadow: 0 34px 70px -28px rgba(30,10,80,.8);">
-          <span style="display: inline-flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .14em; color: #1B8A57; background: rgba(27,138,87,.1); border: 1px solid rgba(27,138,87,.28); padding: 7px 12px; border-radius: 999px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #1B8A57;"></span>LOCAL</span>
-          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -.02em; margin-top: 14px;" data-i18n="p4Title">Your plans are nobody's business.</div>
+          <span style="display: inline-flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .14em; color: #1B8A57; background: rgba(27,138,87,.1); border: 1px solid rgba(27,138,87,.28); padding: 7px 12px; border-radius: 999px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #1B8A57;"></span>LOCAL</span>
+          <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -.02em; margin-top: 14px;" data-i18n="p4Title">Your plans are nobody's business.</div>
           <p style="font-size: 14px; line-height: 1.5; color: #756D5E; margin: 10px 0 0;" data-i18n="p4Desc">Trips are saved on your device and that is where they stay. Nothing goes online unless you share it yourself.</p>
         </div>
       </div>
@@ -546,7 +546,7 @@
 
   <!-- ============ DARK SHOWCASE · SHARE ============ -->
   <section style="background: #16130C; color: #F4EFE4; padding: 100px clamp(20px, 4vw, 40px) 0;">
-    <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(38px, 5.6vw, 64px); line-height: 1.02; letter-spacing: -.03em; text-align: center; margin: 0;" data-i18n="p5Heading">Your year,<br><span style="color: #FF5A35;">ready for the grid</span></h2>
+    <h2 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: clamp(38px, 5.6vw, 64px); line-height: 1.02; letter-spacing: -.03em; text-align: center; margin: 0;" data-i18n="p5Heading">Your year,<br><span style="color: #FF5A35;">ready for the grid</span></h2>
     <p style="font-size: 16px; color: rgba(244,239,228,.65); text-align: center; max-width: 460px; margin: 18px auto 0; line-height: 1.5;" data-i18n="p5Sub">One tap turns your trips into a 4:5 travel log - screenshot it, caption it, post it.</p>
 
     <div style="max-width: 880px; margin: 54px auto 0; background: #FF5A35; border-radius: 30px; padding: clamp(22px, 4vw, 40px); box-shadow: 0 50px 100px -50px rgba(255,90,53,.55);">
@@ -555,8 +555,8 @@
         <div style="width: min(340px, 100%); background: #16130C; border-radius: 20px; padding: 26px 26px 20px; display: flex; flex-direction: column; box-shadow: 0 30px 60px -28px rgba(0,0,0,.6);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-              <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .24em; color: rgba(244,239,228,.55);">TRAVEL!</div>
-              <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 32px; line-height: .95; letter-spacing: -.02em; margin-top: 8px;" data-i18n="p5CardTitle">2026<br>Travel log</div>
+              <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .24em; color: rgba(244,239,228,.55);">TRAVEL!</div>
+              <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 32px; line-height: .95; letter-spacing: -.02em; margin-top: 8px;" data-i18n="p5CardTitle">2026<br>Travel log</div>
             </div>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(45deg); margin-top: 4px;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
           </div>
@@ -564,90 +564,90 @@
             <div style="display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; background: rgba(244,239,228,.06); border: 1px solid rgba(244,239,228,.1); border-radius: 12px; padding: 8px;">
               <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Eiffel_tower_(panorama).jpg?width=200" alt="Paris" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
               <span style="min-width: 0;">
-                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> CDG</span>
+                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> CDG</span>
                 <span style="display: block; font-size: 11.5px; font-weight: 600; color: rgba(244,239,228,.9); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Paris on a whim &middot; 9-11 JAN</span>
               </span>
               <span style="text-align: right;">
-                <span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">3</span>
-                <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">3</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
               </span>
             </div>
             <div style="display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; background: rgba(244,239,228,.06); border: 1px solid rgba(244,239,228,.1); border-radius: 12px; padding: 8px;">
               <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Skyline-New-York-City.jpg?width=200" alt="New York" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
               <span style="min-width: 0;">
-                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> JFK</span>
+                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> JFK</span>
                 <span style="display: block; font-size: 11.5px; font-weight: 600; color: rgba(244,239,228,.9); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">New York, finally &middot; 2-8 MAR</span>
               </span>
               <span style="text-align: right;">
-                <span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">7</span>
-                <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">7</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
               </span>
             </div>
             <div style="display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; background: rgba(244,239,228,.06); border: 1px solid rgba(244,239,228,.1); border-radius: 12px; padding: 8px;">
               <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Amsterdam's_Canals.jpg?width=200" alt="Amsterdam" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
               <span style="min-width: 0;">
-                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> AMS</span>
+                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> AMS</span>
                 <span style="display: block; font-size: 11.5px; font-weight: 600; color: rgba(244,239,228,.9); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Canals and King's Day &middot; 24-27 APR</span>
               </span>
               <span style="text-align: right;">
-                <span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">4</span>
-                <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">4</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
               </span>
             </div>
             <div style="display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; background: rgba(244,239,228,.06); border: 1px solid rgba(244,239,228,.1); border-radius: 12px; padding: 8px;">
               <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Barcelona_City_View_from_Sagrada_Fam%C3%ADlia_-_2013.07_-_panoramio.jpg?width=200" alt="Barcelona" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
               <span style="min-width: 0;">
-                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> BCN</span>
+                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> BCN</span>
                 <span style="display: block; font-size: 11.5px; font-weight: 600; color: rgba(244,239,228,.9); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tapas crawl - Barcelona &middot; 12-16 MAY</span>
               </span>
               <span style="text-align: right;">
-                <span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">5</span>
-                <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">5</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
               </span>
             </div>
             <div style="display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; background: rgba(244,239,228,.06); border: 1px solid rgba(244,239,228,.1); border-radius: 12px; padding: 8px;">
               <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Athens_Parthenon_Acropolis.jpg?width=200" alt="Athens" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
               <span style="min-width: 0;">
-                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> ATH</span>
+                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> ATH</span>
                 <span style="display: block; font-size: 11.5px; font-weight: 600; color: rgba(244,239,228,.9); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Island hop from Athens &middot; 4-10 JUN</span>
               </span>
               <span style="text-align: right;">
-                <span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">7</span>
-                <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">7</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
               </span>
             </div>
             <div style="display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; background: rgba(244,239,228,.06); border: 1px solid rgba(244,239,228,.1); border-radius: 12px; padding: 8px;">
               <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Panorama_of_Funchal.jpg?width=300" alt="Funchal" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
               <span style="min-width: 0;">
-                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> FNC</span>
+                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> FNC</span>
                 <span style="display: block; font-size: 11.5px; font-weight: 600; color: rgba(244,239,228,.9); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Build Days - Madeira &middot; 15-18 SEP</span>
               </span>
               <span style="text-align: right;">
-                <span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">4</span>
-                <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">4</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
               </span>
             </div>
             <div style="display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; background: rgba(244,239,228,.06); border: 1px solid rgba(244,239,228,.1); border-radius: 12px; padding: 8px;">
               <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Alfama_lisboa.jpg?width=200" alt="Lisbon" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
               <span style="min-width: 0;">
-                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> LIS</span>
+                <span style="display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-weight: 800; font-size: 12px;">OPO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(90deg); flex-shrink: 0;"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg> LIS</span>
                 <span style="display: block; font-size: 11.5px; font-weight: 600; color: rgba(244,239,228,.9); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Lisbon by rail &middot; 3-6 OCT</span>
               </span>
               <span style="text-align: right;">
-                <span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">4</span>
-                <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 18px; color: #FF5A35;">4</span>
+                <span style="display: block; font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(244,239,228,.6);">DAYS</span>
               </span>
             </div>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(244,239,228,.14); padding-top: 14px; margin-top: 18px;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .06em; color: rgba(244,239,228,.7);" data-i18n="p5Summary">7 TRIPS · 34 DAYS</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #FF5A35;">@yourhandle</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; letter-spacing: .06em; color: rgba(244,239,228,.7);" data-i18n="p5Summary">7 TRIPS · 34 DAYS</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; color: #FF5A35;">@yourhandle</span>
           </div>
         </div>
         <!-- side panel -->
         <div style="width: min(260px, 100%); background: #FFFFFF; color: #16130C; border-radius: 20px; padding: 26px 24px; display: flex; flex-direction: column; box-shadow: 0 30px 60px -28px rgba(0,0,0,.5);">
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .22em; color: #A39A89;">SHARE</div>
-          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 23px; letter-spacing: -.02em; margin-top: 10px;" data-i18n="p5SideTitle">Ready for the grid</div>
+          <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .22em; color: #A39A89;">SHARE</div>
+          <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 23px; letter-spacing: -.02em; margin-top: 10px;" data-i18n="p5SideTitle">Ready for the grid</div>
           <p style="font-size: 13.5px; line-height: 1.5; color: #756D5E; margin: 10px 0 0; flex: 1;" data-i18n="p5SideDesc">A 4:5 recap of every trip. Screenshot the card or grab the caption - then drop both into Instagram.</p>
           <span style="display: block; text-align: center; font-weight: 700; font-size: 14px; color: #F4EFE4; background: #16130C; padding: 12px 0; border-radius: 999px; margin-top: 18px;" data-i18n="p5Copy">Copy caption</span>
           <span style="display: block; text-align: center; font-weight: 600; font-size: 14px; color: #16130C; background: #FFFFFF; border: 1px solid rgba(22,19,12,.12); padding: 11px 0; border-radius: 999px; margin-top: 8px;" data-i18n="p5Close">Close</span>
@@ -662,9 +662,9 @@
       <div style="text-align: center; max-width: 760px; margin: 0 auto 56px;">
         <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,90,53,.14); border: 1px solid rgba(255,90,53,.32); padding: 6px 14px; border-radius: 999px;">
           <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #FF5A35; box-shadow: 0 0 10px #FF5A35;"></span>
-          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #FF5A35;" data-i18n="featBadge">FEATURE SHOWCASE</span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #FF5A35;" data-i18n="featBadge">FEATURE SHOWCASE</span>
         </div>
-        <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 5.2vw, 54px); line-height: 1.05; letter-spacing: -.03em; margin: 18px 0 0;" data-i18n="featHeader">Everything<br><span style="color: #FF5A35;">a traveler needs</span></h2>
+        <h2 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: clamp(32px, 5.2vw, 54px); line-height: 1.05; letter-spacing: -.03em; margin: 18px 0 0;" data-i18n="featHeader">Everything<br><span style="color: #FF5A35;">a traveler needs</span></h2>
         <p style="font-size: 15.5px; line-height: 1.6; color: rgba(244,239,228,.7); margin: 16px auto 0; text-wrap: pretty;" data-i18n="featSub">不再只是冰冷的預訂紀錄。888travel 整合雙軌 AI 容錯、外部 Agent 自動派工、足跡地圖與年度日曆，為現代旅人提供極致優雅的自託管體驗。</p>
       </div>
 
@@ -675,10 +675,10 @@
         <div class="tw-bento-card" style="grid-column: span 7;">
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #1B8A57;" data-i18n="bento1Badge">01 / INTELLIGENCE</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #1B8A57; background: rgba(27,138,87,.14); border: 1px solid rgba(27,138,87,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento1Pill">FAILOVER READY</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #1B8A57;" data-i18n="bento1Badge">01 / INTELLIGENCE</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #1B8A57; background: rgba(27,138,87,.14); border: 1px solid rgba(27,138,87,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento1Pill">FAILOVER READY</span>
             </div>
-            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento1Title">AI 隨行特助 · 雙軌自動容錯備援</h3>
+            <h3 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento1Title">AI 隨行特助 · 雙軌自動容錯備援</h3>
             <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento1Desc">針對當前旅程時間軸量身打造。若主要 LLM 超載或逾時，自動在秒級內無縫切換備援模型（如 Gemini / OpenAI / Groq / Ollama），問天氣、推薦雨天備案，一鍵將景點直接加入行程。</p>
           </div>
           <div class="tw-bento-media">
@@ -687,9 +687,9 @@
                 <span style="background: #FF5A35;"></span>
                 <span style="background: #E89A2B;"></span>
                 <span style="background: #1B8A57;"></span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">888travel // ai-copilot-drawer</span>
+                <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">888travel // ai-copilot-drawer</span>
               </div>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #1B8A57;">● ONLINE</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; color: #1B8A57;">● ONLINE</span>
             </div>
             <img src="screenshots/copilot-drawer.png" alt="888travel AI Copilot Drawer with fallback failover" loading="lazy">
           </div>
@@ -704,10 +704,10 @@
         <div class="tw-bento-card" style="grid-column: span 5;">
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #1E40FF;" data-i18n="bento2Badge">02 / AGENT DISPATCH</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #60A5FA; background: rgba(96,165,250,.14); border: 1px solid rgba(96,165,250,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento2Pill">19 ENDPOINTS</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #1E40FF;" data-i18n="bento2Badge">02 / AGENT DISPATCH</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #60A5FA; background: rgba(96,165,250,.14); border: 1px solid rgba(96,165,250,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento2Pill">19 ENDPOINTS</span>
             </div>
-            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento2Title">19 個 Agent RESTful 端點 · 原生支援 skill.md</h3>
+            <h3 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento2Title">19 個 Agent RESTful 端點 · 原生支援 skill.md</h3>
             <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento2Desc">讓 Claude Code、Cursor、ChatGPT、Antigravity 自動為你規劃旅程。內建標準 llms.txt 與動態 skill.md，一鍵生成一次性 Bearer Token，完全免登入後台即可由 AI Agent 全自動排程。</p>
           </div>
           <div class="tw-bento-media">
@@ -716,9 +716,9 @@
                 <span style="background: #FF5A35;"></span>
                 <span style="background: #E89A2B;"></span>
                 <span style="background: #1B8A57;"></span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">agent // api/v1/trips</span>
+                <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">agent // api/v1/trips</span>
               </div>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #60A5FA;">BEARER AUTH</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; color: #60A5FA;">BEARER AUTH</span>
             </div>
             <img src="screenshots/agent-settings.png" alt="888travel Agent API Settings & Bearer Token" loading="lazy">
           </div>
@@ -733,10 +733,10 @@
         <div class="tw-bento-card" style="grid-column: span 5;">
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #FF5A35;" data-i18n="bento3Badge">03 / TIMELINE ENGINE</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #FF5A35; background: rgba(255,90,53,.14); border: 1px solid rgba(255,90,53,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento3Pill">PLAN B READY</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #FF5A35;" data-i18n="bento3Badge">03 / TIMELINE ENGINE</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #FF5A35; background: rgba(255,90,53,.14); border: 1px solid rgba(255,90,53,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento3Pill">PLAN B READY</span>
             </div>
-            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento3Title">旅程情報卡 · 航程細項與主備案互換</h3>
+            <h3 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento3Title">旅程情報卡 · 航程細項與主備案互換</h3>
             <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento3Desc">所有機票代碼、飯店確認號、乘車點與地圖指引集中收納。遇到天候變化或突發狀況？一鍵將預備好的 Plan B 備案方案切換為正式行程，時間軸即時更新。</p>
           </div>
           <div class="tw-bento-media tw-bento-media-tall">
@@ -745,9 +745,9 @@
                 <span style="background: #FF5A35;"></span>
                 <span style="background: #E89A2B;"></span>
                 <span style="background: #1B8A57;"></span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">trip // funchal-plan-b</span>
+                <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">trip // funchal-plan-b</span>
               </div>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #FF5A35;">LIVE WEATHER</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; color: #FF5A35;">LIVE WEATHER</span>
             </div>
             <img src="screenshots/tripcard.png" alt="888travel Trip Intelligence Card and Plan B alternative" loading="lazy">
           </div>
@@ -762,10 +762,10 @@
         <div class="tw-bento-card" style="grid-column: span 7;">
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #E89A2B;" data-i18n="bento4Badge">04 / ANNUAL CALENDAR</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #FCD34D; background: rgba(252,211,77,.14); border: 1px solid rgba(252,211,77,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento4Pill">365-DAY GRID</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #E89A2B;" data-i18n="bento4Badge">04 / ANNUAL CALENDAR</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #FCD34D; background: rgba(252,211,77,.14); border: 1px solid rgba(252,211,77,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento4Pill">365-DAY GRID</span>
             </div>
-            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento4Title">365 天年度日曆 · 離家天數與私有 ICS</h3>
+            <h3 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento4Title">365 天年度日曆 · 離家天數與私有 ICS</h3>
             <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento4Desc">俯瞰全年所有旅程與空檔，動態彩條清楚標示行程區間，即時統計 2026 離家在途天數與衝堂警示；提供專屬私密 ICS 訂閱網址，完美同步 Apple Calendar 與 Google 日曆。</p>
           </div>
           <div class="tw-bento-media tw-bento-media-tall">
@@ -774,9 +774,9 @@
                 <span style="background: #FF5A35;"></span>
                 <span style="background: #E89A2B;"></span>
                 <span style="background: #1B8A57;"></span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">calendar // year-2026-grid</span>
+                <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">calendar // year-2026-grid</span>
               </div>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #FCD34D;">ICS STREAM</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; color: #FCD34D;">ICS STREAM</span>
             </div>
             <img src="screenshots/calendar.png" alt="888travel 365-Day Annual Calendar & Days Away Counter" loading="lazy">
           </div>
@@ -791,10 +791,10 @@
         <div class="tw-bento-card" style="grid-column: span 6;">
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #1E40FF;" data-i18n="bento5Badge">05 / FOOTPRINT MAP</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #93C5FD; background: rgba(147,197,253,.14); border: 1px solid rgba(147,197,253,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento5Pill">BEEN THERE</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #1E40FF;" data-i18n="bento5Badge">05 / FOOTPRINT MAP</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #93C5FD; background: rgba(147,197,253,.14); border: 1px solid rgba(147,197,253,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento5Pill">BEEN THERE</span>
             </div>
-            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento5Title">足跡世界地圖 · 飛行軌跡與里程統計</h3>
+            <h3 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento5Title">足跡世界地圖 · 飛行軌跡與里程統計</h3>
             <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento5Desc">點亮你曾經造訪過的每一座城市與國家。根據時間軸自動繪製優雅的起降弧線，累積個人旅行里程與歷史回憶，告別死板的表格清單。</p>
           </div>
           <div class="tw-bento-media tw-bento-media-mid">
@@ -803,9 +803,9 @@
                 <span style="background: #FF5A35;"></span>
                 <span style="background: #E89A2B;"></span>
                 <span style="background: #1B8A57;"></span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">globe // flight-arcs-tracker</span>
+                <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">globe // flight-arcs-tracker</span>
               </div>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #93C5FD;">GLOBAL</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; color: #93C5FD;">GLOBAL</span>
             </div>
             <img src="screenshots/map.png" alt="888travel Footprint World Map and Flight Arcs" loading="lazy">
           </div>
@@ -820,10 +820,10 @@
         <div class="tw-bento-card" style="grid-column: span 6;">
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #7C4DFF;" data-i18n="bento6Badge">06 / PRIVACY &amp; SECURITY</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #C4B5FD; background: rgba(196,181,253,.14); border: 1px solid rgba(196,181,253,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento6Pill">100% PRIVATE</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .16em; color: #7C4DFF;" data-i18n="bento6Badge">06 / PRIVACY &amp; SECURITY</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #C4B5FD; background: rgba(196,181,253,.14); border: 1px solid rgba(196,181,253,.28); padding: 3px 9px; border-radius: 999px;" data-i18n="bento6Pill">100% PRIVATE</span>
             </div>
-            <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento6Title">100% 個人雲端私有託管 · 雙重守門驗證</h3>
+            <h3 style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: clamp(21px, 2.5vw, 25px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px;" data-i18n="bento6Title">100% 個人雲端私有託管 · 雙重守門驗證</h3>
             <p style="font-size: 13.8px; line-height: 1.6; color: rgba(244,239,228,.72); margin: 0;" data-i18n="bento6Desc">託管於你自己的 Cloudflare Worker 與 KV 資料庫，零商業追蹤。支援自訂密碼關卡與 Resend Magic Code / OTP 電子信箱動態驗證，每週自動生成雲端快照備份。</p>
           </div>
           <div class="tw-bento-media tw-bento-media-mid">
@@ -832,9 +832,9 @@
                 <span style="background: #FF5A35;"></span>
                 <span style="background: #E89A2B;"></span>
                 <span style="background: #1B8A57;"></span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">security // kv-resend-otp-vault</span>
+                <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; color: rgba(244,239,228,.5); margin-left: 6px;">security // kv-resend-otp-vault</span>
               </div>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: #C4B5FD;">AES SECURED</span>
+              <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10px; font-weight: 700; color: #C4B5FD;">AES SECURED</span>
             </div>
             <img src="screenshots/llm-settings.png" alt="888travel Cloudflare KV & LLM Configuration" loading="lazy">
           </div>
@@ -851,7 +851,7 @@
       <div style="margin-top: 36px; padding: 22px 26px; background: rgba(244,239,228,.04); border: 1px solid rgba(244,239,228,.08); border-radius: 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="color: #FF5A35; font-size: 18px;">✦</span>
-          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .12em; color: rgba(244,239,228,.6);" data-i18n="bentoMoreHeader">FULL ECOSYSTEM PARITY</span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; font-weight: 700; letter-spacing: .12em; color: rgba(244,239,228,.6);" data-i18n="bentoMoreHeader">FULL ECOSYSTEM PARITY</span>
         </div>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
           <span class="tw-bento-pill" data-i18n="bentoPill1">Google 日曆雙向同步</span>
@@ -867,10 +867,10 @@
     <!-- ============ GIANT CTA ============ -->
     <div id="get" style="padding: 110px 0 90px; text-align: center;">
       <a href="https://travel.david888.com/app" style="display: flex; align-items: center; justify-content: center; width: min(760px, 100%); height: clamp(150px, 22vw, 220px); margin: 0 auto; background: #1E40FF; border-radius: 999px; text-decoration: none; transition: transform .2s ease, box-shadow .2s ease; box-shadow: 0 40px 90px -40px rgba(30,64,255,.8);" class="tw-h3">
-        <span style="font-family: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Noto Sans TC', sans-serif; font-weight: 700; font-size: clamp(26px, 4vw, 40px); letter-spacing: -.02em; color: #F4EFE4;" data-i18n="ctaBtn">直接開啟 888漫步旅遊</span>
+        <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'PingFang TC', sans-serif; font-weight: 700; font-size: clamp(26px, 4vw, 40px); letter-spacing: -.02em; color: #F4EFE4;" data-i18n="ctaBtn">直接開啟 888漫步旅遊</span>
       </a>
 
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .22em; color: rgba(244,239,228,.5); margin-top: 26px;" data-i18n="ctaBadge">免安裝網頁版 · 雲端同步 · 即開即用</div>
+        <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 11px; letter-spacing: .22em; color: rgba(244,239,228,.5); margin-top: 26px;" data-i18n="ctaBadge">免安裝網頁版 · 雲端同步 · 即開即用</div>
 
     </div>
 
@@ -880,10 +880,10 @@
         <div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
-            <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 20px;" data-i18n="brandTitle">888漫步旅遊</span>
+            <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 20px;" data-i18n="brandTitle">888漫步旅遊</span>
           </div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .2em; color: rgba(244,239,228,.45); margin-top: 10px;">© 2026</div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(244,239,228,.65); margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+          <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 10.5px; letter-spacing: .2em; color: rgba(244,239,228,.45); margin-top: 10px;">© 2026</div>
+          <div style="font-family: 'JetBrains Mono', 'Noto Sans TC', monospace; font-size: 12px; color: rgba(244,239,228,.65); margin-top: 8px; display: flex; align-items: center; gap: 8px;">
             <a href="/llms.txt" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;" title="Machine-readable specification index">llms.txt</a>
             <span>·</span>
             <a href="/skill.md" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;" title="Autonomous AI Agent skill definition">skill.md</a>
@@ -893,7 +893,7 @@
         </div>
         <div style="font-size: 13.5px; color: rgba(244,239,228,.45); text-align: center;" data-i18n="footerCredit">Created with <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="color: #FF5A35; vertical-align: -2px;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"></path></svg> for travel, by <a href="https://david888.com" target="_blank" rel="noopener" style="color: inherit; font-weight: inherit; text-decoration: underline;" class="tw-h4">david888.com</a>（修改於 <a href="https://www.giovannibrees.com" target="_blank" rel="noopener" style="color: inherit; font-weight: inherit; text-decoration: underline;" class="tw-h4">Giovanni Brees</a>）</div>
         <div style="background: #FF5A35; border-radius: 16px; padding: 18px 22px; display: flex; align-items: center; gap: 12px;">
-          <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; line-height: 1.1; color: #FFFFFF;" data-i18n="footerSlogan">遇見更有<br>遠見的自己</span>
+          <span style="font-family: 'JetBrains Mono', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; font-weight: 800; font-size: 18px; line-height: 1.1; color: #FFFFFF;" data-i18n="footerSlogan">遇見更有<br>遠見的自己</span>
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style="color: #FFFFFF; transform: rotate(45deg);"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" fill="currentColor"></path></svg>
         </div>
       </div>
