@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.8.0] - 2026-10-08
+
+### Added & Architecture / 多租戶架構與可配置自主註冊開關 (Multi-Tenant Architecture & Configurable Registration)
+- **多租戶資料隔離與自動平滑遷移 (Tenant Partitioning & Zero-Downtime Auto-Migration)**：
+  - 核心儲存庫全面由單一 `store` 升級為依用戶 UID 分區的獨立空間 `store:<uid>`，徹底隔離各用戶之旅程、細項與追蹤資料。
+  - 後端初始化自動偵測既有單租戶資料，無痛自動升格遷移為首位最高管理員 (`usr_admin`)，現有所有旅程、細項與設定 100% 完整保留。
+- **動態工作階段安全防護 (Dynamic 30-Day Session Tokens)**：
+  - 揚棄靜態密碼雜湊 Cookie，全面升級為動態生成之隨機工作階段金鑰 `session:<token>`，具備 30 天滾動生命週期 (TTL)。
+  - 登出時立即於伺服器端銷毀 Session，並連帶清除本機對應用戶之快取資料。
+- **管理員自主註冊開關與租戶目錄 (Admin Registration Toggle & Tenant Directory)**：
+  - 最高管理員專屬「🛡️ 系統管理 (Admin)」設定面板，提供「開放訪客自主註冊」即時開關 (`POST /admin/config`)。
+  - 關閉註冊時，訪客註冊請求即由伺服器端嚴格回傳 HTTP 403 阻擋，前端介面自動切換至註冊關閉提示卡。
+  - 管理面板即時列出已註冊租戶清單（包含 UID、電子信箱、角色、註冊時間與狀態）。
+- **主機 AI 算力防護與嚴格 BYOK 機制 (Host Quota Defense & Strict BYOK)**：
+  - 預設關閉共享 AI 算力池 (`shared_ai_pool: false`)，各租戶必須自行填寫個人 API Key (BYOK) 才能調用 AI 隨行特助，徹底防止主機帳單被意外耗盡。
+  - 管理員亦可視需求彈性開放共享主機 AI 算力池。
+- **雙軌認證介面與 OTP 速率防護 (Tabbed Auth Modal & Resend Rate Limiting)**：
+  - 認證彈窗全新改版為頁籤切換之「登入」與「註冊」雙軌介面，支援密碼與 Resend OTP 雙軌認證。
+  - 寄送 OTP 導入 60 秒冷卻倒數與每小時次數上限速率限制，並支援 Cloudflare Turnstile 機器人驗證。
+
 ## [2.7.0] - 2026-10-08
 
 ### Enhanced & Design / 官網特色全幅視覺 Bento Grid 震撼登場 (Visual Bento Showcase Gallery)

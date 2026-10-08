@@ -15,21 +15,30 @@ export default {
     const url = new URL(request.url);
     if (request.method === "OPTIONS") return cors(new Response(null, { status: 204 }));
 
-    // --- Password gate. The password is set in-app and stored hashed in KV; no
-    // dashboard secret needed. Once set, /trips and /sync require the X-Auth token.
+    // --- Auto-migrate legacy single-user data on first run
+    await ensureMultiTenantMigration(env);
+
+    // --- Authentication status & configuration
     if (url.pathname === "/auth/status" && request.method === "GET") {
       const authSet = !!(await env.TRIPS.get("auth"));
       const authEmail = (await env.TRIPS.get("auth_email")) || null;
       const resendKey = await getResendKey(env);
       const places = await getGooglePlacesConfig(env);
+      const sysConfig = await getSystemConfig(env);
+      const session = await resolveSession(request, env);
       return cors(json({
         set: authSet,
         email: authEmail ? maskEmail(authEmail) : null,
         fullEmail: authEmail,
         resendConfigured: !!resendKey,
-        googlePlacesConfigured: places.configured
+        googlePlacesConfigured: places.configured,
+        allowRegistration: sysConfig.allow_registration,
+        authenticated: !!session,
+        currentUser: session ? { uid: session.uid, email: session.email, role: session.role } : null
       }));
     }
+
+    // --- Multi-Tenant Login (Email + Password)
     if (url.pathname === "/auth/login" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
       const pw = (body && body.password) || "";
@@ -37,30 +46,130 @@ export default {
       if (!pw || !email) return cors(json({ error: "email and password required" }, 400));
       const hash = await sha256(pw);
       const storedHash = await env.TRIPS.get("auth");
-      const storedEmail = await env.TRIPS.get("auth_email");
-      if (!storedHash) {                                       // first-time setup
+
+      // First-time setup on fresh instance
+      if (!storedHash) {
         await env.TRIPS.put("auth", hash);
         await env.TRIPS.put("auth_email", email);
-        ctx.waitUntil(pingInstallCount(env));                   // one anonymous "an instance exists" ping - see README
-        return okLogin(hash);
+        const adminUser = {
+          uid: "usr_admin",
+          email,
+          passwordHash: hash,
+          role: "admin",
+          status: "active",
+          createdAt: Date.now()
+        };
+        await saveUser(env, adminUser);
+        await saveSystemConfig(env, {
+          allow_registration: false,
+          admin_email: email,
+          shared_ai_pool: false,
+          version: 2
+        });
+        const token = await createSession(env, adminUser);
+        ctx.waitUntil(pingInstallCount(env));
+        return okLogin(token, adminUser);
       }
-      if (hash !== storedHash) return cors(json({ error: "wrong email or password" }, 401));
-      if (!storedEmail) { await env.TRIPS.put("auth_email", email); } // migrate a password-only setup
-      else if (storedEmail !== email) return cors(json({ error: "wrong email or password" }, 401));
-      return okLogin(hash);
+
+      // Check registered users table
+      let user = await getUserByEmail(env, email);
+      if (!user) {
+        // Fallback check legacy admin
+        const storedEmail = ((await env.TRIPS.get("auth_email")) || "").trim().toLowerCase();
+        if (storedHash === hash && (!storedEmail || storedEmail === email)) {
+          user = {
+            uid: "usr_admin",
+            email,
+            passwordHash: hash,
+            role: "admin",
+            status: "active",
+            createdAt: Date.now()
+          };
+          await saveUser(env, user);
+        }
+      }
+
+      if (!user) return cors(json({ error: "wrong email or password" }, 401));
+      if (user.passwordHash !== hash) return cors(json({ error: "wrong email or password" }, 401));
+      if (user.status === "disabled") return cors(json({ error: "account is suspended" }, 403));
+
+      const token = await createSession(env, user);
+      return okLogin(token, user);
     }
-    // --- OTP Login Flow (Email verification code via Resend)
+
+    // --- Multi-Tenant Registration Gateway
+    if (url.pathname === "/auth/register" && request.method === "POST") {
+      const cfg = await getSystemConfig(env);
+      if (!cfg.allow_registration) {
+        return cors(json({ error: "註冊功能目前已關閉，僅限管理員或既有用戶登入 / Registration is currently closed" }, 403));
+      }
+
+      const body = await request.json().catch(() => ({}));
+      const email = ((body && body.email) || "").trim().toLowerCase();
+      const pw = (body && body.password) || "";
+      const turnstileToken = (body && body.turnstileToken) || "";
+
+      if (!email || !email.includes("@")) {
+        return cors(json({ error: "請輸入有效的電子信箱 / Valid email required" }, 400));
+      }
+      if (!pw || pw.length < 6) {
+        return cors(json({ error: "密碼長度至少需 6 個字元 / Password must be at least 6 characters" }, 400));
+      }
+
+      if (env.TURNSTILE_SECRET_KEY) {
+        const clientIp = request.headers.get("CF-Connecting-IP") || "";
+        const verified = await verifyTurnstile(env, turnstileToken, clientIp);
+        if (!verified) {
+          return cors(json({ error: "人機驗證失敗，請重試 / Bot verification failed" }, 403));
+        }
+      }
+
+      const existingUser = await getUserByEmail(env, email);
+      if (existingUser) {
+        return cors(json({ error: "此信箱已註冊，請直接登入 / Account already exists, please sign in" }, 409));
+      }
+
+      const uid = "usr_" + randHex(8);
+      const hash = await sha256(pw);
+      const newUser = {
+        uid,
+        email,
+        passwordHash: hash,
+        role: "user",
+        status: "active",
+        createdAt: Date.now()
+      };
+      await saveUser(env, newUser);
+      await saveTenantStore(env, uid, { trips: {}, seenEmails: {}, deletedSegs: {} });
+
+      const token = await createSession(env, newUser);
+      return okLogin(token, newUser, 201);
+    }
+
+    // --- OTP Verification Code Dispatch (Login & Registration)
     if (url.pathname === "/auth/otp/send" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
       const email = ((body && body.email) || "").trim().toLowerCase();
+      const purpose = (body && body.purpose) || "login";
       if (!email || !email.includes("@")) return cors(json({ error: "請輸入有效的電子信箱 / Valid email required" }, 400));
-      
+
+      const cfg = await getSystemConfig(env);
+      const existingUser = await getUserByEmail(env, email);
       const storedAuth = await env.TRIPS.get("auth");
-      const storedEmail = (await env.TRIPS.get("auth_email")) || "";
-      
-      // If instance already has a registered admin email, verify the request matches it
-      if (storedAuth && storedEmail && storedEmail.toLowerCase() !== email) {
-        return cors(json({ error: "此信箱非已註冊的管理員信箱 / Email not recognized for this instance" }, 403));
+      const storedEmail = ((await env.TRIPS.get("auth_email")) || "").trim().toLowerCase();
+      const isAdmin = storedAuth && storedEmail && storedEmail === email;
+
+      if (purpose === "register") {
+        if (!cfg.allow_registration) {
+          return cors(json({ error: "註冊功能目前已關閉 / Registration is currently closed" }, 403));
+        }
+        if (existingUser || isAdmin) {
+          return cors(json({ error: "此信箱已註冊，請直接登入 / Account already exists" }, 409));
+        }
+      } else {
+        if (!existingUser && !isAdmin && storedAuth) {
+          return cors(json({ error: "此信箱尚未註冊，請先註冊帳號 / Account not recognized" }, 403));
+        }
       }
 
       const resendKey = await getResendKey(env);
@@ -68,32 +177,41 @@ export default {
         return cors(json({ error: "尚未設定 Resend API 金鑰，請先使用密碼登入並於設定頁面配置 Resend / Resend API key not configured" }, 400));
       }
 
-      // Check cooldown (60 seconds)
+      // Rate Limit 1: 60-second cooldown
       const cooldown = await env.TRIPS.get("otp_cd:" + email);
       if (cooldown) {
         return cors(json({ error: "請求過於頻繁，請等待 60 秒後再重新發送 / Please wait 60s before requesting another code" }, 429));
       }
 
+      // Rate Limit 2: Hourly quota (5 per email per hour)
+      const hourlyKey = "otp_rate:" + email;
+      const hourlyRaw = await env.TRIPS.get(hourlyKey);
+      const hourlyCount = hourlyRaw ? parseInt(hourlyRaw, 10) : 0;
+      if (hourlyCount >= 5) {
+        return cors(json({ error: "驗證碼發送次數已達每小時上限 (5次)，請稍後再試 / Hourly limit exceeded" }, 429));
+      }
+      await env.TRIPS.put(hourlyKey, String(hourlyCount + 1), { expirationTtl: 3600 });
+
       // Generate 6-digit numeric OTP code
       const code = Math.floor(100000 + Math.random() * 900000).toString();
-      await env.TRIPS.put("otp:" + email, JSON.stringify({ code, attempts: 0, createdAt: Date.now() }), { expirationTtl: 600 });
+      await env.TRIPS.put("otp:" + email, JSON.stringify({ code, attempts: 0, createdAt: Date.now(), purpose }), { expirationTtl: 600 });
       await env.TRIPS.put("otp_cd:" + email, "1", { expirationTtl: 60 });
 
       try {
         await sendEmailViaResend(env, {
           to: email,
-          subject: `【888漫步旅遊 / 888travel】您的登入驗證碼：${code}`,
-          text: `您好！\n\n您的 888漫步旅遊 (888travel) 登入驗證碼為：\n\n${code}\n\n驗證碼有效期為 10 分鐘。如果您並未要求此驗證碼，請忽略此郵件。`,
+          subject: `【888漫步旅遊 / 888travel】您的驗證碼：${code}`,
+          text: `您好！\n\n您的 888漫步旅遊 (888travel) 驗證碼為：\n\n${code}\n\n驗證碼有效期為 10 分鐘。如果您並未要求此驗證碼，請忽略此郵件。`,
           html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC',sans-serif;max-width:480px;margin:0 auto;background:#ECE7DC;padding:36px 24px;border-radius:18px;">
             <div style="background:#FFFFFF;border-radius:14px;padding:32px 28px;box-shadow:0 12px 36px rgba(22,19,12,0.08);text-align:center;">
               <div style="font-size:20px;font-weight:800;color:#16130C;margin-bottom:8px;">888漫步旅遊 · 888travel</div>
-              <div style="font-size:14px;color:#756D5E;margin-bottom:24px;">一次性登入安全驗證碼 (One-Time Password)</div>
+              <div style="font-size:14px;color:#756D5E;margin-bottom:24px;">一次性登入與驗證安全碼 (One-Time Password)</div>
               <div style="background:#F6F2E9;border:1px solid rgba(22,19,12,0.1);border-radius:10px;padding:18px;margin:18px 0;">
                 <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;font-size:36px;font-weight:800;letter-spacing:8px;color:#FF5A35;line-height:1;">${code}</div>
               </div>
               <div style="font-size:13px;color:#756D5E;line-height:1.6;margin-top:16px;">
                 此驗證碼於 <b>10 分鐘內有效</b>。<br>
-                若您並未主動索取此登入驗證碼，請忽略此郵件。
+                若您並未主動索取此驗證碼，請忽略此郵件。
               </div>
             </div>
           </div>`
@@ -103,10 +221,13 @@ export default {
         return cors(json({ error: "寄送驗證碼失敗：" + (err && err.message ? err.message : String(err)) }, 500));
       }
     }
+
+    // --- OTP Verify & Session Minting
     if (url.pathname === "/auth/otp/verify" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
       const email = ((body && body.email) || "").trim().toLowerCase();
       const code = ((body && body.code) || "").trim();
+      const setPassword = (body && body.password) || "";
       if (!email || !code) return cors(json({ error: "信箱與驗證碼皆為必填 / Email and code required" }, 400));
 
       const otpRaw = await env.TRIPS.get("otp:" + email);
@@ -131,25 +252,118 @@ export default {
       await env.TRIPS.delete("otp:" + email);
 
       let storedHash = await env.TRIPS.get("auth");
-      const storedEmail = await env.TRIPS.get("auth_email");
+      const storedEmail = ((await env.TRIPS.get("auth_email")) || "").trim().toLowerCase();
+
+      // First-time setup via OTP on fresh instance
       if (!storedHash) {
-        // First-time setup via OTP! Mint a random session hash
-        storedHash = await sha256(crypto.randomUUID() + "-" + Date.now());
+        storedHash = setPassword ? await sha256(setPassword) : await sha256(crypto.randomUUID() + "-" + Date.now());
         await env.TRIPS.put("auth", storedHash);
         await env.TRIPS.put("auth_email", email);
+        const adminUser = {
+          uid: "usr_admin",
+          email,
+          passwordHash: storedHash,
+          role: "admin",
+          status: "active",
+          createdAt: Date.now()
+        };
+        await saveUser(env, adminUser);
+        await saveSystemConfig(env, {
+          allow_registration: false,
+          admin_email: email,
+          shared_ai_pool: false,
+          version: 2
+        });
+        const token = await createSession(env, adminUser);
         ctx.waitUntil(pingInstallCount(env));
-        return okLogin(storedHash);
+        return okLogin(token, adminUser);
       }
-      if (!storedEmail) {
-        await env.TRIPS.put("auth_email", email);
+
+      let user = await getUserByEmail(env, email);
+      if (!user) {
+        if (storedEmail && storedEmail === email) {
+          user = {
+            uid: "usr_admin",
+            email,
+            passwordHash: storedHash,
+            role: "admin",
+            status: "active",
+            createdAt: Date.now()
+          };
+          await saveUser(env, user);
+        } else if (otpData.purpose === "register") {
+          const cfg = await getSystemConfig(env);
+          if (!cfg.allow_registration) {
+            return cors(json({ error: "註冊功能目前已關閉 / Registration closed" }, 403));
+          }
+          const hash = setPassword ? await sha256(setPassword) : "";
+          const uid = "usr_" + randHex(8);
+          user = {
+            uid,
+            email,
+            passwordHash: hash,
+            role: "user",
+            status: "active",
+            createdAt: Date.now()
+          };
+          await saveUser(env, user);
+          await saveTenantStore(env, uid, { trips: {}, seenEmails: {}, deletedSegs: {} });
+        } else {
+          return cors(json({ error: "用戶不存在，請先註冊帳號 / Account not found" }, 404));
+        }
       }
-      return okLogin(storedHash);
+
+      const token = await createSession(env, user);
+      return okLogin(token, user);
     }
-    // Log out: expire the session cookie. Public (needs no auth) - it only clears.
+
+    // --- Log out: revoke session & expire cookie
     if (url.pathname === "/auth/logout" && request.method === "POST") {
+      const header = request.headers.get("X-Auth") || "";
+      const m = (request.headers.get("Cookie") || "").match(/(?:^|;\s*)tk=([^;]+)/);
+      const token = header || (m ? m[1] : "");
+      if (token && token.startsWith("s_")) {
+        await env.TRIPS.delete("session:" + token);
+      }
       const r = cors(json({ ok: true }));
       r.headers.append("Set-Cookie", `tk=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=Lax`);
       return r;
+    }
+
+    // --- Admin: System Configuration (Registration Toggle & Shared AI Pool)
+    if (url.pathname === "/admin/config" && request.method === "POST") {
+      const session = await resolveSession(request, env);
+      if (!session || session.role !== "admin") {
+        return cors(json({ error: "需要管理員權限 / Admin privilege required" }, 403));
+      }
+      const body = await request.json().catch(() => ({}));
+      const cfg = await getSystemConfig(env);
+      if (typeof body.allow_registration === "boolean") {
+        cfg.allow_registration = body.allow_registration;
+      }
+      if (typeof body.shared_ai_pool === "boolean") {
+        cfg.shared_ai_pool = body.shared_ai_pool;
+      }
+      await saveSystemConfig(env, cfg);
+      return cors(json({ ok: true, config: cfg }));
+    }
+    if (url.pathname === "/admin/config" && request.method === "GET") {
+      const session = await resolveSession(request, env);
+      if (!session || session.role !== "admin") {
+        return cors(json({ error: "需要管理員權限 / Admin privilege required" }, 403));
+      }
+      const cfg = await getSystemConfig(env);
+      return cors(json({ ok: true, config: cfg }));
+    }
+
+    // --- Admin: List Registered Users
+    if (url.pathname === "/admin/users" && request.method === "GET") {
+      const session = await resolveSession(request, env);
+      if (!session || session.role !== "admin") {
+        return cors(json({ error: "需要管理員權限 / Admin privilege required" }, 403));
+      }
+      const userList = await listAllUsers(env);
+      return cors(json({ ok: true, users: userList }));
     }
     // --- Google consent flow. These two are plain browser NAVIGATIONS, not app
     // fetches, so they cannot carry the X-Auth header and may lack the session
@@ -161,7 +375,18 @@ export default {
       const stored = await env.TRIPS.get("auth");
       const t = url.searchParams.get("t") || "";
       const cm = (request.headers.get("Cookie") || "").match(/(?:^|;\s*)tk=([^;]+)/);
-      if (!stored || (t !== stored && (cm ? cm[1] : "") !== stored))
+      const token = t || (cm ? cm[1] : "");
+
+      let session = await resolveSession(request, env);
+      if (!session && token && token.startsWith("s_")) {
+        const raw = await env.TRIPS.get("session:" + token);
+        if (raw) {
+          try { session = JSON.parse(raw); } catch(e) {}
+        }
+      }
+
+      const isLegacyAuth = stored && (token === stored);
+      if (!session && !isLegacyAuth)
         return new Response("Sign in to the app first, then hit Connect Google again.", { status: 401 });
       const c = await googleClient(env);
       if (!c) return new Response("Save your Google client ID and secret in Settings first.", { status: 400 });
@@ -201,8 +426,18 @@ export default {
     if (url.pathname.startsWith("/t/") && request.method === "GET") {
       const tok = url.pathname.slice(3);
       if (!/^[a-f0-9]{32}$/.test(tok)) return new Response("Not found", { status: 404 });
-      const store = await loadStore(env);
-      const t = Object.values(store.trips).find((x) => x.shareToken === tok);
+      const shareRaw = await env.TRIPS.get("share:" + tok);
+      let targetUid = "usr_admin";
+      let targetTripId = null;
+      if (shareRaw) {
+        try {
+          const info = JSON.parse(shareRaw);
+          targetUid = info.uid;
+          targetTripId = info.tripId;
+        } catch(e) {}
+      }
+      const store = await loadStore(env, targetUid);
+      const t = targetTripId ? store.trips[targetTripId] : Object.values(store.trips).find((x) => x.shareToken === tok);
       if (!t) return new Response("This trip link is no longer active.", { status: 404 });
       return new Response(shareTripHtml(t), { headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
@@ -212,9 +447,13 @@ export default {
     // headers; the token is minted by POST /ics/token.
     if (url.pathname === "/cal.ics" && request.method === "GET") {
       const tok = url.searchParams.get("t") || "";
-      const want = (await env.TRIPS.get("ics_token")) || "";
-      if (!want || tok !== want) return new Response("unauthorized", { status: 401 });
-      const store = await loadStore(env);
+      let targetUid = await env.TRIPS.get("ics_uid:" + tok);
+      if (!targetUid) {
+        const want = (await env.TRIPS.get("ics_token")) || "";
+        if (want && tok === want) targetUid = "usr_admin";
+      }
+      if (!targetUid) return new Response("unauthorized", { status: 401 });
+      const store = await loadStore(env, targetUid);
       return new Response(buildIcs(store), { headers: { "Content-Type": "text/calendar; charset=utf-8" } });
     }
 
@@ -252,10 +491,11 @@ export default {
     if (url.pathname.startsWith("/api/v1/")) {
       const agentBlocked = await agentAuthGuard(request, env);
       if (agentBlocked) return cors(agentBlocked);
+      const currentUid = (request.session && request.session.uid) || "usr_admin";
 
       // GET /api/v1/trips - List all trips
       if (url.pathname === "/api/v1/trips" && request.method === "GET") {
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         const trips = Object.values(store.trips)
           .sort((a, b) => ((a.start || "") < (b.start || "") ? -1 : 1))
           .map(t => ({
@@ -282,7 +522,7 @@ export default {
         if (!body.to || !body.start || !body.end) {
           return cors(json({ error: "Missing required trip fields: 'to', 'start', and 'end' are required" }, 400));
         }
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         const id = (body.id ? String(body.id).trim() : "") || uid();
         const start = norm(body.start);
         const end = norm(body.end);
@@ -334,7 +574,7 @@ export default {
           segments: initialSegs,
           updatedAt: Date.now()
         };
-        await saveStore(env, store);
+        await saveStore(env, store, currentUid);
         return cors(json({ ok: true, trip: store.trips[id] }, 201));
       }
 
@@ -342,7 +582,7 @@ export default {
       const segBatchMatch = url.pathname.match(/^\/api\/v1\/trips\/([a-zA-Z0-9_-]+)\/segments\/?$/);
       if (segBatchMatch && request.method === "POST") {
         const tripId = segBatchMatch[1];
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         const t = store.trips[tripId];
         if (!t) return cors(json({ error: "Trip not found" }, 404));
 
@@ -391,7 +631,7 @@ export default {
         }
         t.segments.sort(segCmp);
         t.updatedAt = Date.now();
-        await saveStore(env, store);
+        await saveStore(env, store, currentUid);
         return cors(json({ ok: true, count: added.length, segments: isArray ? added : added[0] }, 201));
       }
 
@@ -399,7 +639,7 @@ export default {
       const segItemMatch = url.pathname.match(/^\/api\/v1\/trips\/([a-zA-Z0-9_-]+)\/segments\/([a-zA-Z0-9_-]+)\/?$/);
       if (segItemMatch && request.method === "PUT") {
         const tripId = segItemMatch[1], sid = segItemMatch[2];
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         const t = store.trips[tripId];
         if (!t) return cors(json({ error: "Trip not found" }, 404));
         const s = (t.segments || []).find(x => x.sid === sid);
@@ -437,14 +677,14 @@ export default {
 
         t.segments.sort(segCmp);
         t.updatedAt = Date.now();
-        await saveStore(env, store);
+        await saveStore(env, store, currentUid);
         return cors(json({ ok: true, segment: s }));
       }
 
       // DELETE /api/v1/trips/:id/segments/:sid - Delete segment with tombstoning
       if (segItemMatch && request.method === "DELETE") {
         const tripId = segItemMatch[1], sid = segItemMatch[2];
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         const t = store.trips[tripId];
         if (!t) return cors(json({ error: "Trip not found" }, 404));
         const s = (t.segments || []).find(x => x.sid === sid);
@@ -454,7 +694,7 @@ export default {
         if (s.conf) store.deletedSegs[s.conf] = Date.now();
         t.segments = (t.segments || []).filter(x => x.sid !== sid);
         t.updatedAt = Date.now();
-        await saveStore(env, store);
+        await saveStore(env, store, currentUid);
         return cors(json({ ok: true, deleted: true, sid }));
       }
 
@@ -462,7 +702,7 @@ export default {
       const tripMatch = url.pathname.match(/^\/api\/v1\/trips\/([a-zA-Z0-9_-]+)\/?$/);
       if (tripMatch) {
         const tripId = tripMatch[1];
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         const t = store.trips[tripId];
 
         // GET /api/v1/trips/:id
@@ -484,7 +724,7 @@ export default {
           if (body.timezone !== undefined) t.timezone = String(body.timezone).trim();
           if (body.photo !== undefined) t.photo = String(body.photo).trim();
           t.updatedAt = Date.now();
-          await saveStore(env, store);
+          await saveStore(env, store, currentUid);
           return cors(json({ ok: true, trip: t }));
         }
 
@@ -492,15 +732,15 @@ export default {
         if (request.method === "DELETE") {
           if (!t) return cors(json({ error: "Trip not found" }, 404));
           delete store.trips[tripId];
-          await saveStore(env, store);
+          await saveStore(env, store, currentUid);
           return cors(json({ ok: true, deleted: true, id: tripId }));
         }
       }
 
       // GET /api/v1/status - Instance health, versions, and integrations
       if (url.pathname === "/api/v1/status" && request.method === "GET") {
-        const store = await loadStore(env);
-        const llm = await getLLMConfig(env);
+        const store = await loadStore(env, currentUid);
+        const llm = await getLLMConfig(env, currentUid);
         const places = await getGooglePlacesConfig(env);
         const gClient = await googleClient(env);
         const gRefresh = env.GOOGLE_REFRESH_TOKEN || (await env.TRIPS.get("g_refresh")) || "";
@@ -530,7 +770,7 @@ export default {
       const swapMatch = url.pathname.match(/^\/api\/v1\/trips\/([a-zA-Z0-9_-]+)\/segments\/([a-zA-Z0-9_-]+)\/swap-fallback\/?$/);
       if (swapMatch && request.method === "POST") {
         const tripId = swapMatch[1], sid = swapMatch[2];
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         const t = store.trips[tripId];
         if (!t) return cors(json({ error: "Trip not found" }, 404));
         const s = (t.segments || []).find(x => x.sid === sid);
@@ -559,7 +799,7 @@ export default {
         s.fallback = oldPrimary;
         s.source = "manual";
         t.updatedAt = Date.now();
-        await saveStore(env, store);
+        await saveStore(env, store, currentUid);
         return cors(json({ ok: true, swapped: true, segment: s }));
       }
 
@@ -585,7 +825,7 @@ export default {
 
       // GET /api/v1/wishes - List Wishlist Radar items
       if (url.pathname === "/api/v1/wishes" && request.method === "GET") {
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         const wishes = store.wishes || [];
         return cors(json({ ok: true, count: wishes.length, wishes }));
       }
@@ -594,7 +834,7 @@ export default {
       if (url.pathname === "/api/v1/wishes" && request.method === "POST") {
         const body = await request.json().catch(() => null);
         if (!body || typeof body !== "object") return cors(json({ error: "Invalid JSON body" }, 400));
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         store.wishes = store.wishes || [];
         const id = body.id || uid();
         const wishItem = {
@@ -610,7 +850,7 @@ export default {
         const idx = store.wishes.findIndex(w => w.id === id);
         if (idx >= 0) store.wishes[idx] = wishItem;
         else store.wishes.push(wishItem);
-        await saveStore(env, store);
+        await saveStore(env, store, currentUid);
         return cors(json({ ok: true, wish: wishItem }, 201));
       }
 
@@ -618,12 +858,12 @@ export default {
       const wishDelMatch = url.pathname.match(/^\/api\/v1\/wishes\/([a-zA-Z0-9_-]+)\/?$/);
       if (wishDelMatch && request.method === "DELETE") {
         const wishId = wishDelMatch[1];
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         store.wishes = store.wishes || [];
         const before = store.wishes.length;
         store.wishes = store.wishes.filter(w => w.id !== wishId);
         if (store.wishes.length !== before) {
-          await saveStore(env, store);
+          await saveStore(env, store, currentUid);
         }
         return cors(json({ ok: true, deleted: true, id: wishId }));
       }
@@ -653,7 +893,7 @@ export default {
 
       // GET /api/v1/export - Full JSON export
       if (url.pathname === "/api/v1/export" && request.method === "GET") {
-        const store = await loadStore(env);
+        const store = await loadStore(env, currentUid);
         const home = (await env.TRIPS.get("home")) || "TPE";
         const homeTz = (await env.TRIPS.get("home_tz")) || "Asia/Taipei";
         return cors(json({
@@ -671,7 +911,7 @@ export default {
         const body = await request.json().catch(() => ({}));
         const rawMessages = Array.isArray(body && body.messages) ? body.messages : [];
         const currentTripId = ((body && body.currentTripId) || "").trim();
-        const result = await dispatchAiChat(env, rawMessages, currentTripId);
+        const result = await dispatchAiChat(env, rawMessages, currentTripId, currentUid);
         if (!result.ok) return cors(json(result, result.status || 400));
         return cors(json(result));
       }
@@ -681,6 +921,7 @@ export default {
 
     const blocked = await authGuard(request, env);
     if (blocked) return cors(blocked);
+    const currentUid = (request.session && request.session.uid) || "usr_admin";
 
     // --- App settings snapshot the front end reads to show connection status.
     // Google, LLM and Resend connect in-app (keys saved to YOUR OWN KV, used only
@@ -690,12 +931,26 @@ export default {
       const gClient = await googleClient(env);
       const gRefresh = env.GOOGLE_REFRESH_TOKEN || (await env.TRIPS.get("g_refresh")) || "";
       const gIcs = (await env.TRIPS.get("g_ics")) || "";
-      const llm = await getLLMConfig(env);
+      const llm = await getLLMConfig(env, currentUid);
       const resend = await getResendConfig(env);
       const places = await getGooglePlacesConfig(env);
-      const home = (await env.TRIPS.get("home")) || "";
-      const homeTz = (await env.TRIPS.get("home_tz")) || "";
-      const units = (await env.TRIPS.get("units")) || "";
+
+      let home = "", homeTz = "", units = "";
+      if (currentUid !== "usr_admin") {
+        try {
+          const pRaw = await env.TRIPS.get("user:" + currentUid + ":profile");
+          if (pRaw) {
+            const p = JSON.parse(pRaw);
+            home = p.home || "";
+            homeTz = p.homeTz || "";
+            units = p.units || "";
+          }
+        } catch(e) {}
+      }
+      if (!home) home = (await env.TRIPS.get("home")) || "";
+      if (!homeTz) homeTz = (await env.TRIPS.get("home_tz")) || "";
+      if (!units) units = (await env.TRIPS.get("units")) || "";
+
       const agentKey = (await env.TRIPS.get("agent_api_key")) || "";
       return cors(json({
         home,
@@ -715,6 +970,10 @@ export default {
         llmFallbackModel: llm.fallbackModel || "",
         llmConfigured: !!llm.apiKey,
         llmSource: llm.source,
+        llmByokRequired: Boolean(llm.byokRequired),
+        // User & Tenant info
+        currentUser: request.session ? { uid: request.session.uid, email: request.session.email, role: request.session.role } : null,
+        isTenant: currentUid !== "usr_admin",
         // Backward-compat flag
         anthropicKeySet: !!llm.apiKey,
         // Resend Configuration
@@ -780,14 +1039,19 @@ export default {
 
       if (!apiKey && !baseUrl && !model && !fallbackModel) {
         // Clear custom configuration
-        await env.TRIPS.delete("llm_config");
-        await env.TRIPS.delete("anthropic_key");
-        delete env._llmConfig;
+        if (currentUid === "usr_admin") {
+          await env.TRIPS.delete("llm_config");
+          await env.TRIPS.delete("user:usr_admin:llm_config");
+          await env.TRIPS.delete("anthropic_key");
+          delete env._llmConfig;
+        } else {
+          await env.TRIPS.delete("user:" + currentUid + ":llm_config");
+        }
         return cors(json({ ok: true, cleared: true }));
       }
 
       // If user is setting a new key or updating config
-      const existing = await getLLMConfig(env);
+      const existing = await getLLMConfig(env, currentUid);
       const newConfig = {
         provider: provider || existing.provider || "openai",
         baseUrl: baseUrl !== undefined ? baseUrl : existing.baseUrl,
@@ -800,8 +1064,13 @@ export default {
         return cors(json({ error: "API 金鑰為必填欄位 / API key is required" }, 400));
       }
 
-      await env.TRIPS.put("llm_config", JSON.stringify(newConfig));
-      delete env._llmConfig;
+      if (currentUid === "usr_admin") {
+        await env.TRIPS.put("llm_config", JSON.stringify(newConfig));
+        await env.TRIPS.put("user:usr_admin:llm_config", JSON.stringify(newConfig));
+        delete env._llmConfig;
+      } else {
+        await env.TRIPS.put("user:" + currentUid + ":llm_config", JSON.stringify(newConfig));
+      }
       return cors(json({ ok: true }));
     }
 
@@ -812,7 +1081,7 @@ export default {
       let baseUrl = ((body && body.baseUrl) || "").trim();
       let apiKey = ((body && body.apiKey) || "").replace(/\s+/g, "");
 
-      const saved = await getLLMConfig(env);
+      const saved = await getLLMConfig(env, currentUid);
       if (!provider) provider = saved.provider || "openai";
       if (!baseUrl && provider !== "anthropic") baseUrl = saved.baseUrl;
       if (!apiKey) apiKey = saved.apiKey;
@@ -869,9 +1138,21 @@ export default {
     // Save general user preferences (home base, home timezone, units)
     if (url.pathname === "/settings/profile" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
-      if (body.home !== undefined) await env.TRIPS.put("home", String(body.home).toUpperCase());
-      if (body.homeTz !== undefined) await env.TRIPS.put("home_tz", String(body.homeTz));
-      if (body.units !== undefined) await env.TRIPS.put("units", String(body.units));
+      if (currentUid === "usr_admin") {
+        if (body.home !== undefined) await env.TRIPS.put("home", String(body.home).toUpperCase());
+        if (body.homeTz !== undefined) await env.TRIPS.put("home_tz", String(body.homeTz));
+        if (body.units !== undefined) await env.TRIPS.put("units", String(body.units));
+      } else {
+        let p = {};
+        try {
+          const pRaw = await env.TRIPS.get("user:" + currentUid + ":profile");
+          if (pRaw) p = JSON.parse(pRaw);
+        } catch(e) {}
+        if (body.home !== undefined) p.home = String(body.home).toUpperCase();
+        if (body.homeTz !== undefined) p.homeTz = String(body.homeTz);
+        if (body.units !== undefined) p.units = String(body.units);
+        await env.TRIPS.put("user:" + currentUid + ":profile", JSON.stringify(p));
+      }
       return cors(json({ ok: true }));
     }
 
@@ -897,7 +1178,7 @@ export default {
       const body = await request.json().catch(() => ({}));
       const rawMessages = Array.isArray(body && body.messages) ? body.messages : [];
       const currentTripId = ((body && body.currentTripId) || "").trim();
-      const result = await dispatchAiChat(env, rawMessages, currentTripId);
+      const result = await dispatchAiChat(env, rawMessages, currentTripId, currentUid);
       if (!result.ok) return cors(json(result, result.status || 400));
       return cors(json(result));
     }
@@ -1164,12 +1445,12 @@ export default {
 
     // Your app reads the consolidated, segment-enriched trips from here.
     if (url.pathname === "/trips" && request.method === "GET") {
-      const store = await loadStore(env);
+      const store = await loadStore(env, currentUid);
       return cors(json(Object.values(store.trips).sort((a, b) => (a.start < b.start ? -1 : 1))));
     }
     // Your app creates OR updates a trip here. Manual plans you edit are merged with ingested ones.
     if (url.pathname === "/trips" && request.method === "POST") {
-      const store = await loadStore(env);
+      const store = await loadStore(env, currentUid);
       const body = await request.json().catch(() => null);
       if (!body || typeof body !== "object") return cors(json({ error: "invalid trip body" }, 400));
       const id = body.id || uid();
@@ -1187,19 +1468,21 @@ export default {
           timezone: body.timezone || "", segments: body.segments || [],
           photo: body.photo || "", updatedAt: Date.now() };
       }
-      await saveStore(env, store);
-      ctx.waitUntil(debouncedEditSync(env)); // enrich from calendar/email, coalescing rapid edits
+      await saveStore(env, store, currentUid);
+      if (currentUid === "usr_admin") {
+        ctx.waitUntil(debouncedEditSync(env)); // enrich from calendar/email, coalescing rapid edits
+      }
       return cors(json(store.trips[id]));
     }
     // Delete a trip from the hub. Without this, a delete in the app only removed
     // the local copy and the worker's copy resurrected it on every refresh.
     if (url.pathname === "/trips/delete" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
-      const store = await loadStore(env);
+      const store = await loadStore(env, currentUid);
       const t = body && body.id ? store.trips[body.id] : null;
       if (t) {
         delete store.trips[body.id];
-        await saveStore(env, store);
+        await saveStore(env, store, currentUid);
       }
       return cors(json({ ok: true, deleted: !!t }));
     }
@@ -1210,7 +1493,7 @@ export default {
     // Gmail re-scan, Clean re-import). Manual plans are removed too.
     if (url.pathname === "/segments/delete" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
-      const store = await loadStore(env);
+      const store = await loadStore(env, currentUid);
       const t = body && body.tripId ? store.trips[body.tripId] : null;
       let removed = 0;
       if (t) {
@@ -1228,7 +1511,7 @@ export default {
         // so a re-ingest in flight can't slip it back in.
         if (conf) store.deletedSegs[conf] = Date.now();
         if (removed) t.updatedAt = Date.now();
-        await saveStore(env, store);
+        await saveStore(env, store, currentUid);
       }
       return cors(json({ ok: true, removed }));
     }
@@ -1236,17 +1519,33 @@ export default {
     // is the whole credential - share it only with your travel companions.
     if (url.pathname === "/trips/share" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
-      const store = await loadStore(env);
+      const store = await loadStore(env, currentUid);
       const t = store.trips[body.id];
       if (!t) return cors(json({ error: "no such trip" }, 404));
-      if (body.revoke) { delete t.shareToken; await saveStore(env, store); return cors(json({ ok: true, revoked: true })); }
-      if (!t.shareToken) { t.shareToken = randHex(16); await saveStore(env, store); }
+      if (body.revoke) {
+        if (t.shareToken) await env.TRIPS.delete("share:" + t.shareToken);
+        delete t.shareToken;
+        await saveStore(env, store, currentUid);
+        return cors(json({ ok: true, revoked: true }));
+      }
+      if (!t.shareToken) {
+        t.shareToken = randHex(16);
+        await saveStore(env, store, currentUid);
+      }
+      await env.TRIPS.put("share:" + t.shareToken, JSON.stringify({ uid: currentUid, tripId: t.id }));
       return cors(json({ ok: true, url: url.origin + "/t/" + t.shareToken }));
     }
     // Mint (once) the private calendar-feed URL.
     if (url.pathname === "/ics/token" && request.method === "POST") {
-      let tok = (await env.TRIPS.get("ics_token")) || "";
-      if (!tok) { tok = randHex(16); await env.TRIPS.put("ics_token", tok); }
+      let tok = (await env.TRIPS.get("ics_token:" + currentUid)) || "";
+      if (!tok) {
+        tok = randHex(16);
+        await env.TRIPS.put("ics_token:" + currentUid, tok);
+        await env.TRIPS.put("ics_uid:" + tok, currentUid);
+        if (currentUid === "usr_admin") {
+          await env.TRIPS.put("ics_token", tok);
+        }
+      }
       return cors(json({ ok: true, url: url.origin + "/cal.ics?t=" + tok }));
     }
     // Safety net: weekly snapshots (taken Sundays before the daily sync) plus
@@ -1571,7 +1870,60 @@ async function ingestFromGmail(store, env, maxEmails) {
 }
 
 // Universal LLM Config: supports Anthropic and any OpenAI-compatible base URL (Gemini, Groq, OpenAI, DeepSeek, etc.)
-async function getLLMConfig(env) {
+async function getLLMConfig(env, uid = "usr_admin") {
+  // If specific tenant, check user:<uid>:llm_config first
+  let userKvConfig = null;
+  if (uid && uid !== "usr_admin") {
+    try {
+      const raw = await env.TRIPS.get("user:" + uid + ":llm_config");
+      if (raw) userKvConfig = JSON.parse(raw);
+    } catch(e) {}
+
+    if (userKvConfig && userKvConfig.apiKey) {
+      let provider = userKvConfig.provider || "openai";
+      let baseUrl = userKvConfig.baseUrl || "";
+      let model = userKvConfig.model || "";
+      let fallbackModel = userKvConfig.fallbackModel || "";
+      let apiKey = userKvConfig.apiKey;
+
+      if (!baseUrl && provider !== "anthropic") {
+        if (provider === "gemini") baseUrl = "https://generativelanguage.googleapis.com/v1beta/openai";
+        else if (provider === "groq") baseUrl = "https://api.groq.com/openai/v1";
+        else if (provider === "deepseek") baseUrl = "https://api.deepseek.com/v1";
+        else if (provider === "openai") baseUrl = "https://api.openai.com/v1";
+      }
+      if (!model) {
+        if (provider === "anthropic") model = "claude-3-5-haiku-latest";
+        else if (provider === "gemini") model = "gemini-2.0-flash";
+        else if (provider === "groq") model = "qwen/qwen3.8-27b";
+        else if (provider === "deepseek") model = "deepseek-chat";
+        else model = "gpt-4o";
+      }
+      return {
+        provider,
+        baseUrl,
+        apiKey,
+        model,
+        fallbackModel,
+        source: "tenant"
+      };
+    }
+
+    // Tenant has not configured their own key: check if shared_ai_pool is enabled in system:config
+    const sysCfg = await getSystemConfig(env);
+    if (!sysCfg.shared_ai_pool) {
+      return {
+        provider: "none",
+        baseUrl: "",
+        apiKey: "",
+        model: "",
+        fallbackModel: "",
+        source: "none",
+        byokRequired: true
+      };
+    }
+  }
+
   if (env._llmConfig && env._llmConfigTs && (Date.now() - env._llmConfigTs < 15000)) return env._llmConfig;
   let kvConfig = null;
   try {
@@ -1777,7 +2129,7 @@ async function getGooglePlaceDetails(env, placeId, lang = "zh-TW") {
   }
 }
 
-async function dispatchAiChat(env, rawMessages, currentTripId = "") {
+async function dispatchAiChat(env, rawMessages, currentTripId = "", uid = "usr_admin") {
   const windowMessages = (Array.isArray(rawMessages) ? rawMessages : []).slice(-10);
   const messages = windowMessages
     .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
@@ -1787,12 +2139,19 @@ async function dispatchAiChat(env, rawMessages, currentTripId = "") {
     return { ok: false, status: 400, error: "INVALID_REQUEST", message: "對話訊息不可為空 / Messages cannot be empty" };
   }
 
-  const llm = await getLLMConfig(env);
-  if (!llm.apiKey) {
-    return { ok: false, status: 400, error: "NO_LLM_KEY", message: "尚未設定 AI 語言模型金鑰，請前往「設定」配置 API Key。" };
+  const llm = await getLLMConfig(env, uid);
+  if (llm.byokRequired || !llm.apiKey) {
+    return {
+      ok: false,
+      status: 400,
+      error: "NO_LLM_KEY",
+      message: llm.byokRequired
+        ? "為保護系統資源，新用戶需使用自有金鑰 (BYOK)。請前往「系統設定 ⚙️ ➔ AI 模型」配置您的專屬 API Key 後即可開始使用！"
+        : "尚未設定 AI 語言模型金鑰，請前往「設定」配置 API Key。"
+    };
   }
 
-  const store = await loadStore(env);
+  const store = await loadStore(env, uid);
   const tripId = (currentTripId || "").trim();
   let tripContext = "";
   let activeTrip = null;
@@ -2464,43 +2823,245 @@ function buildIcs(store) {
   return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//888travel//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:888漫步旅遊 · 888travel\r\nX-WR-TIMEZONE:Asia/Taipei\r\n" + ev + "\r\nEND:VCALENDAR\r\n";
 }
 
-async function loadStore(env) {
-  const raw = await env.TRIPS.get("store");
-  return raw ? JSON.parse(raw) : { trips: {}, seenEmails: {}, deletedSegs: {} };
+// --- Multi-Tenant Storage & Namespace Accessors ---
+async function loadTenantStore(env, uid) {
+  const targetUid = uid || "usr_admin";
+  const raw = await env.TRIPS.get("store:" + targetUid);
+  if (raw) {
+    try { return JSON.parse(raw); } catch(e) {}
+  }
+  // Backward compatibility fallback for admin
+  if (targetUid === "usr_admin") {
+    const legacy = await env.TRIPS.get("store");
+    if (legacy) {
+      try { return JSON.parse(legacy); } catch(e) {}
+    }
+  }
+  return { trips: {}, seenEmails: {}, deletedSegs: {} };
 }
-async function saveStore(env, store) { await env.TRIPS.put("store", JSON.stringify(store)); }
+
+async function saveTenantStore(env, uid, store) {
+  const targetUid = uid || "usr_admin";
+  const str = JSON.stringify(store);
+  await env.TRIPS.put("store:" + targetUid, str);
+  // Mirror to legacy store if admin for backward compatibility with external scripts
+  if (targetUid === "usr_admin") {
+    await env.TRIPS.put("store", str);
+  }
+}
+
+async function loadStore(env, uid) {
+  return await loadTenantStore(env, uid || "usr_admin");
+}
+async function saveStore(env, store, uid) {
+  return await saveTenantStore(env, uid || "usr_admin", store);
+}
+
+// --- System Configuration ---
+async function getSystemConfig(env) {
+  const raw = await env.TRIPS.get("system:config");
+  if (raw) {
+    try { return JSON.parse(raw); } catch(e) {}
+  }
+  const adminEmail = (await env.TRIPS.get("auth_email")) || null;
+  return {
+    allow_registration: false,
+    admin_email: adminEmail ? adminEmail.toLowerCase().trim() : null,
+    shared_ai_pool: false,
+    version: 2
+  };
+}
+
+async function saveSystemConfig(env, cfg) {
+  await env.TRIPS.put("system:config", JSON.stringify(cfg));
+}
+
+// --- User Management ---
+async function getUserByEmail(env, email) {
+  if (!email) return null;
+  const raw = await env.TRIPS.get("user:by_email:" + email.toLowerCase().trim());
+  if (raw) {
+    try { return JSON.parse(raw); } catch(e) {}
+  }
+  return null;
+}
+
+async function getUserById(env, uid) {
+  if (!uid) return null;
+  const raw = await env.TRIPS.get("user:by_id:" + uid);
+  if (raw) {
+    try { return JSON.parse(raw); } catch(e) {}
+  }
+  return null;
+}
+
+async function saveUser(env, user) {
+  const emailKey = user.email.toLowerCase().trim();
+  await env.TRIPS.put("user:by_email:" + emailKey, JSON.stringify(user));
+  await env.TRIPS.put("user:by_id:" + user.uid, JSON.stringify(user));
+}
+
+async function listAllUsers(env) {
+  try {
+    const list = await env.TRIPS.list({ prefix: "user:by_id:" });
+    const users = [];
+    for (const key of list.keys) {
+      const raw = await env.TRIPS.get(key.name);
+      if (raw) {
+        try {
+          const u = JSON.parse(raw);
+          users.push({
+            uid: u.uid,
+            email: u.email,
+            role: u.role || "user",
+            status: u.status || "active",
+            createdAt: u.createdAt || 0
+          });
+        } catch(e) {}
+      }
+    }
+    return users.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  } catch(e) {
+    return [];
+  }
+}
+
+// --- Dynamic Session Management ---
+async function createSession(env, user) {
+  const token = "s_" + crypto.randomUUID().replace(/-/g, "") + randHex(12);
+  const sessionData = {
+    uid: user.uid,
+    email: user.email,
+    role: user.role || "user",
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 2592000000 // 30 days
+  };
+  await env.TRIPS.put("session:" + token, JSON.stringify(sessionData), { expirationTtl: 2592000 });
+  return token;
+}
+
+async function resolveSession(request, env) {
+  const header = request.headers.get("X-Auth") || "";
+  const m = (request.headers.get("Cookie") || "").match(/(?:^|;\s*)tk=([^;]+)/);
+  const cookie = m ? m[1] : "";
+  const token = header || cookie;
+  if (!token) return null;
+
+  // 1. Dynamic multi-tenant session token
+  if (token.startsWith("s_")) {
+    const raw = await env.TRIPS.get("session:" + token);
+    if (raw) {
+      try {
+        const s = JSON.parse(raw);
+        if (s && s.uid) return s;
+      } catch(e) {}
+    }
+  }
+
+  // 2. Legacy admin password hash session fallback
+  const stored = await env.TRIPS.get("auth");
+  if (stored && token === stored) {
+    const storedEmail = ((await env.TRIPS.get("auth_email")) || "admin@local").trim().toLowerCase();
+    let adminUser = await getUserByEmail(env, storedEmail);
+    if (!adminUser) {
+      adminUser = {
+        uid: "usr_admin",
+        email: storedEmail,
+        passwordHash: stored,
+        role: "admin",
+        status: "active",
+        createdAt: Date.now()
+      };
+      await saveUser(env, adminUser);
+    }
+    return { uid: adminUser.uid, email: adminUser.email, role: "admin" };
+  }
+
+  return null;
+}
+
+// --- Auto Migration for Existing Single-User Installations ---
+async function ensureMultiTenantMigration(env) {
+  const cfg = await env.TRIPS.get("system:config");
+  if (cfg) return; // already migrated or configured
+
+  const storedAuth = await env.TRIPS.get("auth");
+  const storedEmail = (await env.TRIPS.get("auth_email")) || "";
+  if (storedAuth) {
+    const adminUid = "usr_admin";
+    const adminEmail = storedEmail.trim().toLowerCase() || "admin@local";
+    const adminUser = {
+      uid: adminUid,
+      email: adminEmail,
+      passwordHash: storedAuth,
+      role: "admin",
+      status: "active",
+      createdAt: Date.now()
+    };
+    await saveUser(env, adminUser);
+
+    const legacyStore = await env.TRIPS.get("store");
+    if (legacyStore) {
+      const existing = await env.TRIPS.get("store:" + adminUid);
+      if (!existing) {
+        await env.TRIPS.put("store:" + adminUid, legacyStore);
+      }
+    }
+
+    await saveSystemConfig(env, {
+      allow_registration: false,
+      admin_email: adminEmail,
+      shared_ai_pool: false,
+      version: 2
+    });
+  }
+}
+
+// Optional Turnstile bot verification
+async function verifyTurnstile(env, token, ip) {
+  if (!env.TURNSTILE_SECRET_KEY) return true;
+  if (!token) return false;
+  try {
+    const formData = new FormData();
+    formData.append("secret", env.TURNSTILE_SECRET_KEY);
+    formData.append("response", token);
+    if (ip) formData.append("remoteip", ip);
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body: formData
+    });
+    const d = await res.json();
+    return !!d.success;
+  } catch(e) {
+    return false;
+  }
+}
 
 async function sha256(s) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
   return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
+
 // Successful login: return the token AND set a durable HttpOnly session cookie
-// (survives iOS localStorage eviction, so you stay signed in ~30 days).
-function okLogin(hash) {
-  const r = cors(json({ ok: true, token: hash }));
-  r.headers.append("Set-Cookie", `tk=${hash}; Max-Age=2592000; Path=/; Secure; HttpOnly; SameSite=Lax`);
+function okLogin(token, user, status = 200) {
+  const payload = { ok: true, token };
+  if (user) {
+    payload.user = { uid: user.uid, email: user.email, role: user.role || "user" };
+  }
+  const r = cors(json(payload, status));
+  r.headers.append("Set-Cookie", `tk=${token}; Max-Age=2592000; Path=/; Secure; HttpOnly; SameSite=Lax`);
   return r;
 }
-// Returns a 401 Response if a password is set and the request has neither a valid
-// X-Auth header nor a valid session cookie, else null.
-// SCOPE: this gate is sized for a SELF-HOSTED, single-user worker - one person,
-// their own Cloudflare account, their own keys. The password hash doubles as
-// the session token, API keys live in plaintext KV, and CORS is open. That is
-// fine for this template; do NOT turn this worker into a hosted multi-tenant
-// service without replacing auth (salted/derived tokens), key storage
-// (encryption), and CORS first.
+
 async function authGuard(request, env) {
+  const session = await resolveSession(request, env);
+  if (session) {
+    request.session = session;
+    return null;
+  }
   const stored = await env.TRIPS.get("auth");
-  // Fail CLOSED: until a password has been set, /trips, /sync and /settings are
-  // locked (401), never open. The front end reads /auth/status (which is public)
-  // and shows the "create your password" screen; /auth/login (also public) sets
-  // it. Only after that does any trip data become reachable, and then only with
-  // a matching X-Auth header or tk cookie. No password => no data, ever.
   if (!stored) return json({ error: "setup required - create your password first" }, 401);
-  const header = request.headers.get("X-Auth") || "";
-  const m = (request.headers.get("Cookie") || "").match(/(?:^|;\s*)tk=([^;]+)/);
-  const cookie = m ? m[1] : "";
-  return (header === stored || cookie === stored) ? null : json({ error: "unauthorized" }, 401);
+  return json({ error: "unauthorized" }, 401);
 }
 
 async function agentAuthGuard(request, env) {
@@ -2510,19 +3071,19 @@ async function agentAuthGuard(request, env) {
   if (authHeader.toLowerCase().startsWith("bearer ")) {
     const token = authHeader.slice(7).trim();
     if (storedAgentKey && token === storedAgentKey) {
+      request.session = { uid: "usr_admin", role: "admin", email: (await env.TRIPS.get("auth_email")) || "admin@local" };
       return null;
     }
   }
 
   // Developer / admin session fallback (X-Auth or tk cookie)
-  const storedAuth = await env.TRIPS.get("auth");
-  const xAuth = request.headers.get("X-Auth") || "";
-  const m = (request.headers.get("Cookie") || "").match(/(?:^|;\s*)tk=([^;]+)/);
-  const cookie = m ? m[1] : "";
-  if (storedAuth && (xAuth === storedAuth || cookie === storedAuth)) {
+  const session = await resolveSession(request, env);
+  if (session) {
+    request.session = session;
     return null;
   }
 
+  const storedAuth = await env.TRIPS.get("auth");
   if (!storedAgentKey && !storedAuth) {
     return json({ error: "Setup required - configure instance first" }, 401);
   }

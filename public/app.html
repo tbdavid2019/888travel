@@ -398,6 +398,26 @@
   .otp-code-input{letter-spacing:6px;font-weight:700;font-size:22px;font-family:var(--mono)}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--cream);font-size:13px;font-weight:500;padding:12px 20px;border-radius:999px;opacity:0;transition:.22s;z-index:80;pointer-events:none}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* Auth Mode Navigation (Login vs Register) */
+  .auth-mode-nav{display:flex;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:3px;margin:14px 0 16px;gap:4px}
+  .auth-mode-btn{flex:1;font-family:var(--body);font-size:13.5px;font-weight:600;padding:8px 12px;border:none;background:transparent;color:var(--muted);border-radius:9px;cursor:pointer;transition:all .18s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .auth-mode-btn:hover{color:var(--ink)}
+  .auth-mode-btn.active{background:var(--card);color:var(--coral);font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .auth-badge{font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;background:rgba(22,19,12,.08);color:var(--muted)}
+
+  /* Toggle Switch */
+  .switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--line);border-radius:24px;transition:.3s}
+  .slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  input:checked + .slider{background-color:var(--coral)}
+  input:checked + .slider:before{transform:translateX(20px)}
+
+  /* Admin User Table */
+  .admin-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13.5px}
+  .admin-table th{text-align:left;padding:9px 12px;background:var(--soft);color:var(--muted);font-weight:600;border-bottom:1px solid var(--line)}
+  .admin-table td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--ink)}
+  .admin-table tr:hover td{background:rgba(22,19,12,.02)}
 
   /* ===================== CJK & Chinese Typography Enhancements ===================== */
   html[lang*="zh"] {
@@ -961,14 +981,40 @@
   var mem={};
   var hasStore=(typeof window.storage!=="undefined" && window.storage);
   var hasLS=(function(){try{var k="__t"+Math.random();localStorage.setItem(k,"1");localStorage.removeItem(k);return true;}catch(e){return false;}})();
+
+  function getCurrentUser(){
+    try{
+      var raw=localStorage.getItem("travel:user");
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return null;
+  }
+  function saveCurrentUser(u){
+    try{
+      if(u) localStorage.setItem("travel:user",JSON.stringify(u));
+      else localStorage.removeItem("travel:user");
+    }catch(e){}
+  }
+  function getStorageKey(key){
+    var u=getCurrentUser();
+    if(u&&u.uid) return "travel:"+u.uid+":"+key;
+    return "travel:"+key;
+  }
+
   async function load(key,fb){try{
     if(hasStore){var r=await window.storage.get(key,false);if(r&&r.value!=null)return JSON.parse(r.value);return fb;}
-    if(hasLS){var v=localStorage.getItem("travel:"+key);return v==null?fb:JSON.parse(v);}
+    if(hasLS){
+      var scopedKey=getStorageKey(key);
+      var v=localStorage.getItem(scopedKey);
+      if(v!=null) return JSON.parse(v);
+      var legacyV=localStorage.getItem("travel:"+key);
+      return legacyV==null?fb:JSON.parse(legacyV);
+    }
     return (key in mem)?mem[key]:fb;
   }catch(e){return fb;}}
   async function save(key,val){try{
     if(hasStore){await window.storage.set(key,JSON.stringify(val),false);}
-    else if(hasLS){localStorage.setItem("travel:"+key,JSON.stringify(val));}
+    else if(hasLS){localStorage.setItem(getStorageKey(key),JSON.stringify(val));}
     else{mem[key]=val;}
   }catch(e){console.error("save",e);}}
 
@@ -2640,6 +2686,8 @@
 
   /* ===================== settings (preserved: worker URL, export/import, clear) ===================== */
   document.getElementById("setBtn").onclick=function(){
+    var currentUser = getCurrentUser();
+    var isAdmin = Boolean(currentUser && currentUser.role === "admin");
     var snap=JSON.stringify({version:2,home:home,trips:trips,wishes:wishes},null,2);
     var gOrigin=esc(settings.workerUrl||location.origin);
     var gRedirect=esc((settings.workerUrl||location.origin)+"/google/callback");
@@ -2653,6 +2701,7 @@
         '<button class="set-tab-btn" type="button" data-pane="agent">'+lucideIcon('zap', 17)+' <span>'+(isZH()?"Agent API":"Agent API")+'</span></button>'+
         '<button class="set-tab-btn" type="button" data-pane="sync">'+lucideIcon('refresh-cw', 17)+' <span>'+(isZH()?"同步服務":"Sync &amp; Services")+'</span></button>'+
         '<button class="set-tab-btn" type="button" data-pane="backup">'+lucideIcon('database', 17)+' <span>'+(isZH()?"備份與資料":"Backup &amp; Data")+'</span></button>'+
+        (isAdmin ? ('<button class="set-tab-btn" type="button" data-pane="admin">'+lucideIcon('shield', 17)+' <span>'+(isZH()?"系統管理":"Admin")+'</span></button>') : '')+
       '</div>'+
 
       '<!-- Pane 1: General -->'+
@@ -2848,6 +2897,76 @@
         '<h4 style="margin-top:24px;color:var(--coral)">'+(isZH()?"危險區域 (Danger Zone)":"Danger Zone")+'</h4>'+
         '<div style="margin-top:8px"><button class="btn" id="clearBtn" style="border-color:rgba(255,90,53,.4);color:var(--coral);display:inline-flex;align-items:center;gap:6px">'+lucideIcon('trash-2', 14)+' <span>'+(isZH()?"清除此裝置所有資料":"Clear all data on this device")+'</span></button></div>'+
       '</div>'+
+      (isAdmin ? (
+        '<!-- Pane 6: Admin -->'+
+        '<div class="set-tab-pane" id="pane_admin">'+
+          '<div class="hint" style="margin-bottom:16px">'+
+            (isZH()
+              ? '身為最高管理員 (Admin)，您可以在此控制公開註冊開關、管理已註冊之多租戶帳號，並設定平台共享 AI 算力政策。'
+              : 'As system administrator, control public tenant registration, manage registered accounts, and configure shared AI pool policies.')+
+          '</div>'+
+
+          '<!-- Section: Registration Toggle -->'+
+          '<div style="background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px">'+
+            '<div style="display:flex;justify-content:space-between;align-items:center;gap:16px">'+
+              '<div>'+
+                '<div style="font-weight:700;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:8px">'+
+                  lucideIcon('user-plus', 16)+
+                  '<span>'+(isZH() ? '開放訪客自主註冊' : 'Allow Public Registration')+'</span>'+
+                  '<span id="adminAllowRegStatus" style="font-size:12px;font-weight:600;margin-left:4px"></span>'+
+                '</div>'+
+                '<div class="hint" style="margin-top:4px;font-size:12.5px">'+
+                  (isZH()
+                    ? '開啟時，未登入訪客可在登入畫面點擊「註冊新帳號」自主加入。關閉時，僅現有用戶與管理員可登入，新註冊將被伺服器嚴格阻擋 (HTTP 403)。'
+                    : 'When enabled, new visitors can register their own accounts. When disabled, registration is strictly rejected by the server (HTTP 403).')+
+                '</div>'+
+              '</div>'+
+              '<label class="switch">'+
+                '<input type="checkbox" id="adminAllowRegToggle">'+
+                '<span class="slider"></span>'+
+              '</label>'+
+            '</div>'+
+          '</div>'+
+
+          '<!-- Section: Shared AI Quota Pool -->'+
+          '<div style="background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px">'+
+            '<div style="display:flex;justify-content:space-between;align-items:center;gap:16px">'+
+              '<div>'+
+                '<div style="font-weight:700;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:8px">'+
+                  lucideIcon('cpu', 16)+
+                  '<span>'+(isZH() ? '允許租戶共享主機 AI 算力' : 'Allow Shared AI Quota Pool')+'</span>'+
+                  '<span id="adminSharedAiStatus" style="font-size:12px;font-weight:600;margin-left:4px"></span>'+
+                '</div>'+
+                '<div class="hint" style="margin-top:4px;font-size:12.5px">'+
+                  (isZH()
+                    ? '關閉時（推薦）：實施嚴格 BYOK (Bring Your Own Key) 模式，租戶必須自行在「AI 模型」設定個人 API Key 才能呼叫 AI，防止主機帳單被耗盡。開啟時：無個人 Key 的租戶將共享主機環境預設的 LLM 算力。'
+                    : 'When disabled (recommended): Strict BYOK mode requires tenants to supply their own API keys, protecting host quotas. When enabled: Tenants without keys can fall back to the host default LLM.')+
+                '</div>'+
+              '</div>'+
+              '<label class="switch">'+
+                '<input type="checkbox" id="adminSharedAiToggle">'+
+                '<span class="slider"></span>'+
+              '</label>'+
+            '</div>'+
+          '</div>'+
+
+          '<!-- Section: Registered Tenants List -->'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;margin-bottom:8px">'+
+            '<h4 style="margin:0;font-size:14.5px;display:flex;align-items:center;gap:8px">'+
+              lucideIcon('users', 16)+
+              '<span>'+(isZH() ? '已註冊租戶清單' : 'Registered Tenants')+'</span>'+
+              '<span class="auth-badge" id="adminUserCount" style="font-size:11.5px">-</span>'+
+            '</h4>'+
+            '<button class="btn" id="adminRefreshUsersBtn" type="button" style="padding:4px 10px;font-size:12px;display:inline-flex;align-items:center;gap:5px">'+
+              lucideIcon('refresh-cw', 12)+
+              '<span>'+(isZH() ? '重新整理' : 'Refresh')+'</span>'+
+            '</button>'+
+          '</div>'+
+          '<div id="adminUserTableContainer" style="background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;min-height:80px">'+
+            '<div class="hint" style="padding:20px;text-align:center">'+(isZH() ? '載入租戶清單中…' : 'Loading tenants…')+'</div>'+
+          '</div>'+
+        '</div>'
+      ) : '')+
 
       '<!-- Modal Bottom Actions -->'+
       '<div class="modal-actions" style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">'+
@@ -3529,6 +3648,163 @@
       }catch(e){el.textContent=isZH()?"無法連線至 Worker。":"Worker not reachable.";}
     }
     loadSnaps();
+
+    // --- Admin Console Operations (Registration toggle & user directory) ---
+    if(isAdmin){
+      async function loadAdminData(){
+        try{
+          var cfgRes = await fetch(apiBase() + "/admin/config", { headers: authHeaders() });
+          if(cfgRes.ok){
+            var cfg = await cfgRes.json();
+            var regToggle = document.getElementById("adminAllowRegToggle");
+            var regStatus = document.getElementById("adminAllowRegStatus");
+            if(regToggle){
+              regToggle.checked = Boolean(cfg.config ? cfg.config.allow_registration : cfg.allow_registration);
+              var isRegOpen = regToggle.checked;
+              if(regStatus){
+                regStatus.textContent = isRegOpen ? (isZH() ? "● 開放中" : "● Open") : (isZH() ? "○ 已關閉" : "○ Closed");
+                regStatus.style.color = isRegOpen ? "var(--green)" : "var(--muted)";
+              }
+            }
+            var aiToggle = document.getElementById("adminSharedAiToggle");
+            var aiStatus = document.getElementById("adminSharedAiStatus");
+            if(aiToggle){
+              aiToggle.checked = Boolean(cfg.config ? cfg.config.shared_ai_pool : cfg.shared_ai_pool);
+              var isAiShared = aiToggle.checked;
+              if(aiStatus){
+                aiStatus.textContent = isAiShared ? (isZH() ? "● 共享主機算力" : "● Shared Pool") : (isZH() ? "● 獨立 BYOK" : "● Strict BYOK");
+                aiStatus.style.color = isAiShared ? "var(--coral)" : "var(--green)";
+              }
+            }
+          }
+
+          var usersRes = await fetch(apiBase() + "/admin/users", { headers: authHeaders() });
+          if(usersRes.ok){
+            var uData = await usersRes.json();
+            renderAdminUsers(uData.users || []);
+          }
+        }catch(e){
+          console.error("Failed to load admin data:", e);
+        }
+      }
+
+      function renderAdminUsers(users){
+        var badge = document.getElementById("adminUserCount");
+        if(badge) badge.textContent = users.length;
+        var container = document.getElementById("adminUserTableContainer");
+        if(!container) return;
+        if(!users || users.length === 0){
+          container.innerHTML = '<div class="hint" style="padding:20px;text-align:center">' + (isZH() ? '尚無其他註冊租戶' : 'No registered tenants yet') + '</div>';
+          return;
+        }
+        var html = '<div style="overflow-x:auto"><table class="admin-table"><thead><tr>' +
+          '<th>' + (isZH() ? '使用者帳號' : 'User') + '</th>' +
+          '<th>' + (isZH() ? '身分' : 'Role') + '</th>' +
+          '<th>' + (isZH() ? '註冊日期' : 'Joined') + '</th>' +
+          '<th>' + (isZH() ? '狀態' : 'Status') + '</th>' +
+          '</tr></thead><tbody>';
+        users.forEach(function(u){
+          var isAdm = u.role === "admin";
+          var roleBadge = isAdm
+            ? '<span style="color:var(--coral);font-weight:700;display:inline-flex;align-items:center;gap:4px">' + lucideIcon('shield', 13) + ' ' + (isZH() ? '管理員' : 'Admin') + '</span>'
+            : '<span style="color:var(--muted);display:inline-flex;align-items:center;gap:4px">' + lucideIcon('user', 13) + ' ' + (isZH() ? '租戶' : 'Tenant') + '</span>';
+          var dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString(isZH() ? 'zh-TW' : 'en-US', { year:'numeric', month:'short', day:'numeric' }) : '-';
+          var statusBadge = u.status === 'disabled'
+            ? '<span style="color:var(--coral);font-weight:600">● ' + (isZH() ? '已停用' : 'Suspended') + '</span>'
+            : '<span style="color:var(--green);font-weight:600">● ' + (isZH() ? '正常' : 'Active') + '</span>';
+          html += '<tr>' +
+            '<td><div style="font-weight:600">' + esc(u.email || u.uid) + '</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">' + esc(u.uid) + '</div></td>' +
+            '<td>' + roleBadge + '</td>' +
+            '<td>' + dateStr + '</td>' +
+            '<td>' + statusBadge + '</td>' +
+            '</tr>';
+        });
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+      }
+
+      var regToggle = document.getElementById("adminAllowRegToggle");
+      if(regToggle){
+        regToggle.onchange = async function(){
+          var checked = regToggle.checked;
+          regToggle.disabled = true;
+          try{
+            var res = await fetch(apiBase() + "/admin/config", {
+              method: "POST",
+              headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+              body: JSON.stringify({ allow_registration: checked })
+            });
+            if(res.ok){
+              var d = await res.json();
+              var regStatus = document.getElementById("adminAllowRegStatus");
+              if(regStatus){
+                regStatus.textContent = d.config.allow_registration ? (isZH() ? "● 開放中" : "● Open") : (isZH() ? "○ 已關閉" : "○ Closed");
+                regStatus.style.color = d.config.allow_registration ? "var(--green)" : "var(--muted)";
+              }
+              toast(isZH() ? (checked ? "已開啟公開註冊" : "已關閉公開註冊") : (checked ? "Registration enabled" : "Registration disabled"));
+            } else {
+              regToggle.checked = !checked;
+              toast(isZH() ? "更新失敗" : "Failed to update");
+            }
+          }catch(err){
+            regToggle.checked = !checked;
+            toast(isZH() ? "網路連線失敗" : "Network error");
+          }
+          regToggle.disabled = false;
+        };
+      }
+
+      var aiToggle = document.getElementById("adminSharedAiToggle");
+      if(aiToggle){
+        aiToggle.onchange = async function(){
+          var checked = aiToggle.checked;
+          aiToggle.disabled = true;
+          try{
+            var res = await fetch(apiBase() + "/admin/config", {
+              method: "POST",
+              headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+              body: JSON.stringify({ shared_ai_pool: checked })
+            });
+            if(res.ok){
+              var d = await res.json();
+              var aiStatus = document.getElementById("adminSharedAiStatus");
+              if(aiStatus){
+                aiStatus.textContent = d.config.shared_ai_pool ? (isZH() ? "● 共享主機算力" : "● Shared Pool") : (isZH() ? "● 獨立 BYOK" : "● Strict BYOK");
+                aiStatus.style.color = d.config.shared_ai_pool ? "var(--coral)" : "var(--green)";
+              }
+              toast(isZH() ? "AI 配額設定已更新" : "AI quota settings updated");
+            } else {
+              aiToggle.checked = !checked;
+              toast(isZH() ? "更新失敗" : "Failed to update");
+            }
+          }catch(err){
+            aiToggle.checked = !checked;
+            toast(isZH() ? "網路連線失敗" : "Network error");
+          }
+          aiToggle.disabled = false;
+        };
+      }
+
+      var refreshBtn = document.getElementById("adminRefreshUsersBtn");
+      if(refreshBtn){
+        refreshBtn.onclick = async function(){
+          refreshBtn.disabled = true;
+          try{
+            var usersRes = await fetch(apiBase() + "/admin/users", { headers: authHeaders() });
+            if(usersRes.ok){
+              var uData = await usersRes.json();
+              renderAdminUsers(uData.users || []);
+              toast(isZH() ? "租戶清單已更新" : "Tenants refreshed");
+            }
+          }catch(e){
+            toast(isZH() ? "更新失敗" : "Refresh failed");
+          }
+          refreshBtn.disabled = false;
+        };
+      }
+
+      loadAdminData();
+    }
     document.getElementById("icsFeed").onclick=async function(){
       if(!settings.workerUrl){toast(isZH()?"日曆訂閱功能需啟用雲端同步模式 — 請先填寫 Worker 網址":"Needs Synced mode — set a Worker URL first");return;}
       try{var r=await fetch(apiBase()+"/ics/token",{method:"POST",headers:authHeaders()});var d=await r.json();
@@ -3569,14 +3845,27 @@
   /* ===================== login (password gate, synced mode) ===================== */
   function authHeaders(){ return authToken ? {"X-Auth":authToken} : {}; }
   var authScrim=document.getElementById("authScrim");
+  var appAuthStatus={set:true,allowRegistration:false,authenticated:false,currentUser:null};
+
   // Log out on this device: clear the server session cookie + local token/cache,
   // then let refresh() hit /trips (now 401) and show the sign-in wall.
   async function doLogout(){
     var base=settings.workerUrl||location.origin;
     try{ await fetch(base+"/auth/logout",{method:"POST",headers:authHeaders()}); }catch(e){}
+    var u = getCurrentUser();
     authToken="";
-    try{ localStorage.removeItem("travel:auth"); localStorage.removeItem("travel:trips"); }catch(e){}
-    trips=[]; closeModal(); render();
+    saveCurrentUser(null);
+    try{
+      localStorage.removeItem("travel:auth");
+      localStorage.removeItem("travel:user");
+      if(u && u.uid){
+        localStorage.removeItem("travel:"+u.uid+":trips");
+        localStorage.removeItem("travel:"+u.uid+":wishes");
+      }
+      localStorage.removeItem("travel:trips");
+      localStorage.removeItem("travel:wishes");
+    }catch(e){}
+    trips=[]; wishes=[]; closeModal(); render();
     if(settings.workerUrl){ toast(isZH()?"已在此裝置登出":"Signed out"); await refresh(); }
     else { location.reload(); }
   }
@@ -3590,8 +3879,35 @@
       return raw;                                                  // legacy plain token
     }catch(e){return"";}
   }
+
+  async function fetchAuthStatus(){
+    if(!settings.workerUrl)return null;
+    try{
+      var st=await fetch(settings.workerUrl+"/auth/status",{headers:authHeaders()});
+      if(st.ok){
+        var d=await st.json();
+        appAuthStatus={
+          set:Boolean(d.set),
+          allowRegistration:Boolean(d.allowRegistration),
+          authenticated:Boolean(d.authenticated),
+          currentUser:d.currentUser||null
+        };
+        if(d.currentUser) saveCurrentUser(d.currentUser);
+        if(d.googlePlacesConfigured!==undefined){
+          settings.googlePlacesConfigured=Boolean(d.googlePlacesConfigured);
+          try{ localStorage.setItem("travel:places_configured", d.googlePlacesConfigured?"1":"0"); }catch(e){}
+        }
+        return d;
+      }
+    }catch(e){}
+    return null;
+  }
+
   function showAuth(mode){
-    return new Promise(function(resolve){
+    return new Promise(async function(resolve){
+      if(mode!=="create"&&settings.workerUrl){
+        await fetchAuthStatus();
+      }
       var create=mode==="create";
       if(create){
         authScrim.innerHTML=
@@ -3599,35 +3915,89 @@
           '<h2>'+(isZH()?"建立個人旅遊中樞":"Set up your hub")+'</h2>'+
           '<p>'+(isZH()?"建立登入資訊——信箱與密碼。你將在各裝置上使用此帳號登入。":"Create your login - email and a password. You’ll use it on each device.")+'</p>'+
           '<input id="authEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
-          '<input id="authInput" type="password" placeholder="'+(isZH()?"密碼":"Password")+'" autocomplete="new-password" style="margin-top:10px">'+
+          '<input id="authInput" type="password" placeholder="'+(isZH()?"密碼 (至少 6 碼)":"Password (min 6 chars)")+'" autocomplete="new-password" style="margin-top:10px">'+
           '<div class="auth-err" id="authErr"></div>'+
-          '<button class="btn solid" id="authBtn">'+(isZH()?"建立帳號":"Create login")+'</button>'+
+          '<button class="btn solid" id="authBtn">'+(isZH()?"建立帳號並登入":"Create login &amp; Sign in")+'</button>'+
           '<div class="auth-foot">'+(isZH()?"在此裝置保持登入 30 天。":"Stays signed in for 30 days on this device.")+'</div></div>';
       } else {
+        var allowReg=Boolean(appAuthStatus.allowRegistration);
         authScrim.innerHTML=
           '<div class="auth-card"><div class="auth-mark">'+plane(30,"color:var(--coral)")+'</div>'+
-          '<h2>'+(isZH()?"歡迎回來":"Welcome back")+'</h2>'+
-          '<p>'+(isZH()?"請登入以解鎖你的旅遊中樞。":"Sign in to unlock your travel hub.")+'</p>'+
-          '<div class="auth-tabs">'+
-            '<button class="auth-tab active" id="tabPw">'+(isZH()?"密碼登入":"Password")+'</button>'+
-            '<button class="auth-tab" id="tabOtp">'+(isZH()?"信箱驗證碼 (OTP)":"Email OTP")+'</button>'+
+          '<h2>'+(isZH()?"888漫步旅遊":"888travel")+'</h2>'+
+          '<p>'+(isZH()?"解鎖你的個人專屬旅遊中樞。":"Sign in to unlock your personal travel hub.")+'</p>'+
+          '<div class="auth-mode-nav">'+
+            '<button class="auth-mode-btn active" id="modeBtnLogin" type="button">'+(isZH()?"登入":"Sign in")+'</button>'+
+            '<button class="auth-mode-btn" id="modeBtnReg" type="button">'+
+              '<span>'+(isZH()?"註冊新帳號":"Create account")+'</span>'+
+              (!allowReg?'<span class="auth-badge">'+(isZH()?"未開放":"Closed")+'</span>':'')+
+            '</button>'+
           '</div>'+
-          '<div id="authPwForm">'+
-            '<input id="authEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
-            '<input id="authInput" type="password" placeholder="'+(isZH()?"密碼":"Password")+'" autocomplete="current-password" style="margin-top:10px">'+
-            '<div class="auth-err" id="authErr"></div>'+
-            '<button class="btn solid" id="authBtn">'+(isZH()?"登入":"Sign in")+'</button>'+
-          '</div>'+
-          '<div id="authOtpForm" style="display:none">'+
-            '<div class="auth-otp-row">'+
-              '<input id="authOtpEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
-              '<button class="btn" id="sendOtpBtn">'+(isZH()?"取得驗證碼":"Send code")+'</button>'+
+
+          '<!-- Login Pane -->'+
+          '<div id="paneLogin">'+
+            '<div class="auth-tabs">'+
+              '<button class="auth-tab active" id="tabPw">'+(isZH()?"密碼登入":"Password")+'</button>'+
+              '<button class="auth-tab" id="tabOtp">'+(isZH()?"信箱驗證碼 (OTP)":"Email OTP")+'</button>'+
             '</div>'+
-            '<input id="authOtpCode" type="text" class="otp-code-input" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="margin-top:10px">'+
-            '<div class="hint" style="margin-top:6px;font-size:13px">'+(isZH()?"輸入信箱收到的 6 位數一次性驗證碼":"Enter 6-digit code sent to your email")+'</div>'+
-            '<div class="auth-err" id="authOtpErr"></div>'+
-            '<button class="btn solid" id="verifyOtpBtn">'+(isZH()?"驗證並登入":"Verify &amp; Sign in")+'</button>'+
+            '<div id="authPwForm">'+
+              '<input id="authEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
+              '<input id="authInput" type="password" placeholder="'+(isZH()?"密碼":"Password")+'" autocomplete="current-password" style="margin-top:10px">'+
+              '<div class="auth-err" id="authErr"></div>'+
+              '<button class="btn solid" id="authBtn">'+(isZH()?"登入":"Sign in")+'</button>'+
+            '</div>'+
+            '<div id="authOtpForm" style="display:none">'+
+              '<div class="auth-otp-row">'+
+                '<input id="authOtpEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
+                '<button class="btn" id="sendOtpBtn">'+(isZH()?"取得驗證碼":"Send code")+'</button>'+
+              '</div>'+
+              '<input id="authOtpCode" type="text" class="otp-code-input" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="margin-top:10px">'+
+              '<div class="hint" style="margin-top:6px;font-size:13px">'+(isZH()?"輸入信箱收到的 6 位數一次性驗證碼":"Enter 6-digit code sent to your email")+'</div>'+
+              '<div class="auth-err" id="authOtpErr"></div>'+
+              '<button class="btn solid" id="verifyOtpBtn">'+(isZH()?"驗證並登入":"Verify &amp; Sign in")+'</button>'+
+            '</div>'+
           '</div>'+
+
+          '<!-- Register Pane -->'+
+          '<div id="paneReg" style="display:none">'+
+            (!allowReg ? (
+              '<div style="background:rgba(255,90,53,.07);border:1px solid rgba(255,90,53,.3);border-radius:14px;padding:16px;text-align:left;margin:8px 0 16px">'+
+                '<div style="font-weight:700;color:var(--coral);font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:6px">'+
+                  '<span>🛡️ '+(isZH()?"新用戶註冊暫未開放":"Registration Currently Closed")+'</span>'+
+                '</div>'+
+                '<div style="font-size:13px;line-height:1.55;color:var(--ink)">'+
+                  (isZH()?"此實例處於私有託管模式，系統管理員尚未開放公開註冊。如果您已有帳號，請點擊下方返回登入。"
+                         :"This instance is currently in private mode. New account registration is closed by the administrator. Please sign in if you already have an account.")+
+                '</div>'+
+              '</div>'+
+              '<button class="btn" id="btnBackToLogin" type="button" style="width:100%">'+(isZH()?"返回登入畫面":"Back to Sign in")+'</button>'
+            ) : (
+              '<div>'+
+                '<div class="auth-tabs">'+
+                  '<button class="auth-tab active" id="tabRegPw">'+(isZH()?"密碼註冊":"Password")+'</button>'+
+                  '<button class="auth-tab" id="tabRegOtp">'+(isZH()?"信箱驗證碼註冊":"Email OTP")+'</button>'+
+                '</div>'+
+                '<div id="authRegPwForm">'+
+                  '<input id="regEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
+                  '<input id="regPw" type="password" placeholder="'+(isZH()?"設定密碼 (至少 6 個字元)":"Password (min 6 chars)")+'" autocomplete="new-password" style="margin-top:10px">'+
+                  '<input id="regPwConfirm" type="password" placeholder="'+(isZH()?"再次確認密碼":"Confirm Password")+'" autocomplete="new-password" style="margin-top:10px">'+
+                  '<div class="auth-err" id="regPwErr"></div>'+
+                  '<button class="btn solid" id="regPwBtn">'+(isZH()?"立即建立帳號並登入":"Create Account &amp; Sign in")+'</button>'+
+                '</div>'+
+                '<div id="authRegOtpForm" style="display:none">'+
+                  '<div class="auth-otp-row">'+
+                    '<input id="regOtpEmail" type="email" placeholder="'+(isZH()?"電子信箱":"Email")+'" autocomplete="email" inputmode="email">'+
+                    '<button class="btn" id="regSendOtpBtn">'+(isZH()?"取得驗證碼":"Send code")+'</button>'+
+                  '</div>'+
+                  '<input id="regOtpCode" type="text" class="otp-code-input" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="margin-top:10px">'+
+                  '<input id="regOtpPassword" type="password" placeholder="'+(isZH()?"設定登入密碼 (選填)":"Set Password (optional)")+'" autocomplete="new-password" style="margin-top:10px">'+
+                  '<div class="hint" style="margin-top:6px;font-size:13px">'+(isZH()?"驗證碼成功後將自動建立帳號並登入":"Verifying code will automatically create your account")+'</div>'+
+                  '<div class="auth-err" id="regOtpErr"></div>'+
+                  '<button class="btn solid" id="regVerifyOtpBtn">'+(isZH()?"驗證並完成註冊":"Verify &amp; Create Account")+'</button>'+
+                '</div>'+
+              '</div>'
+            ))+
+          '</div>'+
+
           '<div class="auth-foot">'+(isZH()?"在此裝置保持登入 30 天。":"Stays signed in for 30 days on this device.")+'</div></div>';
       }
       authScrim.classList.add("show");
@@ -3638,11 +4008,16 @@
         async function submit(){
           var em=email.value.trim(),pw=input.value;
           if(!em){err.textContent=isZH()?"請輸入電子信箱":"Enter your email";return;}
-          if(!pw){err.textContent=isZH()?"請輸入密碼":"Enter a password";return;}
+          if(!pw||pw.length<6){err.textContent=isZH()?"密碼長度需至少 6 個字元":"Password must be at least 6 characters";return;}
           btn.disabled=true;err.textContent="";
           try{
             var res=await fetch(settings.workerUrl+"/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,password:pw})});
-            if(res.ok){var d=await res.json();authToken=d.token;saveAuth(authToken);authScrim.classList.remove("show");resolve(true);return;}
+            if(res.ok){
+              var d=await res.json();
+              authToken=d.token;saveAuth(authToken);
+              if(d.user) saveCurrentUser(d.user);
+              authScrim.classList.remove("show");resolve(true);return;
+            }
             err.textContent=isZH()?"無法建立帳號，請再試一次":"Could not set up - try again";
           }catch(e){err.textContent=isZH()?"網路連線錯誤，請重試":"Network error - try again";}
           btn.disabled=false;
@@ -3653,7 +4028,30 @@
         return;
       }
 
-      // Login Mode (Tabs: Password vs OTP)
+      // Mode Navigation (Login vs Register)
+      var modeBtnLogin=document.getElementById("modeBtnLogin"),modeBtnReg=document.getElementById("modeBtnReg");
+      var paneLogin=document.getElementById("paneLogin"),paneReg=document.getElementById("paneReg");
+
+      function switchMode(toReg){
+        if(toReg){
+          modeBtnReg.classList.add("active");modeBtnLogin.classList.remove("active");
+          paneLogin.style.display="none";paneReg.style.display="";
+          var regEm=document.getElementById("regEmail")||document.getElementById("regOtpEmail");
+          if(regEm) regEm.focus();
+        } else {
+          modeBtnLogin.classList.add("active");modeBtnReg.classList.remove("active");
+          paneLogin.style.display="";paneReg.style.display="none";
+          var em=document.getElementById("authEmail")||document.getElementById("authOtpEmail");
+          if(em) em.focus();
+        }
+      }
+
+      modeBtnLogin.onclick=function(){ switchMode(false); };
+      modeBtnReg.onclick=function(){ switchMode(true); };
+      var btnBackToLogin=document.getElementById("btnBackToLogin");
+      if(btnBackToLogin) btnBackToLogin.onclick=function(){ switchMode(false); };
+
+      // Login Sub-tabs: Password vs OTP
       var tabPw=document.getElementById("tabPw"),tabOtp=document.getElementById("tabOtp");
       var pwForm=document.getElementById("authPwForm"),otpForm=document.getElementById("authOtpForm");
       var email=document.getElementById("authEmail"),input=document.getElementById("authInput"),btn=document.getElementById("authBtn"),err=document.getElementById("authErr");
@@ -3682,7 +4080,12 @@
         btn.disabled=true;err.textContent="";
         try{
           var res=await fetch(settings.workerUrl+"/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,password:pw})});
-          if(res.ok){var d=await res.json();authToken=d.token;saveAuth(authToken);authScrim.classList.remove("show");resolve(true);return;}
+          if(res.ok){
+            var d=await res.json();
+            authToken=d.token;saveAuth(authToken);
+            if(d.user) saveCurrentUser(d.user);
+            authScrim.classList.remove("show");resolve(true);return;
+          }
           var d=await res.json().catch(function(){return{};});
           err.textContent=d.error||(isZH()?"信箱或密碼錯誤":"Wrong email or password");
         }catch(e){err.textContent=isZH()?"網路連線錯誤，請重試":"Network error - try again";}
@@ -3692,21 +4095,21 @@
       email.onkeydown=function(e){if(e.key==="Enter")input.focus();};
       input.onkeydown=function(e){if(e.key==="Enter")submitPw();};
 
-      // OTP Send Code
+      // OTP Login Send Code
       var otpCooldownTimer=null;
-      function startCooldown(sec){
+      function startCooldown(targetBtn, sec){
         var remain=sec;
-        sendBtn.disabled=true;
-        sendBtn.textContent=remain+"s";
+        targetBtn.disabled=true;
+        targetBtn.textContent=remain+"s";
         if(otpCooldownTimer)clearInterval(otpCooldownTimer);
         otpCooldownTimer=setInterval(function(){
           remain--;
           if(remain<=0){
             clearInterval(otpCooldownTimer);
-            sendBtn.disabled=false;
-            sendBtn.textContent=isZH()?"重新取得":"Resend";
+            targetBtn.disabled=false;
+            targetBtn.textContent=isZH()?"重新取得":"Resend";
           } else {
-            sendBtn.textContent=remain+"s";
+            targetBtn.textContent=remain+"s";
           }
         },1000);
       }
@@ -3716,12 +4119,12 @@
         if(!em||!em.includes("@")){otpErr.textContent=isZH()?"請輸入有效的電子信箱":"Enter a valid email";return;}
         sendBtn.disabled=true;otpErr.textContent=isZH()?"發送中…":"Sending…";
         try{
-          var res=await fetch(settings.workerUrl+"/auth/otp/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em})});
+          var res=await fetch(settings.workerUrl+"/auth/otp/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,purpose:"login"})});
           var d=await res.json().catch(function(){return{};});
           if(res.ok){
             otpErr.style.color="var(--green)";
             otpErr.textContent=d.message||(isZH()?"驗證碼已寄出至信箱 ✓":"Code sent to your email ✓");
-            startCooldown(60);
+            startCooldown(sendBtn, 60);
             otpCode.focus();
             setTimeout(function(){otpErr.style.color="";},4000);
             return;
@@ -3738,7 +4141,7 @@
         }
       };
 
-      // OTP Verify Submit
+      // OTP Login Verify Submit
       async function submitOtp(){
         var em=otpEmail.value.trim(),cd=otpCode.value.trim();
         if(!em){otpErr.textContent=isZH()?"請輸入電子信箱":"Enter your email";return;}
@@ -3749,7 +4152,9 @@
           var d=await res.json().catch(function(){return{};});
           if(res.ok){
             if(otpCooldownTimer)clearInterval(otpCooldownTimer);
-            authToken=d.token;saveAuth(authToken);authScrim.classList.remove("show");resolve(true);return;
+            authToken=d.token;saveAuth(authToken);
+            if(d.user) saveCurrentUser(d.user);
+            authScrim.classList.remove("show");resolve(true);return;
           }
           otpErr.textContent=d.error||(isZH()?"驗證碼錯誤，請重新確認":"Incorrect code");
         }catch(e){otpErr.textContent=isZH()?"網路連線錯誤，請重試":"Network error - try again";}
@@ -3757,19 +4162,113 @@
       }
       verifyBtn.onclick=submitOtp;
       otpCode.onkeydown=function(e){if(e.key==="Enter")submitOtp();};
+
+      // Register Handlers (if registration enabled)
+      if(allowReg){
+        var tabRegPw=document.getElementById("tabRegPw"),tabRegOtp=document.getElementById("tabRegOtp");
+        var regPwForm=document.getElementById("authRegPwForm"),regOtpForm=document.getElementById("authRegOtpForm");
+        var regEmail=document.getElementById("regEmail"),regPw=document.getElementById("regPw"),regPwConfirm=document.getElementById("regPwConfirm"),regPwBtn=document.getElementById("regPwBtn"),regPwErr=document.getElementById("regPwErr");
+        var regOtpEmail=document.getElementById("regOtpEmail"),regOtpCode=document.getElementById("regOtpCode"),regOtpPassword=document.getElementById("regOtpPassword"),regSendOtpBtn=document.getElementById("regSendOtpBtn"),regVerifyOtpBtn=document.getElementById("regVerifyOtpBtn"),regOtpErr=document.getElementById("regOtpErr");
+
+        if(tabRegPw && tabRegOtp){
+          tabRegPw.onclick=function(){
+            tabRegPw.classList.add("active");tabRegOtp.classList.remove("active");
+            regPwForm.style.display="";regOtpForm.style.display="none";
+            regPwErr.textContent="";if(regOtpEmail.value&&!regEmail.value)regEmail.value=regOtpEmail.value;
+            regEmail.focus();
+          };
+          tabRegOtp.onclick=function(){
+            tabRegOtp.classList.add("active");tabRegPw.classList.remove("active");
+            regPwForm.style.display="none";regOtpForm.style.display="";
+            regOtpErr.textContent="";if(regEmail.value&&!regOtpEmail.value)regOtpEmail.value=regEmail.value;
+            regOtpEmail.focus();
+          };
+        }
+
+        // Register with Password
+        if(regPwBtn){
+          async function submitRegPw(){
+            var em=regEmail.value.trim(),pw=regPw.value,pwc=regPwConfirm.value;
+            if(!em||!em.includes("@")){regPwErr.textContent=isZH()?"請輸入有效的電子信箱":"Enter a valid email";return;}
+            if(!pw||pw.length<6){regPwErr.textContent=isZH()?"密碼長度至少需 6 個字元":"Password must be at least 6 characters";return;}
+            if(pw!==pwc){regPwErr.textContent=isZH()?"兩次密碼輸入不相符":"Passwords do not match";return;}
+            regPwBtn.disabled=true;regPwErr.textContent="";
+            try{
+              var res=await fetch(settings.workerUrl+"/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,password:pw})});
+              var d=await res.json().catch(function(){return{};});
+              if(res.ok){
+                authToken=d.token;saveAuth(authToken);
+                if(d.user) saveCurrentUser(d.user);
+                authScrim.classList.remove("show");resolve(true);return;
+              }
+              regPwErr.textContent=d.error||(isZH()?"註冊失敗，請重試":"Registration failed");
+            }catch(e){regPwErr.textContent=isZH()?"網路連線錯誤，請重試":"Network error - try again";}
+            regPwBtn.disabled=false;
+          }
+          regPwBtn.onclick=submitRegPw;
+          regEmail.onkeydown=function(e){if(e.key==="Enter")regPw.focus();};
+          regPw.onkeydown=function(e){if(e.key==="Enter")regPwConfirm.focus();};
+          regPwConfirm.onkeydown=function(e){if(e.key==="Enter")submitRegPw();};
+        }
+
+        // Register with OTP
+        if(regSendOtpBtn){
+          regSendOtpBtn.onclick=async function(){
+            var em=regOtpEmail.value.trim();
+            if(!em||!em.includes("@")){regOtpErr.textContent=isZH()?"請輸入有效的電子信箱":"Enter a valid email";return;}
+            regSendOtpBtn.disabled=true;regOtpErr.textContent=isZH()?"發送中…":"Sending…";
+            try{
+              var res=await fetch(settings.workerUrl+"/auth/otp/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,purpose:"register"})});
+              var d=await res.json().catch(function(){return{};});
+              if(res.ok){
+                regOtpErr.style.color="var(--green)";
+                regOtpErr.textContent=d.message||(isZH()?"註冊驗證碼已寄出至信箱 ✓":"Code sent to your email ✓");
+                startCooldown(regSendOtpBtn, 60);
+                regOtpCode.focus();
+                setTimeout(function(){regOtpErr.style.color="";},4000);
+                return;
+              }
+              regSendOtpBtn.disabled=false;
+              regSendOtpBtn.textContent=isZH()?"取得驗證碼":"Send code";
+              regOtpErr.style.color="var(--coral)";
+              regOtpErr.textContent=d.error||(isZH()?"無法發送驗證碼":"Could not send code");
+            }catch(e){
+              regSendOtpBtn.disabled=false;
+              regSendOtpBtn.textContent=isZH()?"取得驗證碼":"Send code";
+              regOtpErr.style.color="var(--coral)";
+              regOtpErr.textContent=isZH()?"網路錯誤，請重試":"Network error - try again";
+            }
+          };
+
+          async function submitRegOtp(){
+            var em=regOtpEmail.value.trim(),cd=regOtpCode.value.trim(),pw=regOtpPassword.value;
+            if(!em){regOtpErr.textContent=isZH()?"請輸入電子信箱":"Enter your email";return;}
+            if(!cd||cd.length<6){regOtpErr.textContent=isZH()?"請輸入 6 位數驗證碼":"Enter 6-digit code";return;}
+            regVerifyOtpBtn.disabled=true;regOtpErr.textContent="";
+            try{
+              var res=await fetch(settings.workerUrl+"/auth/otp/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,code:cd,password:pw})});
+              var d=await res.json().catch(function(){return{};});
+              if(res.ok){
+                if(otpCooldownTimer)clearInterval(otpCooldownTimer);
+                authToken=d.token;saveAuth(authToken);
+                if(d.user) saveCurrentUser(d.user);
+                authScrim.classList.remove("show");resolve(true);return;
+              }
+              regOtpErr.textContent=d.error||(isZH()?"驗證碼錯誤，請重新確認":"Incorrect code");
+            }catch(e){regOtpErr.textContent=isZH()?"網路連線錯誤，請重試":"Network error - try again";}
+            regVerifyOtpBtn.disabled=false;
+          }
+          regVerifyOtpBtn.onclick=submitRegOtp;
+          regOtpCode.onkeydown=function(e){if(e.key==="Enter")submitRegOtp();};
+        }
+      }
     });
   }
   async function ensureAuth(){
     if(!settings.workerUrl)return;
     authToken=loadAuth();
-    var st;
-    try{st=await fetch(settings.workerUrl+"/auth/status");}catch(e){return;}
-    if(!st.ok)return;                                 // old worker without auth -> no gate
-    var d=await st.json();
-    if(d && d.googlePlacesConfigured !== undefined){
-      settings.googlePlacesConfigured = Boolean(d.googlePlacesConfigured);
-      try{ localStorage.setItem("travel:places_configured", d.googlePlacesConfigured ? "1" : "0"); }catch(e){}
-    }
+    var d=await fetchAuthStatus();
+    if(!d)return;
     if(!d.set){await showAuth("create");return;}      // first time: set up email + password
     // Already set: don't force a login here. The session cookie (or stored token)
     // may already authenticate us; refresh() prompts only if /trips returns 401.
