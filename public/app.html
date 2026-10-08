@@ -2699,7 +2699,7 @@
         '<button class="set-tab-btn active" type="button" data-pane="general">'+lucideIcon('user', 17)+' <span>'+(isZH()?"一般偏好":"General")+'</span></button>'+
         '<button class="set-tab-btn" type="button" data-pane="llm">'+lucideIcon('bot', 17)+' <span>'+(isZH()?"AI 模型":"AI Model")+'</span></button>'+
         '<button class="set-tab-btn" type="button" data-pane="agent">'+lucideIcon('zap', 17)+' <span>'+(isZH()?"Agent API":"Agent API")+'</span></button>'+
-        '<button class="set-tab-btn" type="button" data-pane="sync">'+lucideIcon('refresh-cw', 17)+' <span>'+(isZH()?"同步服務":"Sync &amp; Services")+'</span></button>'+
+        (isAdmin ? ('<button class="set-tab-btn" type="button" data-pane="sync">'+lucideIcon('refresh-cw', 17)+' <span>'+(isZH()?"同步服務":"Sync &amp; Services")+'</span></button>') : '')+
         '<button class="set-tab-btn" type="button" data-pane="backup">'+lucideIcon('database', 17)+' <span>'+(isZH()?"備份與資料":"Backup &amp; Data")+'</span></button>'+
         (isAdmin ? ('<button class="set-tab-btn" type="button" data-pane="admin">'+lucideIcon('shield', 17)+' <span>'+(isZH()?"系統管理":"Admin")+'</span></button>') : '')+
       '</div>'+
@@ -2858,28 +2858,30 @@
         '</div>'+
       '</div>'+
 
-      '<!-- Pane 4: Sync & Services -->'+
-      '<div class="set-tab-pane" id="pane_sync">'+
-        '<h4>'+(isZH()?"連結 Google 行事曆與 Gmail":"Connect Google Calendar &amp; Gmail")+'</h4>'+
-        field(isZH()?"Google 用戶端編號 (Client ID)":"Google client ID","s_gid","text","","1234….apps.googleusercontent.com")+
-        field(isZH()?"Google 用戶端密鑰 (Client Secret)":"Google client secret","s_gsecret","password","",isZH()?"僅加密儲存於你的 Worker":"GOCSPX-…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
-        '<div class="hint">'+gHint+'</div>'+
-        '<div class="modal-actions act-row"><button class="btn" id="gSave" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存":"Save")+'</span></button><button class="btn solid" id="gConnect" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('refresh-cw', 14)+' <span>'+(isZH()?"連結 Google":"Connect Google")+'</span></button><button class="btn" id="gTest">'+(isZH()?"測試連線":"Test connection")+'</button><button class="btn" id="gRescan">'+(isZH()?"重新掃描信箱":"Re-scan inbox")+'</button><button class="btn" id="gReset">'+(isZH()?"全新重新匯入":"Clean re-import")+'</button><button class="btn" id="gTrace">'+(isZH()?"郵件診斷":"Trace email")+'</button><button class="btn" id="gClear" style="border-color:rgba(255,90,53,.4);color:var(--coral);display:inline-flex;align-items:center;gap:6px">'+lucideIcon('trash-2', 14)+' <span>'+(isZH()?"解除綁定":"Disconnect")+'</span></button></div>'+
-        '<div id="gStatus" class="hint" style="font-size:14px;line-height:1.55;margin-top:10px">'+(isZH()?"檢查連線狀態中…":"Checking connection…")+'</div>'+
+      (isAdmin ? (
+        '<!-- Pane 4: Sync & Services -->'+
+        '<div class="set-tab-pane" id="pane_sync">'+
+          '<h4>'+(isZH()?"連結 Google 行事曆與 Gmail":"Connect Google Calendar &amp; Gmail")+'</h4>'+
+          field(isZH()?"Google 用戶端編號 (Client ID)":"Google client ID","s_gid","text","","1234….apps.googleusercontent.com")+
+          field(isZH()?"Google 用戶端密鑰 (Client Secret)":"Google client secret","s_gsecret","password","",isZH()?"僅加密儲存於你的 Worker":"GOCSPX-…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
+          '<div class="hint">'+gHint+'</div>'+
+          '<div class="modal-actions act-row"><button class="btn" id="gSave" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存":"Save")+'</span></button><button class="btn solid" id="gConnect" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('refresh-cw', 14)+' <span>'+(isZH()?"連結 Google":"Connect Google")+'</span></button><button class="btn" id="gTest">'+(isZH()?"測試連線":"Test connection")+'</button><button class="btn" id="gRescan">'+(isZH()?"重新掃描信箱":"Re-scan inbox")+'</button><button class="btn" id="gReset">'+(isZH()?"全新重新匯入":"Clean re-import")+'</button><button class="btn" id="gTrace">'+(isZH()?"郵件診斷":"Trace email")+'</button><button class="btn" id="gClear" style="border-color:rgba(255,90,53,.4);color:var(--coral);display:inline-flex;align-items:center;gap:6px">'+lucideIcon('trash-2', 14)+' <span>'+(isZH()?"解除綁定":"Disconnect")+'</span></button></div>'+
+          '<div id="gStatus" class="hint" style="font-size:14px;line-height:1.55;margin-top:10px">'+(isZH()?"檢查連線狀態中…":"Checking connection…")+'</div>'+
 
-        '<h4 style="margin-top:24px">'+(isZH()?"Google Places API（景點與餐廳評價/營業時間）":"Google Places API (Ratings &amp; Hours)")+'</h4>'+
-        field(isZH()?"Google Places API 金鑰 (API Key)":"Google Places API Key","s_places_key","password","",isZH()?"AIzaSy…（留空清除）":"AIzaSy… (blank to clear)",isZH()?"可填於此或設於 Cloudflare":"stored in Worker KV or Cloudflare secret")+
-        '<div class="hint">'+(isZH()?"啟用後，在規劃細項（如餐廳、景點）時將解鎖「Google 查詢評價與營業時間」。<b>若未設定，相關按鈕將完全自動隱藏</b>。支援在 Cloudflare 填入 <code>GOOGLE_PLACES_API_KEY</code> 或直接在上方儲存於 KV。":"When configured, unlocks \"Search Google Places\" in plan forms. <b>If unconfigured, the search feature remains completely hidden</b>.")+'</div>'+
-        '<div class="modal-actions act-row"><button class="btn" id="placesSave" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存 Places 設定":"Save Places Key")+'</span></button><button class="btn" id="placesTest" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('search', 14)+' <span>'+(isZH()?"測試 Places 查詢":"Test Places API")+'</span></button></div>'+
-        '<div id="placesStatus" class="hint" style="margin-top:8px"></div>'+
+          '<h4 style="margin-top:24px">'+(isZH()?"Google Places API（景點與餐廳評價/營業時間）":"Google Places API (Ratings &amp; Hours)")+'</h4>'+
+          field(isZH()?"Google Places API 金鑰 (API Key)":"Google Places API Key","s_places_key","password","",isZH()?"AIzaSy…（留空清除）":"AIzaSy… (blank to clear)",isZH()?"可填於此或設於 Cloudflare":"stored in Worker KV or Cloudflare secret")+
+          '<div class="hint">'+(isZH()?"啟用後，在規劃細項（如餐廳、景點）時將解鎖「Google 查詢評價與營業時間」。<b>若未設定，相關按鈕將完全自動隱藏</b>。支援在 Cloudflare 填入 <code>GOOGLE_PLACES_API_KEY</code> 或直接在上方儲存於 KV。":"When configured, unlocks \"Search Google Places\" in plan forms. <b>If unconfigured, the search feature remains completely hidden</b>.")+'</div>'+
+          '<div class="modal-actions act-row"><button class="btn" id="placesSave" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存 Places 設定":"Save Places Key")+'</span></button><button class="btn" id="placesTest" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('search', 14)+' <span>'+(isZH()?"測試 Places 查詢":"Test Places API")+'</span></button></div>'+
+          '<div id="placesStatus" class="hint" style="margin-top:8px"></div>'+
 
-        '<h4 style="margin-top:24px">'+(isZH()?"Resend 郵件寄送服務（OTP 登入與通知）":"Resend Email Delivery (OTP &amp; Alerts)")+'</h4>'+
-        field(isZH()?"Resend API 金鑰 (API Key)":"Resend API Key","s_resend_key","password","","re_123456…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
-        field(isZH()?"寄件者地址 (From Address)":"From Address","s_resend_from","text","","888travel <onboarding@resend.dev>",isZH()?"(需符合 Resend 驗證網域或使用預設)":"(verified domain or onboarding@resend.dev)")+
-        '<div class="hint">'+(isZH()?"用於發送 6 位數 OTP 登入驗證碼及重要行程提醒。前往 <b>resend.com/api-keys</b> 取得金鑰。若未綁定自有網域，可直接使用預設寄件地址。":"Used to send 6-digit OTP login verification codes and trip updates. Get a free key at <b>resend.com/api-keys</b>. You can use the default onboarding address if you haven't verified a custom domain.")+'</div>'+
-        '<div class="modal-actions act-row"><button class="btn" id="resendSave" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存 Resend 設定":"Save Resend Config")+'</span></button><button class="btn" id="resendTest" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('mail', 14)+' <span>'+(isZH()?"發送測試郵件":"Send Test Email")+'</span></button></div>'+
-        '<div id="resendStatus" class="hint" style="margin-top:8px"></div>'+
-      '</div>'+
+          '<h4 style="margin-top:24px">'+(isZH()?"Resend 郵件寄送服務（OTP 登入與通知）":"Resend Email Delivery (OTP &amp; Alerts)")+'</h4>'+
+          field(isZH()?"Resend API 金鑰 (API Key)":"Resend API Key","s_resend_key","password","","re_123456…",isZH()?"僅存於 Worker 端":"stored on your worker only")+
+          field(isZH()?"寄件者地址 (From Address)":"From Address","s_resend_from","text","","888travel <onboarding@resend.dev>",isZH()?"(需符合 Resend 驗證網域或使用預設)":"(verified domain or onboarding@resend.dev)")+
+          '<div class="hint">'+(isZH()?"用於發送 6 位數 OTP 登入驗證碼及重要行程提醒。前往 <b>resend.com/api-keys</b> 取得金鑰。若未綁定自有網域，可直接使用預設寄件地址。":"Used to send 6-digit OTP login verification codes and trip updates. Get a free key at <b>resend.com/api-keys</b>. You can use the default onboarding address if you haven't verified a custom domain.")+'</div>'+
+          '<div class="modal-actions act-row"><button class="btn" id="resendSave" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('check', 14)+' <span>'+(isZH()?"儲存 Resend 設定":"Save Resend Config")+'</span></button><button class="btn" id="resendTest" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('mail', 14)+' <span>'+(isZH()?"發送測試郵件":"Send Test Email")+'</span></button></div>'+
+          '<div id="resendStatus" class="hint" style="margin-top:8px"></div>'+
+        '</div>'
+      ) : '')+
 
       '<!-- Pane 5: Backup & Data -->'+
       '<div class="set-tab-pane" id="pane_backup">'+
@@ -2888,8 +2890,10 @@
         '<div class="modal-actions act-row" style="margin-top:0"><button class="btn" id="copyJson" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('copy', 14)+' <span>'+(isZH()?"複製 JSON 資料":"Copy data")+'</span></button><button class="btn" id="dlJson" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('download', 14)+' <span>'+(isZH()?"下載檔案":"Download")+'</span></button><button class="btn" id="icsFeed" style="display:inline-flex;align-items:center;gap:6px">'+lucideIcon('calendar', 14)+' <span>'+(isZH()?"複製日曆訂閱網址 (ICS)":"Copy calendar feed link")+'</span></button></div>'+
         '<div class="hint">'+(isZH()?"日曆訂閱網址可用於 Apple 行事曆、Google 日曆或 Outlook 貼入「透過 URL 訂閱」，旅程即自動保持同步。":"The feed link works in ANY calendar app — paste it under “Subscribe by URL” in Apple, Google or Outlook and your trips stay updated.")+'</div>'+
 
-        '<h4 style="margin-top:24px">'+(isZH()?"雲端自動快照 (Weekly Snapshots)":"Cloud Snapshots (Weekly)")+'</h4>'+
-        '<div class="hint" id="snapList" style="margin-top:4px">'+(isZH()?"載入雲端自動快照中…":"Loading snapshots…")+'</div>'+
+        (isAdmin ? (
+          '<h4 style="margin-top:24px">'+(isZH()?"雲端自動快照 (Weekly Snapshots)":"Cloud Snapshots (Weekly)")+'</h4>'+
+          '<div class="hint" id="snapList" style="margin-top:4px">'+(isZH()?"載入雲端自動快照中…":"Loading snapshots…")+'</div>'
+        ) : '')+
 
         '<h4 style="margin-top:24px">'+(isZH()?"合併匯入 JSON 旅程":"Merge Import JSON")+'</h4>'+
         '<div class="field"><textarea id="imp" class="mono" placeholder=\'[{"from":"TPE","to":"NRT","start":"2026-10-02","end":"2026-10-12","label":"Tokyo"}]\' style="min-height:80px"></textarea><div class="err" id="imperr"></div></div>'+
@@ -3626,28 +3630,30 @@
         toast(isZH()?"Google 已解除連結":"Google disconnected");await loadGStatus();}
       catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
     };
-    loadGStatus();
-    updateStatusChip();   // the Local/Synced chip now lives here
-    // Weekly snapshots: list what the worker has kept and offer one-tap restore.
-    async function loadSnaps(){
-      var el=document.getElementById("snapList");if(!el)return;
-      if(!settings.workerUrl){el.textContent=isZH()?"雲端自動快照需搭配 Worker 運作 — 請先於上方填寫 Worker 網址。":"Automatic snapshots live on your worker — set a Worker URL above first.";return;}
-      try{var r=await fetch(apiBase()+"/backups",{headers:authHeaders()});var d=await r.json();
-        if(!r.ok){el.textContent=isZH()?"請先登入以檢視快照。":"Sign in to see snapshots.";return;}
-        if(!d.backups||!d.backups.length){el.innerHTML=isZH()?"<b>自動快照：</b>每週日系統會自動完整備份你的所有資料（保留最近 4 週）。目前尚無快照 — 首份快照將於本週日建立。":"<b>Automatic snapshots:</b> a full copy of your data is kept every Sunday (last 4 weeks). None yet — the first lands this Sunday.";return;}
-        el.innerHTML=(isZH()?"<b>雲端自動快照</b> — 還原將套用該份備份（當前資料會先自動備份，隨時可復原）：<br>":"<b>Automatic snapshots</b> — restore replaces everything with that copy (the current data is snapshotted first, so a restore is undoable):<br>")+
-          d.backups.map(function(b){var dd=new Date(b.at);return '<button class="btn" style="margin:6px 6px 0 0" data-restore="'+b.slot+'">'+dd.toLocaleDateString(isZH()?"zh-TW":"en-US")+(isZH()?(' · '+b.trips+' 趟旅程'):(' · '+b.trips+' trips'))+'</button>';}).join("");
-        el.querySelectorAll("[data-restore]").forEach(function(btn){btn.onclick=async function(){
-          if(!confirm((isZH()?"確定要使用此快照（":"Replace ALL current trips and plans with this snapshot (")+btn.textContent.trim()+(isZH()?"）替換目前所有的旅程與細項嗎？":")?")))return;
-          try{var rr=await fetch(apiBase()+"/backups/restore",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({slot:btn.dataset.restore})});
-            var dd2=await rr.json();
-            if(rr.ok){toast(isZH()?("已還原 "+dd2.trips+" 趟旅程 ✓"):("Restored "+dd2.trips+" trips ✓"));closeModal();await refresh();}
-            else toast(dd2.error||(isZH()?"無法還原":"Could not restore"));}
-          catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
-        };});
-      }catch(e){el.textContent=isZH()?"無法連線至 Worker。":"Worker not reachable.";}
+    updateStatusChip();
+    if(isAdmin){
+      loadGStatus();
+      // Weekly snapshots: list what the worker has kept and offer one-tap restore.
+      async function loadSnaps(){
+        var el=document.getElementById("snapList");if(!el)return;
+        if(!settings.workerUrl){el.textContent=isZH()?"雲端自動快照需搭配 Worker 運作 — 請先於上方填寫 Worker 網址。":"Automatic snapshots live on your worker — set a Worker URL above first.";return;}
+        try{var r=await fetch(apiBase()+"/backups",{headers:authHeaders()});var d=await r.json();
+          if(!r.ok){el.textContent=isZH()?"請先登入以檢視快照。":"Sign in to see snapshots.";return;}
+          if(!d.backups||!d.backups.length){el.innerHTML=isZH()?"<b>自動快照：</b>每週日系統會自動完整備份你的所有資料（保留最近 4 週）。目前尚無快照 — 首份快照將於本週日建立。":"<b>Automatic snapshots:</b> a full copy of your data is kept every Sunday (last 4 weeks). None yet — the first lands this Sunday.";return;}
+          el.innerHTML=(isZH()?"<b>雲端自動快照</b> — 還原將套用該份備份（當前資料會先自動備份，隨時可復原）：<br>":"<b>Automatic snapshots</b> — restore replaces everything with that copy (the current data is snapshotted first, so a restore is undoable):<br>")+
+            d.backups.map(function(b){var dd=new Date(b.at);return '<button class="btn" style="margin:6px 6px 0 0" data-restore="'+b.slot+'">'+dd.toLocaleDateString(isZH()?"zh-TW":"en-US")+(isZH()?(' · '+b.trips+' 趟旅程'):(' · '+b.trips+' trips'))+'</button>';}).join("");
+          el.querySelectorAll("[data-restore]").forEach(function(btn){btn.onclick=async function(){
+            if(!confirm((isZH()?"確定要使用此快照（":"Replace ALL current trips and plans with this snapshot (")+btn.textContent.trim()+(isZH()?"）替換目前所有的旅程與細項嗎？":")?")))return;
+            try{var rr=await fetch(apiBase()+"/backups/restore",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({slot:btn.dataset.restore})});
+              var dd2=await rr.json();
+              if(rr.ok){toast(isZH()?("已還原 "+dd2.trips+" 趟旅程 ✓"):("Restored "+dd2.trips+" trips ✓"));closeModal();await refresh();}
+              else toast(dd2.error||(isZH()?"無法還原":"Could not restore"));}
+            catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+          };});
+        }catch(e){el.textContent=isZH()?"無法連線至 Worker。":"Worker not reachable.";}
+      }
+      loadSnaps();
     }
-    loadSnaps();
 
     // --- Admin Console Operations (Registration toggle & user directory) ---
     if(isAdmin){

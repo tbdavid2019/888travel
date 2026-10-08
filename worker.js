@@ -870,6 +870,9 @@ export default {
 
       // POST /api/v1/sync - Trigger on-demand sync of Google Calendar & Gmail
       if (url.pathname === "/api/v1/sync" && request.method === "POST") {
+        if (currentUid !== "usr_admin") {
+          return cors(json({ error: "Google Calendar & Gmail sync is restricted to administrator" }, 403));
+        }
         const only = url.searchParams.get("only") || "";
         const stats = await runSync(env, only);
         return cors(json({ ok: true, syncStats: stats }));
@@ -877,6 +880,9 @@ export default {
 
       // GET /api/v1/backups - List cloud snapshot backups
       if (url.pathname === "/api/v1/backups" && request.method === "GET") {
+        if (currentUid !== "usr_admin") {
+          return cors(json({ error: "System snapshots are restricted to administrator" }, 403));
+        }
         const out = [];
         for (const slot of ["0", "1", "2", "3", "pre"]) {
           const raw = await env.TRIPS.get("backup:" + slot);
@@ -951,7 +957,8 @@ export default {
       if (!homeTz) homeTz = (await env.TRIPS.get("home_tz")) || "";
       if (!units) units = (await env.TRIPS.get("units")) || "";
 
-      const agentKey = (await env.TRIPS.get("agent_api_key")) || "";
+      const userAgentKey = await env.TRIPS.get("user:" + currentUid + ":agent_key");
+      const agentKey = userAgentKey || (currentUid === "usr_admin" ? (await env.TRIPS.get("agent_api_key")) : "");
       return cors(json({
         home,
         homeTz,
@@ -988,19 +995,41 @@ export default {
       }));
     }
 
-    // Agent API Key Management (In-app key generation, status, and revocation)
+    // Agent API Key Management (Per-tenant isolated key generation, status, and revocation)
     if (url.pathname === "/settings/agent-key" && request.method === "GET") {
-      const key = await env.TRIPS.get("agent_api_key");
+      const userKey = await env.TRIPS.get("user:" + currentUid + ":agent_key");
+      const key = userKey || (currentUid === "usr_admin" ? (await env.TRIPS.get("agent_api_key")) : null);
       const mask = key ? (key.slice(0, 11) + "..." + key.slice(-4)) : null;
       return cors(json({ configured: !!key, keyMask: mask }));
     }
     if (url.pathname === "/settings/agent-key" && request.method === "POST") {
+      const oldKey = await env.TRIPS.get("user:" + currentUid + ":agent_key");
+      if (oldKey) {
+        await env.TRIPS.delete("agent_token:" + oldKey);
+      }
       const newKey = "rr_agent_" + randHex(24);
-      await env.TRIPS.put("agent_api_key", newKey);
+      await env.TRIPS.put("user:" + currentUid + ":agent_key", newKey);
+      await env.TRIPS.put("agent_token:" + newKey, JSON.stringify({
+        uid: currentUid,
+        email: (request.session && request.session.email) || "",
+        role: (request.session && request.session.role) || "user"
+      }));
+      if (currentUid === "usr_admin") {
+        await env.TRIPS.put("agent_api_key", newKey);
+      }
       return cors(json({ ok: true, key: newKey }));
     }
     if (url.pathname === "/settings/agent-key" && request.method === "DELETE") {
-      await env.TRIPS.delete("agent_api_key");
+      const oldKey = await env.TRIPS.get("user:" + currentUid + ":agent_key");
+      if (oldKey) {
+        await env.TRIPS.delete("agent_token:" + oldKey);
+        await env.TRIPS.delete("user:" + currentUid + ":agent_key");
+      }
+      if (currentUid === "usr_admin") {
+        const legacyKey = await env.TRIPS.get("agent_api_key");
+        if (legacyKey) await env.TRIPS.delete("agent_token:" + legacyKey);
+        await env.TRIPS.delete("agent_api_key");
+      }
       return cors(json({ ok: true, cleared: true }));
     }
 
@@ -1010,6 +1039,7 @@ export default {
     // consent screen; the refresh token lands in YOUR OWN KV and never leaves
     // the worker. Dashboard secrets (GOOGLE_*), if present, always win.
     if (url.pathname === "/settings/google" && request.method === "POST") {
+      if (currentUid !== "usr_admin") return cors(json({ error: "Google connection is restricted to administrator" }, 403));
       const body = await request.json().catch(() => ({}));
       // strip ALL whitespace: Google shows these wrapped over several lines, so copies pick up breaks
       const id = ((body && body.clientId) || "").replace(/\s+/g, "");
@@ -1185,6 +1215,7 @@ export default {
 
     // Resend Email Delivery Settings
     if (url.pathname === "/settings/resend" && request.method === "POST") {
+      if (currentUid !== "usr_admin") return cors(json({ error: "Resend configuration is restricted to administrator" }, 403));
       const body = await request.json().catch(() => ({}));
       const apiKey = ((body && body.apiKey) || "").replace(/\s+/g, "");
       const from = ((body && body.from) || "").trim();
@@ -1208,6 +1239,7 @@ export default {
 
     // Test Resend Email Sending
     if (url.pathname === "/settings/resend/test" && request.method === "POST") {
+      if (currentUid !== "usr_admin") return cors(json({ error: "Resend test is restricted to administrator" }, 403));
       const body = await request.json().catch(() => ({}));
       const storedEmail = await env.TRIPS.get("auth_email");
       const targetEmail = ((body && body.to) || storedEmail || "").trim();
@@ -1234,6 +1266,7 @@ export default {
 
     // Google Places API Settings (In-app key configuration)
     if (url.pathname === "/settings/places" && request.method === "POST") {
+      if (currentUid !== "usr_admin") return cors(json({ error: "Google Places configuration is restricted to administrator" }, 403));
       const body = await request.json().catch(() => ({}));
       const apiKey = ((body && body.apiKey) || "").replace(/\s+/g, "");
       if (apiKey === "") {
@@ -1248,6 +1281,7 @@ export default {
 
     // Google Places API Test Connection
     if (url.pathname === "/settings/places/test" && request.method === "POST") {
+      if (currentUid !== "usr_admin") return cors(json({ error: "Google Places test is restricted to administrator" }, 403));
       const places = await getGooglePlacesConfig(env);
       if (!places.apiKey) {
         return cors(json({ ok: false, error: "尚未設定 Google Places API Key / Google Places API Key not configured" }, 400));
@@ -1296,6 +1330,7 @@ export default {
     // What can the Google connection actually see? Split by stage, so "no travel
     // info appeared" points at the exact culprit.
     if (url.pathname === "/google/test" && request.method === "GET") {
+      if (currentUid !== "usr_admin") return cors(json({ ok: false, error: "Google connection is restricted to administrator" }, 403));
       const token = await googleToken(env);
       if (!token) return cors(json({ ok: false, error: "Not connected - no refresh token yet." }));
       const out = { ok: true, anthropicKeySet: !!(await anthropicKey(env)) };
@@ -1326,6 +1361,7 @@ export default {
     // with its own /sync passes, and a background run here would race the first
     // of those (two runSyncs on the same store = double Claude spend).
     if (url.pathname === "/gmail/rescan" && request.method === "POST") {
+      if (currentUid !== "usr_admin") return cors(json({ error: "Gmail rescan is restricted to administrator" }, 403));
       const store = await loadStore(env);
       store.seenEmails = {};
       await saveStore(env, store);
@@ -1335,6 +1371,7 @@ export default {
     // Answers "where exactly does my email die" in one call, without marking
     // anything as seen.
     if (url.pathname === "/gmail/trace" && request.method === "GET") {
+      if (currentUid !== "usr_admin") return cors(json({ ok: false, error: "Gmail trace is restricted to administrator" }, 403));
       const token = await googleToken(env);
       if (!token) return cors(json({ ok: false, error: "Google not connected." }));
       const out = { ok: true };
@@ -1551,6 +1588,7 @@ export default {
     // Safety net: weekly snapshots (taken Sundays before the daily sync) plus
     // the automatic pre-restore/pre-reset copy. List them / restore one.
     if (url.pathname === "/backups" && request.method === "GET") {
+      if (currentUid !== "usr_admin") return cors(json({ error: "Snapshots are restricted to administrator" }, 403));
       const out = [];
       for (const slot of ["0", "1", "2", "3", "pre"]) {
         const raw = await env.TRIPS.get("backup:" + slot);
@@ -1562,14 +1600,16 @@ export default {
       return cors(json({ ok: true, backups: out }));
     }
     if (url.pathname === "/backups/restore" && request.method === "POST") {
+      if (currentUid !== "usr_admin") return cors(json({ error: "Snapshots and restore are restricted to administrator" }, 403));
       const body = await request.json().catch(() => ({}));
       const raw = await env.TRIPS.get("backup:" + String(body.slot));
       if (!raw) return cors(json({ error: "no such snapshot" }, 404));
       const b = JSON.parse(raw);
       // keep what is being replaced, so a restore is itself restorable
-      const cur = await env.TRIPS.get("store");
+      const cur = await env.TRIPS.get("store:usr_admin") || await env.TRIPS.get("store");
       if (cur) await env.TRIPS.put("backup:pre", JSON.stringify({ at: Date.now(), raw: cur }));
       await env.TRIPS.put("store", b.raw);
+      await env.TRIPS.put("store:usr_admin", b.raw);
       const s = JSON.parse(b.raw);
       return cors(json({ ok: true, trips: Object.keys(s.trips || {}).length }));
     }
@@ -1579,6 +1619,7 @@ export default {
     // gmail stats {parsed,failed,filed,unfiled,remaining} so the app can keep
     // draining a backlog until remaining hits zero - no guessing.
     if (url.pathname === "/sync" && request.method === "POST") {
+      if (currentUid !== "usr_admin") return cors(json({ error: "Google Calendar & Gmail sync is restricted to administrator" }, 403));
       const stats = await runSync(env, url.searchParams.get("only") || "");
       return cors(json(Object.assign({ ok: true }, stats)));
     }
@@ -3070,6 +3111,16 @@ async function agentAuthGuard(request, env) {
 
   if (authHeader.toLowerCase().startsWith("bearer ")) {
     const token = authHeader.slice(7).trim();
+    // 1. Check user-scoped agent token
+    const tokenSessionRaw = await env.TRIPS.get("agent_token:" + token);
+    if (tokenSessionRaw) {
+      try {
+        const sess = JSON.parse(tokenSessionRaw);
+        request.session = sess;
+        return null;
+      } catch(e) {}
+    }
+    // 2. Fallback to legacy instance-wide agent key (maps to usr_admin)
     if (storedAgentKey && token === storedAgentKey) {
       request.session = { uid: "usr_admin", role: "admin", email: (await env.TRIPS.get("auth_email")) || "admin@local" };
       return null;
@@ -3086,9 +3137,6 @@ async function agentAuthGuard(request, env) {
   const storedAuth = await env.TRIPS.get("auth");
   if (!storedAgentKey && !storedAuth) {
     return json({ error: "Setup required - configure instance first" }, 401);
-  }
-  if (!storedAgentKey) {
-    return json({ error: "Unauthorized: Agent API Key has not been generated yet in Settings" }, 401);
   }
   return json({ error: "Unauthorized: Invalid or missing Agent API Bearer token" }, 401);
 }
