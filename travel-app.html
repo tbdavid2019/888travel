@@ -3277,51 +3277,57 @@
       }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
     };
 
-    document.getElementById("resendSave").onclick=async function(){
-      var k=val("s_resend_key"), f=val("s_resend_from");
-      try{
-        var r=await fetch(apiBase()+"/settings/resend",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({apiKey:k,from:f})});
-        var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存 Resend 設定":"Could not save Resend config"));return;}
-        document.getElementById("s_resend_key").value="";
-        toast(isZH()?"Resend 設定已儲存 ✓":"Resend config saved ✓");
-        await loadGStatus();
-      }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
-    };
+    if(isAdmin){
+      var rsBtn = document.getElementById("resendSave");
+      if(rsBtn) rsBtn.onclick=async function(){
+        var k=val("s_resend_key"), f=val("s_resend_from");
+        try{
+          var r=await fetch(apiBase()+"/settings/resend",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({apiKey:k,from:f})});
+          var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存 Resend 設定":"Could not save Resend config"));return;}
+          var rk=document.getElementById("s_resend_key");if(rk)rk.value="";
+          toast(isZH()?"Resend 設定已儲存 ✓":"Resend config saved ✓");
+          await loadGStatus();
+        }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+      };
 
-    document.getElementById("resendTest").onclick=async function(){
-      toast(isZH()?"發送測試信中…":"Sending test email…");
-      try{
-        var r=await fetch(apiBase()+"/settings/resend/test",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({})});
-        var d=await r.json();
-        if(!r.ok){toast(d.error||(isZH()?"測試信寄送失敗":"Send test failed"));return;}
-        toast(isZH()?("測試信已成功寄出至 "+d.to+" ✓"):("Test email sent to "+d.to+" ✓"));
-      }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
-    };
+      var rtBtn = document.getElementById("resendTest");
+      if(rtBtn) rtBtn.onclick=async function(){
+        toast(isZH()?"發送測試信中…":"Sending test email…");
+        try{
+          var r=await fetch(apiBase()+"/settings/resend/test",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({})});
+          var d=await r.json();
+          if(!r.ok){toast(d.error||(isZH()?"測試信寄送失敗":"Send test failed"));return;}
+          toast(isZH()?("測試信已成功寄出至 "+d.to+" ✓"):("Test email sent to "+d.to+" ✓"));
+        }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+      };
 
-    document.getElementById("placesSave").onclick=async function(){
-      var k=val("s_places_key");
-      try{
-        var r=await fetch(apiBase()+"/settings/places",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({apiKey:k})});
-        var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存 Places 設定":"Could not save Places config"));return;}
-        settings.googlePlacesConfigured = Boolean(k);
-        try{ localStorage.setItem("travel:places_configured", k ? "1" : "0"); }catch(e){}
-        document.getElementById("s_places_key").value="";
-        toast(isZH()?"Google Places 設定已儲存 ✓":"Google Places config saved ✓");
-        await loadGStatus();
-      }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
-    };
+      var psBtn = document.getElementById("placesSave");
+      if(psBtn) psBtn.onclick=async function(){
+        var k=val("s_places_key");
+        try{
+          var r=await fetch(apiBase()+"/settings/places",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({apiKey:k})});
+          var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存 Places 設定":"Could not save Places config"));return;}
+          settings.googlePlacesConfigured = Boolean(k);
+          try{ localStorage.setItem("travel:places_configured", k ? "1" : "0"); }catch(e){}
+          var pk=document.getElementById("s_places_key");if(pk)pk.value="";
+          toast(isZH()?"Google Places 設定已儲存 ✓":"Google Places config saved ✓");
+          await loadGStatus();
+        }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+      };
 
-    document.getElementById("placesTest").onclick=async function(){
-      toast(isZH()?"測試連線中…":"Testing Google Places…");
-      try{
-        var r=await fetch(apiBase()+"/settings/places/test",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({query:"Tokyo Tower"})});
-        var d=await r.json();
-        if(!r.ok || !d.ok){toast(d.error||(isZH()?"測試失敗":"Test failed"));return;}
-        var sName = d.sample ? d.sample.name : "Tokyo Tower";
-        toast(isZH()?("✅ 連線成功！成功檢索："+sName):("✅ Places API working! Found: "+sName));
-        await loadGStatus();
-      }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
-    };
+      var ptBtn = document.getElementById("placesTest");
+      if(ptBtn) ptBtn.onclick=async function(){
+        toast(isZH()?"測試連線中…":"Testing Google Places…");
+        try{
+          var r=await fetch(apiBase()+"/settings/places/test",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({query:"Tokyo Tower"})});
+          var d=await r.json();
+          if(!r.ok || !d.ok){toast(d.error||(isZH()?"測試失敗":"Test failed"));return;}
+          var sName = d.sample ? d.sample.name : "Tokyo Tower";
+          toast(isZH()?("✅ 連線成功！成功檢索："+sName):("✅ Places API working! Found: "+sName));
+          await loadGStatus();
+        }catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+      };
+    }
 
     // --- AI Agent Integration Key Management & Prompt Generation ---
     var currentAgentKey = "";
@@ -3500,139 +3506,147 @@
     }
 
 
-    document.getElementById("gSave").onclick=async function(){
-      var id=val("s_gid"),sec=val("s_gsecret");
-      if(!id||!sec){toast("Paste both the client ID and the secret");return;}
-      setGStatus("Saving…");
-      try{var r=await fetch(apiBase()+"/settings/google",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({clientId:id,clientSecret:sec})});
-        var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存":"Could not save"));setGStatus("");return;}
-        document.getElementById("s_gsecret").value="";toast(isZH()?"Google 用戶端已儲存——現在請點擊「連結 Google」":"Google client saved — now hit Connect");await loadGStatus();}
-      catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
-    };
-    document.getElementById("gConnect").onclick=function(){
-      // token travels in the URL: this is a navigation, not a fetch, so it can't
-      // carry the X-Auth header and may lack the session cookie (PWA, old login)
-      window.open(apiBase()+"/google/connect?t="+encodeURIComponent(authToken||""),"_blank");
-      setGStatus(isZH()?"等待 Google 授權中…請在新分頁核准存取權限，完成後重新開啟設定。":"Waiting for Google… approve access in the new tab, then reopen Settings.");
-    };
-    document.getElementById("gTest").onclick=async function(){
-      setGStatus(isZH()?"正在測試各階段連線…":"Testing each stage…");
-      try{var r=await fetch(apiBase()+"/google/test",{headers:authHeaders()});var d=await r.json();
-        if(!d.ok){setGStatus('<span style="color:var(--coral)">○ '+esc(d.error||(isZH()?"尚未連結":"Not connected"))+'</span>');return;}
-        var bits=[];
-        bits.push(d.calendar.ok
-          ?('<span style="color:var(--green)">● '+(isZH()?'日曆連線正常 — 即將到來的活動：'+d.calendar.upcoming+' 個':'Calendar OK — '+d.calendar.upcoming+' upcoming event'+(d.calendar.upcoming===1?"":"s"))+'</span>'+(d.calendar.sample&&d.calendar.sample.length?'<br><span class="opt">'+d.calendar.sample.map(esc).join(" · ")+'</span>':''))
-          :('<span style="color:var(--coral)">○ '+(isZH()?'日曆：':'Calendar: ')+esc(d.calendar.error||(isZH()?"失敗":"failed"))+'</span> — '+(isZH()?'請確認 Google Cloud 專案是否已啟用 Calendar API？':'is the Google Calendar API enabled in your Cloud project?')));
-        bits.push(d.gmail.ok
-          ?('<span style="color:var(--green)">● '+(isZH()?'Gmail 連線正常':'Gmail OK')+'</span> <span class="opt">'+esc(d.gmail.email||"")+'</span>')
-          :('<span style="color:var(--coral)">○ '+(isZH()?'Gmail：':'Gmail: ')+esc(d.gmail.error||(isZH()?"失敗":"failed"))+'</span> — '+(isZH()?'請確認 Google Cloud 專案是否已啟用 Gmail API？':'is the Gmail API enabled in your Cloud project?')));
-        var parseCount = isZH() ? ('目前已掃描 ' + d.seenEmails + ' 封郵件') : (d.seenEmails + ' emails scanned so far');
-        bits.push((d.llmConfigured || d.anthropicKeySet)
-          ? ('<span style="color:var(--green)">● ' + (isZH() ? '郵件智慧解析已啟用' : 'Email parsing on') + '</span> <span class="opt">(' + parseCount + ')</span>')
-          : ('<span style="color:var(--amber)">◐ ' + (isZH() ? '郵件智慧解析未啟用' : 'Email parsing OFF') + '</span> — ' + (isZH() ? '請在上方設定 LLM API 金鑰並儲存，然後點擊「重新掃描信箱」。' : 'configure your LLM API key above and Save, then hit Re-scan inbox.')));
-        if(d.unfiled&&d.unfiled.length){
-          bits.push('<span style="color:var(--amber)">◐ '+(isZH()?'已解析但尚未歸檔 — 日期未落在任何旅程中：':'Parsed but not filed — no trip covers their dates:')+'</span><br><span class="opt">'+d.unfiled.map(function(u){return esc(u.name)+' ('+esc(u.start)+(u.end&&u.end!==u.start?' – '+esc(u.end):'')+')';}).join(" · ")+'</span> — '+(isZH()?'請建立涵蓋該日期的旅程後重新掃描。':'create or widen a trip around those dates and Re-scan.'));
-        }
-        setGStatus(bits.join("<br>"));
-      }catch(e){setGStatus('<span style="color:var(--faint)">'+(isZH()?"無法連線至 Worker。":"Worker not reachable.")+'</span>');}
-    };
-    document.getElementById("gTrace").onclick=async function(){
-      toast(isZH()?"郵件診斷中…結果將顯示於按鈕上方":"Tracing\u2026 result appears above the buttons");
-      setGStatus(isZH()?"正在對您最新轉發/符合條件的郵件執行完整診斷…":"Tracing your newest forwarded / matching email through every stage\u2026");
-      try{var r=await fetch(apiBase()+"/gmail/trace",{headers:authHeaders()});var d=await r.json();
-        if(!d.ok){setGStatus('<span style="color:var(--coral)">\u25cb '+esc(d.error||(isZH()?"診斷失敗":"Trace failed"))+'</span>');return;}
-        var L=[];
-        if(d.plusAddress)L.push((isZH()?'轉發地址：':'Forward address: ')+'<b>'+esc(d.plusAddress)+'</b>'+(d.plusMatches!==undefined?(isZH()?' — 在此找到 '+d.plusMatches+' 封信件':' \u2014 '+d.plusMatches+' email'+(d.plusMatches===1?"":"s")+' found there'):''));
-        if(d.fallbackQueryUsed)L.push('<span class="opt">'+(isZH()?'未找到 +trip 信件 — 改為診斷最新符合預訂搜尋的信件。':'No +trip mail found \u2014 traced the newest booking-search match instead.')+'</span>');
-        if(d.textLength!==undefined)L.push((isZH()?'已讀取 '+d.textLength+' 字元內容':'Read '+d.textLength+' characters of text')+(d.alreadySeen?(isZH()?' <span style="color:var(--amber)">(此信件已被標記為已處理 — 可點擊「重新掃描信箱」清除)</span>':' <span style="color:var(--amber)">(this email is marked as already processed \u2014 Re-scan inbox to clear that)</span>'):''));
-        if(d.parsed)L.push((isZH()?'已解析：':'Parsed: ')+'<b>'+esc(d.parsed.name||"?")+'</b> ('+esc(d.parsed.type||"?")+", "+esc(d.parsed.start||"?")+(d.parsed.end&&d.parsed.end!==d.parsed.start?' \u2013 '+esc(d.parsed.end):'')+')');
-        L.push((d.step==="done"&&d.result.indexOf("Would file")===0?'<span style="color:var(--green)">\u25cf ':'<span style="color:var(--amber)">\u25d0 ')+esc(d.result)+'</span>');
-        setGStatus(L.join("<br>"));
-      }catch(e){setGStatus('<span style="color:var(--faint)">'+(isZH()?"無法連線至 Worker。":"Worker not reachable.")+'</span>');}
-    };
-    // ONE tap does the whole job: (optionally clean first,) re-scan, then keep
-    // running sync passes until the inbox is drained. Drained = a pass marked
-    // fewer than the worker's 10-email budget as seen (read from /google/test),
-    // so nobody has to count passes or press anything twice.
-    async function inboxPipeline(clean){
-      var btnIds=["gSave","gConnect","gTest","gRescan","gReset","gTrace","gClear"],i,el;
-      for(i=0;i<btnIds.length;i++){el=document.getElementById(btnIds[i]);if(el)el.disabled=true;}
-      try{
-        if(clean){
-          setGStatus(isZH()?'正在清除自動匯入的規劃…':'Removing auto-imported plans…');
-          var rr=await fetch(apiBase()+"/plans/reset",{method:"POST",headers:authHeaders()});
-          var dd=await rr.json().catch(function(){return{};});
-          if(!rr.ok){setGStatus('<span style="color:var(--coral)">○ '+esc(dd.error||(isZH()?"無法清除":"Could not clean"))+'</span>');return;}
-          setGStatus(isZH()?('已清除 '+(dd.removed||0)+' 個匯入細項 — 正在重新匯入…'):('Removed '+(dd.removed||0)+' imported plan'+(dd.removed===1?'':'s')+' — re-importing fresh…'));
-          await refresh();
-        }else{
-          setGStatus(isZH()?'正在從頭重新讀取過去一年的郵件…':'Re-reading the last year of email from scratch…');
-          var r0=await fetch(apiBase()+"/gmail/rescan",{method:"POST",headers:authHeaders()});
-          if(!r0.ok){setGStatus('<span style="color:var(--coral)">○ '+(isZH()?"無法啟動重新掃描":"Could not start the re-scan")+'</span>');return;}
-        }
-        // Pass 1 is a full sync (calendar + email); every pass after that
-        // is a cheap email-only sync, so the Worker's outbound-call cap can
-        // never starve the parser again. The worker reports how many matching
-        // emails are STILL unread after each pass - we loop until that is 0.
-        var before=planCount(),newPlans=0,newTrips=0,pass=0,MAX=12,drained=false,parserDown=false,left=null,g=null;
-        while(pass<MAX){
-          pass++;
-          var passPrompt = isZH()
-            ? ('同步輪次 '+pass+(left!==null?' — 尚有 '+left+' 封郵件排隊中':' — 正在讀取新郵件')+'… <span class="opt">'+
-              (newPlans||newTrips?'('+(newTrips?newTrips+' 趟新旅程, ':'')+newPlans+' 個新細項已匯入)':'(您可以關閉此視窗 — 其餘會在背景自動完成)')+'</span>')
-            : ('Sync pass '+pass+(left!==null?' — '+left+' emails still queued':' — reading new emails')+'… <span class="opt">'+
-              (newPlans||newTrips?'('+(newTrips?newTrips+' new trip'+(newTrips>1?'s':'')+', ':'')+newPlans+' new plan'+(newPlans===1?'':'s')+' so far)':'(you can close this — the rest finishes by itself in the background)')+'</span>');
-          setGStatus(passPrompt);
-          var stats=null;
-          try{var sr=await fetch(apiBase()+"/sync"+(pass>1?"?only=gmail":""),{method:"POST",headers:authHeaders()});stats=await sr.json();}catch(e){}
-          await refresh();
-          var after=planCount();
-          newPlans+=Math.max(0,after.plans-before.plans);newTrips+=Math.max(0,after.trips-before.trips);before=after;
-          g=stats&&stats.gmail;
-          if(g){left=g.remaining;
-            if(g.remaining===0){drained=true;break;}
-            if(g.failed>0&&g.parsed===0){parserDown=true;break;}   // parser unreachable - more passes won't help
-          }
-          // g missing (stage crashed mid-pass): keep going, the next email-only pass is cheap
-        }
-        var bits=[];
-        if(newTrips)bits.push(isZH()?(newTrips+' 趟新旅程'):(newTrips+' new trip'+(newTrips>1?'s':'')));
-        if(newPlans)bits.push(isZH()?(newPlans+' 個新細項'):(newPlans+' new plan'+(newPlans>1?'s':'')));
-        var out=drained
-          ?(isZH()
-            ? ('<span style="color:var(--green)">● 完成（共執行 '+pass+' 輪）— '+(bits.length?bits.join('、'):'無新增預訂')+ '。所有符合的郵件皆已讀取完畢。</span>')
-            : ('<span style="color:var(--green)">● Done after '+pass+' pass'+(pass>1?'es':'')+' — '+(bits.length?bits.join(', '):'nothing new found')+'. Every matching email has been read.</span>'))
-          :(isZH()
-            ? ('<span style="color:var(--amber)">◐ 已在第 '+pass+' 輪暫停 — '+(bits.length?bits.join('、'):'目前無新增項目')+ '。</span>')
-            : ('<span style="color:var(--amber)">◐ Stopped after '+pass+' pass'+(pass>1?'es':'')+' — '+(bits.length?bits.join(', '):'nothing new yet')+'.</span>'));
-        if(parserDown)out+='<br><span style="color:var(--coral)">○ '+(isZH()?'無法連線至郵件解析服務 — 請檢查「郵件智慧解析」下方的 Anthropic API 金鑰，然後再次點擊「重新掃描信箱」。':'The email parser could not be reached — check the Anthropic API key under Email parsing, then tap Re-scan inbox again.')+'</span>';
-        else if(!drained)out+='<br><span style="color:var(--amber)">◐ '+(left!==null?(isZH()?'尚有 '+left+' 封符合的郵件排隊中':left+' matching emails still queued'):(isZH()?'收件匣中可能還有更多信件':'The inbox may hold more'))+' — '+(isZH()?'無需其他操作：系統會在接下來的數小時內於背景自動匯入。（亦可隨時點擊「重新掃描信箱」立即處理）':'no action needed: they import automatically in the background over the next hours. (Tap Re-scan inbox to finish now instead.)')+'</span>';
-        if(g&&g.unfiled>0){
-          var uf=null;
-          try{var tr=await fetch(apiBase()+"/google/test",{headers:authHeaders()});uf=(await tr.json()).unfiled;}catch(e){}
-          if(uf&&uf.length)out+='<br><span style="color:var(--amber)">◐ '+(isZH()?'已解析但尚未歸檔 — 日期未落在任何旅程中：':'Parsed but not filed — no trip covers their dates:')+'</span><br><span class="opt">'+
-            uf.map(function(u){return esc(u.name)+' ('+esc(u.start)+(u.end&&u.end!==u.start?' – '+esc(u.end):'')+')';}).join(' · ')+
-            '</span> — '+(isZH()?'請建立涵蓋該日期的旅程後，再次點擊「重新掃描信箱」。':'create or widen a trip around those dates, then tap Re-scan inbox once more.');
-        }
-        setGStatus(out);
-        toast(bits.length?(isZH()?('收件匣已匯入 — '+bits.join('、')+' ✓'):('Inbox imported — '+bits.join(', ')+' ✓')):(drained?(isZH()?'收件匣已掃描完畢 — 未發現新預訂':'Inbox scanned — nothing new found'):(isZH()?'掃描提早結束 — 請參閱設定說明':'Scan stopped early — see Settings for why')));
-      }catch(e){setGStatus('<span style="color:var(--faint)">'+(isZH()?"無法連線至 Worker。":"Worker not reachable.")+'</span>');}
-      finally{for(i=0;i<btnIds.length;i++){el=document.getElementById(btnIds[i]);if(el)el.disabled=false;}}
-    }
-    document.getElementById("gReset").onclick=function(){
-      if(!confirm(isZH()?"確定要清除所有旅程中「自動匯入」的細項，並透過智慧過濾重新匯入嗎？（你手動新增的細項將完整保留）":"Remove ALL auto-imported plans from every trip and re-import them fresh through the relevance filter? Plans you added by hand stay."))return;
-      inboxPipeline(true);
-    };
-    document.getElementById("gRescan").onclick=function(){inboxPipeline(false);};
-    document.getElementById("gClear").onclick=async function(){
-      if(!confirm(isZH()?"確定要解除與 Google 的連結嗎？旅程將完整保留，僅暫停日曆與 Gmail 的自動匯入。":"Disconnect Google? Trips stay; calendar and Gmail just stop feeding them until you connect again."))return;
-      try{await fetch(apiBase()+"/settings/google",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({})});
-        toast(isZH()?"Google 已解除連結":"Google disconnected");await loadGStatus();}
-      catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
-    };
-    updateStatusChip();
     if(isAdmin){
-      loadGStatus();
+      var gSaveBtn = document.getElementById("gSave");
+      if(gSaveBtn) gSaveBtn.onclick=async function(){
+        var id=val("s_gid"),sec=val("s_gsecret");
+        if(!id||!sec){toast("Paste both the client ID and the secret");return;}
+        setGStatus("Saving…");
+        try{var r=await fetch(apiBase()+"/settings/google",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({clientId:id,clientSecret:sec})});
+          var d=await r.json();if(!r.ok){toast(d.error||(isZH()?"無法儲存":"Could not save"));setGStatus("");return;}
+          var gs=document.getElementById("s_gsecret");if(gs)gs.value="";
+          toast(isZH()?"Google 用戶端已儲存——現在請點擊「連結 Google」":"Google client saved — now hit Connect");await loadGStatus();}
+        catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+      };
+
+      var gConnBtn = document.getElementById("gConnect");
+      if(gConnBtn) gConnBtn.onclick=function(){
+        // token travels in the URL: this is a navigation, not a fetch, so it can't
+        // carry the X-Auth header and may lack the session cookie (PWA, old login)
+        window.open(apiBase()+"/google/connect?t="+encodeURIComponent(authToken||""),"_blank");
+        setGStatus(isZH()?"等待 Google 授權中…請在新分頁核准存取權限，完成後重新開啟設定。":"Waiting for Google… approve access in the new tab, then reopen Settings.");
+      };
+
+      var gTestBtn = document.getElementById("gTest");
+      if(gTestBtn) gTestBtn.onclick=async function(){
+        setGStatus(isZH()?"正在測試各階段連線…":"Testing each stage…");
+        try{var r=await fetch(apiBase()+"/google/test",{headers:authHeaders()});var d=await r.json();
+          if(!d.ok){setGStatus('<span style="color:var(--coral)">○ '+esc(d.error||(isZH()?"尚未連結":"Not connected"))+'</span>');return;}
+          var bits=[];
+          bits.push(d.calendar.ok
+            ?('<span style="color:var(--green)">● '+(isZH()?'日曆連線正常 — 即將到來的活動：'+d.calendar.upcoming+' 個':'Calendar OK — '+d.calendar.upcoming+' upcoming event'+(d.calendar.upcoming===1?"":"s"))+'</span>'+(d.calendar.sample&&d.calendar.sample.length?'<br><span class="opt">'+d.calendar.sample.map(esc).join(" · ")+'</span>':''))
+            :('<span style="color:var(--coral)">○ '+(isZH()?'日曆：':'Calendar: ')+esc(d.calendar.error||(isZH()?"失敗":"failed"))+'</span> — '+(isZH()?'請確認 Google Cloud 專案是否已啟用 Calendar API？':'is the Google Calendar API enabled in your Cloud project?')));
+          bits.push(d.gmail.ok
+            ?('<span style="color:var(--green)">● '+(isZH()?'Gmail 連線正常':'Gmail OK')+'</span> <span class="opt">'+esc(d.gmail.email||"")+'</span>')
+            :('<span style="color:var(--coral)">○ '+(isZH()?'Gmail：':'Gmail: ')+esc(d.gmail.error||(isZH()?"失敗":"failed"))+'</span> — '+(isZH()?'請確認 Google Cloud 專案是否已啟用 Gmail API？':'is the Gmail API enabled in your Cloud project?')));
+          var parseCount = isZH() ? ('目前已掃描 ' + d.seenEmails + ' 封郵件') : (d.seenEmails + ' emails scanned so far');
+          bits.push((d.llmConfigured || d.anthropicKeySet)
+            ? ('<span style="color:var(--green)">● ' + (isZH() ? '郵件智慧解析已啟用' : 'Email parsing on') + '</span> <span class="opt">(' + parseCount + ')</span>')
+            : ('<span style="color:var(--amber)">◐ ' + (isZH() ? '郵件智慧解析未啟用' : 'Email parsing OFF') + '</span> — ' + (isZH() ? '請在上方設定 LLM API 金鑰並儲存，然後點擊「重新掃描信箱」。' : 'configure your LLM API key above and Save, then hit Re-scan inbox.')));
+          if(d.unfiled&&d.unfiled.length){
+            bits.push('<span style="color:var(--amber)">◐ '+(isZH()?'已解析但尚未歸檔 — 日期未落在任何旅程中：':'Parsed but not filed — no trip covers their dates:')+'</span><br><span class="opt">'+d.unfiled.map(function(u){return esc(u.name)+' ('+esc(u.start)+(u.end&&u.end!==u.start?' – '+esc(u.end):'')+')';}).join(" · ")+'</span> — '+(isZH()?'請建立涵蓋該日期的旅程後重新掃描。':'create or widen a trip around those dates and Re-scan.'));
+          }
+          setGStatus(bits.join("<br>"));
+        }catch(e){setGStatus('<span style="color:var(--faint)">'+(isZH()?"無法連線至 Worker。":"Worker not reachable.")+'</span>');}
+      };
+
+      var gTraceBtn = document.getElementById("gTrace");
+      if(gTraceBtn) gTraceBtn.onclick=async function(){
+        toast(isZH()?"郵件診斷中…結果將顯示於按鈕上方":"Tracing\u2026 result appears above the buttons");
+        setGStatus(isZH()?"正在對您最新轉發/符合條件的郵件執行完整診斷…":"Tracing your newest forwarded / matching email through every stage\u2026");
+        try{var r=await fetch(apiBase()+"/gmail/trace",{headers:authHeaders()});var d=await r.json();
+          if(!d.ok){setGStatus('<span style="color:var(--coral)">\u25cb '+esc(d.error||(isZH()?"診斷失敗":"Trace failed"))+'</span>');return;}
+          var L=[];
+          if(d.plusAddress)L.push((isZH()?'轉發地址：':'Forward address: ')+'<b>'+esc(d.plusAddress)+'</b>'+(d.plusMatches!==undefined?(isZH()?' — 在此找到 '+d.plusMatches+' 封信件':' \u2014 '+d.plusMatches+' email'+(d.plusMatches===1?"":"s")+' found there'):''));
+          if(d.fallbackQueryUsed)L.push('<span class="opt">'+(isZH()?'未找到 +trip 信件 — 改為診斷最新符合預訂搜尋的信件。':'No +trip mail found \u2014 traced the newest booking-search match instead.')+'</span>');
+          if(d.textLength!==undefined)L.push((isZH()?'已讀取 '+d.textLength+' 字元內容':'Read '+d.textLength+' characters of text')+(d.alreadySeen?(isZH()?' <span style="color:var(--amber)">(此信件已被標記為已處理 — 可點擊「重新掃描信箱」清除)</span>':' <span style="color:var(--amber)">(this email is marked as already processed \u2014 Re-scan inbox to clear that)</span>'):''));
+          if(d.parsed)L.push((isZH()?'已解析：':'Parsed: ')+'<b>'+esc(d.parsed.name||"?")+'</b> ('+esc(d.parsed.type||"?")+", "+esc(d.parsed.start||"?")+(d.parsed.end&&d.parsed.end!==d.parsed.start?' \u2013 '+esc(d.parsed.end):'')+')');
+          L.push((d.step==="done"&&d.result.indexOf("Would file")===0?'<span style="color:var(--green)">\u25cf ':'<span style="color:var(--amber)">\u25d0 ')+esc(d.result)+'</span>');
+          setGStatus(L.join("<br>"));
+        }catch(e){setGStatus('<span style="color:var(--faint)">'+(isZH()?"無法連線至 Worker。":"Worker not reachable.")+'</span>');}
+      };
+
+      async function inboxPipeline(clean){
+        var btnIds=["gSave","gConnect","gTest","gRescan","gReset","gTrace","gClear"],i,el;
+        for(i=0;i<btnIds.length;i++){el=document.getElementById(btnIds[i]);if(el)el.disabled=true;}
+        try{
+          if(clean){
+            setGStatus(isZH()?'正在清除自動匯入的規劃…':'Removing auto-imported plans…');
+            var rr=await fetch(apiBase()+"/plans/reset",{method:"POST",headers:authHeaders()});
+            var dd=await rr.json().catch(function(){return{};});
+            if(!rr.ok){setGStatus('<span style="color:var(--coral)">○ '+esc(dd.error||(isZH()?"無法清除":"Could not clean"))+'</span>');return;}
+            setGStatus(isZH()?('已清除 '+(dd.removed||0)+' 個匯入細項 — 正在重新匯入…'):('Removed '+(dd.removed||0)+' imported plan'+(dd.removed===1?'':'s')+' — re-importing fresh…'));
+            await refresh();
+          }else{
+            setGStatus(isZH()?'正在從頭重新讀取過去一年的郵件…':'Re-reading the last year of email from scratch…');
+            var r0=await fetch(apiBase()+"/gmail/rescan",{method:"POST",headers:authHeaders()});
+            if(!r0.ok){setGStatus('<span style="color:var(--coral)">○ '+(isZH()?"無法啟動重新掃描":"Could not start the re-scan")+'</span>');return;}
+          }
+          var before=planCount(),newPlans=0,newTrips=0,pass=0,MAX=12,drained=false,parserDown=false,left=null,g=null;
+          while(pass<MAX){
+            pass++;
+            var passPrompt = isZH()
+              ? ('同步輪次 '+pass+(left!==null?' — 尚有 '+left+' 封郵件排隊中':' — 正在讀取新郵件')+'… <span class="opt">'+
+                (newPlans||newTrips?'('+(newTrips?newTrips+' 趟新旅程, ':'')+newPlans+' 個新細項已匯入)':'(您可以關閉此視窗 — 其餘會在背景自動完成)')+'</span>')
+              : ('Sync pass '+pass+(left!==null?' — '+left+' emails still queued':' — reading new emails')+'… <span class="opt">'+
+                (newPlans||newTrips?'('+(newTrips?newTrips+' new trip'+(newTrips>1?'s':'')+', ':'')+newPlans+' new plan'+(newPlans===1?'':'s')+' so far)':'(you can close this — the rest finishes by itself in the background)')+'</span>');
+            setGStatus(passPrompt);
+            var stats=null;
+            try{var sr=await fetch(apiBase()+"/sync"+(pass>1?"?only=gmail":""),{method:"POST",headers:authHeaders()});stats=await sr.json();}catch(e){}
+            await refresh();
+            var after=planCount();
+            newPlans+=Math.max(0,after.plans-before.plans);newTrips+=Math.max(0,after.trips-before.trips);before=after;
+            g=stats&&stats.gmail;
+            if(g){left=g.remaining;
+              if(g.remaining===0){drained=true;break;}
+              if(g.failed>0&&g.parsed===0){parserDown=true;break;}
+            }
+          }
+          var bits=[];
+          if(newTrips)bits.push(isZH()?(newTrips+' 趟新旅程'):(newTrips+' new trip'+(newTrips>1?'s':'')));
+          if(newPlans)bits.push(isZH()?(newPlans+' 個新細項'):(newPlans+' new plan'+(newPlans>1?'s':'')));
+          var out=drained
+            ?(isZH()
+              ? ('<span style="color:var(--green)">● 完成（共執行 '+pass+' 輪）— '+(bits.length?bits.join('、'):'無新增預訂')+ '。所有符合的郵件皆已讀取完畢。</span>')
+              : ('<span style="color:var(--green)">● Done after '+pass+' pass'+(pass>1?'es':'')+' — '+(bits.length?bits.join(', '):'nothing new found')+'. Every matching email has been read.</span>'))
+            :(isZH()
+              ? ('<span style="color:var(--amber)">◐ 已在第 '+pass+' 輪暫停 — '+(bits.length?bits.join('、'):'目前無新增項目')+ '。</span>')
+              : ('<span style="color:var(--amber)">◐ Stopped after '+pass+' pass'+(pass>1?'es':'')+' — '+(bits.length?bits.join(', '):'nothing new yet')+'.</span>'));
+          if(parserDown)out+='<br><span style="color:var(--coral)">○ '+(isZH()?'無法連線至郵件解析服務 — 請檢查「郵件智慧解析」下方的 Anthropic API 金鑰，然後再次點擊「重新掃描信箱」。':'The email parser could not be reached — check the Anthropic API key under Email parsing, then tap Re-scan inbox again.')+'</span>';
+          else if(!drained)out+='<br><span style="color:var(--amber)">◐ '+(left!==null?(isZH()?'尚有 '+left+' 封符合的郵件排隊中':left+' matching emails still queued'):(isZH()?'收件匣中可能還有更多信件':'The inbox may hold more'))+' — '+(isZH()?'無需其他操作：系統會在接下來的數小時內於背景自動匯入。（亦可隨時點擊「重新掃描信箱」立即處理）':'no action needed: they import automatically in the background over the next hours. (Tap Re-scan inbox to finish now instead.)')+'</span>';
+          if(g&&g.unfiled>0){
+            var uf=null;
+            try{var tr=await fetch(apiBase()+"/google/test",{headers:authHeaders()});uf=(await tr.json()).unfiled;}catch(e){}
+            if(uf&&uf.length)out+='<br><span style="color:var(--amber)">◐ '+(isZH()?'已解析但尚未歸檔 — 日期未落在任何旅程中：':'Parsed but not filed — no trip covers their dates:')+'</span><br><span class="opt">'+
+              uf.map(function(u){return esc(u.name)+' ('+esc(u.start)+(u.end&&u.end!==u.start?' – '+esc(u.end):'')+')';}).join(' · ')+
+              '</span> — '+(isZH()?'請建立涵蓋該日期的旅程後，再次點擊「重新掃描信箱」。':'create or widen a trip around those dates, then tap Re-scan inbox once more.');
+          }
+          setGStatus(out);
+          toast(bits.length?(isZH()?('收件匣已匯入 — '+bits.join('、')+' ✓'):('Inbox imported — '+bits.join(', ')+' ✓')):(drained?(isZH()?'收件匣已掃描完畢 — 未發現新預訂':'Inbox scanned — nothing new found'):(isZH()?'掃描提早結束 — 請參閱設定說明':'Scan stopped early — see Settings for why')));
+        }catch(e){setGStatus('<span style="color:var(--faint)">'+(isZH()?"無法連線至 Worker。":"Worker not reachable.")+'</span>');}
+        finally{for(i=0;i<btnIds.length;i++){el=document.getElementById(btnIds[i]);if(el)el.disabled=false;}}
+      }
+
+      var gResetBtn = document.getElementById("gReset");
+      if(gResetBtn) gResetBtn.onclick=function(){
+        if(!confirm(isZH()?"確定要清除所有旅程中「自動匯入」的細項，並透過智慧過濾重新匯入嗎？（你手動新增的細項將完整保留）":"Remove ALL auto-imported plans from every trip and re-import them fresh through the relevance filter? Plans you added by hand stay."))return;
+        inboxPipeline(true);
+      };
+
+      var gRescanBtn = document.getElementById("gRescan");
+      if(gRescanBtn) gRescanBtn.onclick=function(){inboxPipeline(false);};
+
+      var gClearBtn = document.getElementById("gClear");
+      if(gClearBtn) gClearBtn.onclick=async function(){
+        if(!confirm(isZH()?"確定要解除與 Google 的連結嗎？旅程將完整保留，僅暫停日曆與 Gmail 的自動匯入。":"Disconnect Google? Trips stay; calendar and Gmail just stop feeding them until you connect again."))return;
+        try{await fetch(apiBase()+"/settings/google",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({})});
+          toast(isZH()?"Google 已解除連結":"Google disconnected");await loadGStatus();}
+        catch(e){toast(isZH()?"無法連線至 Worker":"Worker not reachable");}
+      };
+    }
+    updateStatusChip();
+    loadGStatus();
+    if(isAdmin){
       // Weekly snapshots: list what the worker has kept and offer one-tap restore.
       async function loadSnaps(){
         var el=document.getElementById("snapList");if(!el)return;
